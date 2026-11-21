@@ -51,6 +51,7 @@ function waveTo(id, originEl) {
     setTimeout(() => {
       wave.classList.remove("grow");
       $("auth").classList.add("play");
+      setTimeout(() => $("auth").classList.add("settled"), 3300);
       busy = false;
     }, 1500);
     return;
@@ -101,6 +102,7 @@ document.querySelectorAll(".tab").forEach((t) => {
     if (card.classList.contains("up") === up) return;
     rise(() => {
       card.classList.toggle("up", up);
+      $("auth").classList.toggle("signup", up);
       document.querySelectorAll(".tab").forEach((x) => x.classList.toggle("on", x === t));
       $("auth-btn").textContent = up ? "Create account" : "Sign in";
     });
