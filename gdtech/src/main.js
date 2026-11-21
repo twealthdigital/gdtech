@@ -131,16 +131,18 @@ function playCall() {
   const call = $("call");
   call.classList.add("on");
   setTimeout(() => call.classList.add("rise"), 80);          // smooth lift to center
-  setTimeout(() => {                                         // ring + buzz, twice
+  setTimeout(() => {                                         // one ring + buzz
     call.classList.add("ringing");
-    if (navigator.vibrate) navigator.vibrate([380, 160, 380]);
+    if (navigator.vibrate) navigator.vibrate([380]);
   }, 1100);
-  setTimeout(() => call.classList.add("leave"), 3300);       // fade away
-  setTimeout(() => show("welcome"), 3500);
+  // Swap to the home screen while the overlay is still solid,
+  // so the sign in / sign up form is never seen again
+  setTimeout(() => show("welcome"), 2300);
+  setTimeout(() => call.classList.add("leave"), 2900);       // then fade away
   setTimeout(() => {
     call.classList.remove("on", "rise", "ringing", "leave");
     signing = false;
-  }, 4300);
+  }, 3800);
 }
 
 $("auth-form").addEventListener("submit", (e) => { e.preventDefault(); signIn($("auth-btn")); });

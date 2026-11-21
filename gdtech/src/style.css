@@ -238,8 +238,8 @@ h1 span { color: var(--orange); }
   border: 2px solid rgba(255, 122, 26, 0.55);
   opacity: 0; transform: scale(0.7);
 }
-.call.ringing .phone { animation: buzz 1.05s ease-in-out 2; }
-.call.ringing .ring { animation: wave 1.05s ease-out 2; }
+.call.ringing .phone { animation: buzz 1.05s ease-in-out 1; }
+.call.ringing .ring { animation: wave 1.05s ease-out 1; }
 .call.ringing .r2 { animation-delay: 0.14s; }
 .call.ringing .r3 { animation-delay: 0.28s; }
 @keyframes buzz {
