@@ -77,16 +77,37 @@ setTimeout(() => show("onboarding"), 2400);
 
 // Auth
 const card = document.querySelector(".card");
+// Card grows upward when its content gets taller
+function rise(change) {
+  const from = card.offsetHeight;
+  change();
+  const to = card.offsetHeight;
+  card.style.overflow = "hidden";
+  card.style.transition = "height 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)";
+  card.style.height = from + "px";
+  void card.offsetHeight;
+  card.style.height = to + "px";
+  setTimeout(() => {
+    card.style.height = "";
+    card.style.transition = "";
+    card.style.overflow = "";
+  }, 520);
+}
+
 document.querySelectorAll(".tab").forEach((t) => {
   t.addEventListener("click", () => {
     const up = t.dataset.t === "up";
-    card.classList.toggle("up", up);
-    document.querySelectorAll(".tab").forEach((x) => x.classList.toggle("on", x === t));
-    $("auth-btn").textContent = up ? "Create account" : "Sign in";
+    if (card.classList.contains("up") === up) return;
+    rise(() => {
+      card.classList.toggle("up", up);
+      document.querySelectorAll(".tab").forEach((x) => x.classList.toggle("on", x === t));
+      $("auth-btn").textContent = up ? "Create account" : "Sign in";
+    });
   });
 });
 $("auth-form").addEventListener("submit", (e) => { e.preventDefault(); show("welcome"); });
 $("guest").addEventListener("click", () => show("welcome"));
+$("google").addEventListener("click", () => show("welcome"));
 
 // Show or hide password
 document.querySelectorAll(".eye").forEach((btn) => {
