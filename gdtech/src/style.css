@@ -199,7 +199,60 @@ h1 span { color: var(--orange); }
 .or { display: flex; align-items: center; gap: 12px; margin: 14px 0; font-size: 12px; font-weight: 600; color: #1d1d1f; }
 .or::before, .or::after { content: ""; flex: 1; height: 1px; background: rgba(11, 11, 12, 0.18); }
 
-.guest { width: 100%; margin-top: 8px; padding: 8px; background: none; font-size: 13px; font-weight: 700; color: var(--black); }
+
+/* Button loading */
+.btn.dark { position: relative; display: flex; align-items: center; justify-content: center; }
+.btn.dark .lbl { transition: opacity 0.25s ease, transform 0.25s ease; }
+.btn.dark .spin {
+  position: absolute; width: 22px; height: 22px; border-radius: 50%;
+  border: 2.5px solid rgba(255, 255, 255, 0.28); border-top-color: #fff;
+  opacity: 0; transform: scale(0.6);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.btn.dark.loading { pointer-events: none; }
+.btn.dark.loading .lbl { opacity: 0; transform: translateY(-6px); }
+.btn.dark.loading .spin { opacity: 1; transform: none; animation: spin 0.75s linear infinite; }
+.btn:disabled { cursor: default; }
+@keyframes spin { to { rotate: 360deg; } }
+
+/* Incoming call intro */
+.call {
+  position: absolute; inset: 0; z-index: 60;
+  display: grid; place-items: center;
+  background: var(--white);
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.5s ease, visibility 0.5s;
+}
+.call.on { opacity: 1; visibility: visible; }
+.call.leave { opacity: 0; transition: opacity 0.7s ease; }
+.call .stage { position: relative; display: grid; place-items: center; width: 140px; height: 140px; }
+.call .phone {
+  position: relative; z-index: 2; width: 96px; height: 96px;
+  filter: drop-shadow(0 18px 30px rgba(255, 122, 26, 0.45));
+  opacity: 0; transform: translateY(45dvh) scale(0.6);
+  transition: transform 1s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.6s ease;
+}
+.call.rise .phone { opacity: 1; transform: none; }
+.call .ring {
+  position: absolute; inset: 0; border-radius: 50%;
+  border: 2px solid rgba(255, 122, 26, 0.55);
+  opacity: 0; transform: scale(0.7);
+}
+.call.ringing .phone { animation: buzz 1.05s ease-in-out 2; }
+.call.ringing .ring { animation: wave 1.05s ease-out 2; }
+.call.ringing .r2 { animation-delay: 0.14s; }
+.call.ringing .r3 { animation-delay: 0.28s; }
+@keyframes buzz {
+  0%, 62%, 100% { rotate: 0deg; translate: 0 0; }
+  6% { rotate: -14deg; translate: -3px 0; } 12% { rotate: 14deg; translate: 3px 0; }
+  18% { rotate: -12deg; translate: -3px 0; } 24% { rotate: 12deg; translate: 3px 0; }
+  30% { rotate: -9deg; translate: -2px 0; } 36% { rotate: 9deg; translate: 2px 0; }
+  42% { rotate: -6deg; } 48% { rotate: 6deg; } 54% { rotate: -3deg; }
+}
+@keyframes wave {
+  0% { opacity: 0.9; transform: scale(0.7); }
+  70%, 100% { opacity: 0; transform: scale(2.4); }
+}
 
 /* Welcome */
 .welcome { display: grid; place-items: center; background: var(--white); }

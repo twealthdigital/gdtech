@@ -104,13 +104,47 @@ document.querySelectorAll(".tab").forEach((t) => {
       card.classList.toggle("up", up);
       $("auth").classList.toggle("signup", up);
       document.querySelectorAll(".tab").forEach((x) => x.classList.toggle("on", x === t));
-      $("auth-btn").textContent = up ? "Create account" : "Sign in";
+      $("auth-btn").querySelector(".lbl").textContent = up ? "Create account" : "Sign in";
     });
   });
 });
-$("auth-form").addEventListener("submit", (e) => { e.preventDefault(); show("welcome"); });
-$("guest").addEventListener("click", () => show("welcome"));
-$("google").addEventListener("click", () => show("welcome"));
+
+// Sign in: button loads first, then the phone rises, rings twice, then home
+let signing = false;
+function signIn(btn) {
+  if (signing) return;
+  signing = true;
+  btn.classList.add("loading");
+  btn.disabled = true;
+  $("google").disabled = true;
+
+  // Replace this wait with the real request; continue once it succeeds
+  setTimeout(() => {
+    btn.classList.remove("loading");
+    btn.disabled = false;
+    $("google").disabled = false;
+    playCall();
+  }, 1800);
+}
+
+function playCall() {
+  const call = $("call");
+  call.classList.add("on");
+  setTimeout(() => call.classList.add("rise"), 80);          // smooth lift to center
+  setTimeout(() => {                                         // ring + buzz, twice
+    call.classList.add("ringing");
+    if (navigator.vibrate) navigator.vibrate([380, 160, 380]);
+  }, 1100);
+  setTimeout(() => call.classList.add("leave"), 3300);       // fade away
+  setTimeout(() => show("welcome"), 3500);
+  setTimeout(() => {
+    call.classList.remove("on", "rise", "ringing", "leave");
+    signing = false;
+  }, 4300);
+}
+
+$("auth-form").addEventListener("submit", (e) => { e.preventDefault(); signIn($("auth-btn")); });
+$("google").addEventListener("click", (e) => signIn(e.currentTarget));
 
 // Show or hide password
 document.querySelectorAll(".eye").forEach((btn) => {
