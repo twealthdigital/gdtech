@@ -137,7 +137,7 @@ function playCall() {
   }, 1100);
   // Swap to the home screen while the overlay is still solid,
   // so the sign in / sign up form is never seen again
-  setTimeout(() => show("welcome"), 2300);
+  setTimeout(() => show("home"), 2300);
   setTimeout(() => call.classList.add("leave"), 2900);       // then fade away
   setTimeout(() => {
     call.classList.remove("on", "rise", "ringing", "leave");
@@ -155,5 +155,22 @@ document.querySelectorAll(".eye").forEach((btn) => {
     const hidden = field.type === "password";
     field.type = hidden ? "text" : "password";
     btn.textContent = hidden ? "Hide" : "Show";
+  });
+});
+
+// Home: banner dots follow the swipe
+const bTrack = $("b-track");
+const bDots = document.querySelectorAll("#b-dots i");
+bTrack.addEventListener("scroll", () => {
+  const step = bTrack.children[0].offsetWidth + 12;
+  let i = Math.round(bTrack.scrollLeft / step);
+  if (bTrack.scrollLeft + bTrack.clientWidth >= bTrack.scrollWidth - 4) i = bDots.length - 1;
+  bDots.forEach((d, n) => d.classList.toggle("on", n === i));
+}, { passive: true });
+
+// Home: bottom nav
+document.querySelectorAll("#dock button").forEach((b) => {
+  b.addEventListener("click", () => {
+    document.querySelectorAll("#dock button").forEach((x) => x.classList.toggle("on", x === b));
   });
 });
