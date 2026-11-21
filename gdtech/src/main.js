@@ -15,9 +15,10 @@ function show(id) {
   $(id).classList.add("active");
 
   // Page background follows the screen so the safe areas blend in
-  const bg = id === "auth" ? "#ff7a1a" : "#ffffff";
+  // Auth: white on top (header and status bar), orange underneath
+  const bg = id === "auth" ? "linear-gradient(#ffffff 46%, #ff7a1a 46%)" : "#ffffff";
   document.documentElement.style.background = bg;
-  document.body.style.background = bg;
+  document.body.style.background = "transparent";
 }
 
 function render() {
