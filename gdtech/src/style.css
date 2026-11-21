@@ -279,16 +279,7 @@ h1 span { color: var(--orange); }
 }
 .b-text { position: relative; z-index: 2; width: 54%; display: flex; flex-direction: column; }
 .b-card h3 { font-size: 19px; font-weight: 800; line-height: 1.1; letter-spacing: 0.01em; }
-.b-card p { margin-top: 8px; font-size: 10.5px; line-height: 1.45; color: rgba(255, 255, 255, 0.68); }
-.b-thumbs { display: flex; gap: 6px; margin-top: auto; padding-bottom: 6px; }
-.th {
-  position: relative; width: 30px; height: 30px; border-radius: 9px; overflow: hidden;
-  display: grid; place-items: center; color: rgba(255, 255, 255, 0.55);
-  background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.22);
-}
-.th svg { width: 16px; height: 16px; }
-.th img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.th.has svg { display: none; }
+.b-card p { margin-top: 10px; font-size: 10.5px; line-height: 1.45; color: rgba(255, 255, 255, 0.68); }
 
 .b-img { position: absolute; top: 0; right: 0; bottom: 0; width: 46%; overflow: hidden; border-radius: 0 26px 26px 0; }
 .b-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
