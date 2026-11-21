@@ -69,9 +69,9 @@
     <!-- Auth -->
     <section class="screen auth" id="auth">
       <div class="top">
-        <div class="ph a"><div class="scr"><img src="/phones/1.png" alt="" onerror="this.remove()" /></div></div>
-        <div class="ph c"><div class="scr"><img src="/phones/3.png" alt="" onerror="this.remove()" /></div></div>
-        <div class="ph b"><div class="scr"><img src="/phones/2.png" alt="" onerror="this.remove()" /></div></div>
+        <img class="ph a" src="/phones/1.png" alt="" />
+        <img class="ph c" src="/phones/3.png" alt="" />
+        <img class="ph b" src="/phones/2.png" alt="" />
         <svg class="edge" viewBox="0 0 1200 60" preserveAspectRatio="none">
           <path d="M0 30 Q150 0 300 30 T600 30 T900 30 T1200 30 V0 H0 Z" fill="#fff" />
         </svg>
@@ -84,11 +84,27 @@
           <button class="tab" data-t="up" type="button">Sign up</button>
         </div>
         <form id="auth-form">
-          <label class="f name"><input type="text" placeholder="Full name" /></label>
-          <label class="f"><input type="email" placeholder="Email address" required /></label>
-          <label class="f"><input type="password" placeholder="Password" required /></label>
+          <label class="f up-only"><input type="text" placeholder="Full name" /></label>
+          <label class="f in-only"><input type="text" placeholder="Email or phone number" /></label>
+          <label class="f up-only"><input type="email" placeholder="Email address" /></label>
+          <label class="f up-only"><input type="tel" placeholder="Phone number" /></label>
+          <label class="f pw">
+            <input type="password" placeholder="Password" required />
+            <button class="eye" type="button">Show</button>
+          </label>
+          <label class="f pw up-only">
+            <input type="password" placeholder="Confirm password" />
+            <button class="eye" type="button">Show</button>
+          </label>
+          <div class="row in-only">
+            <label class="chk"><input type="checkbox" /> Remember me</label>
+            <button class="link" type="button">Forgot password?</button>
+          </div>
+          <label class="chk up-only"><input type="checkbox" /> I agree to the Terms and Privacy Policy</label>
           <button class="btn dark" type="submit" id="auth-btn">Sign in</button>
         </form>
+        <div class="or"><span>or</span></div>
+        <button class="btn outline" id="google" type="button">Continue with Google</button>
         <button class="guest" id="guest" type="button">Continue as guest</button>
       </div>
     </section>

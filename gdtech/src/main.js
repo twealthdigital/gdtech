@@ -13,6 +13,11 @@ let index = 0;
 function show(id) {
   document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
   $(id).classList.add("active");
+
+  // Page background follows the screen so the safe areas blend in
+  const bg = id === "auth" ? "#ff7a1a" : "#ffffff";
+  document.documentElement.style.background = bg;
+  document.body.style.background = bg;
 }
 
 function render() {
@@ -82,3 +87,13 @@ document.querySelectorAll(".tab").forEach((t) => {
 });
 $("auth-form").addEventListener("submit", (e) => { e.preventDefault(); show("welcome"); });
 $("guest").addEventListener("click", () => show("welcome"));
+
+// Show or hide password
+document.querySelectorAll(".eye").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const field = btn.parentElement.querySelector("input");
+    const hidden = field.type === "password";
+    field.type = hidden ? "text" : "password";
+    btn.textContent = hidden ? "Hide" : "Show";
+  });
+});
