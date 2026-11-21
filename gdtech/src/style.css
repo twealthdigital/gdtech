@@ -106,10 +106,10 @@ h1 span { color: var(--orange); }
 .auth .top {
   position: absolute; top: 0; left: 0; right: 0; height: 46%;
   background: #ffffff;
-  transform: translateY(-102%);
-  transition: transform 1s cubic-bezier(0.2, 0.8, 0.2, 1.05);
+  opacity: 0; transform: translateY(-40px);
+  transition: opacity 0.8s ease, transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-.auth.play .top { transform: none; }
+.auth.play .top { opacity: 1; transform: none; }
 
 .auth .edge {
   position: absolute; left: 0; bottom: -58px; width: 100%; height: 60px;
@@ -126,7 +126,7 @@ h1 span { color: var(--orange); }
   transform-origin: 50% 40%;
   opacity: 0; transform: translateY(60px) scale(0.92);
   translate: 0 0;
-  transition: opacity 0.6s ease 0.8s, transform 1s cubic-bezier(0.2, 0.9, 0.3, 1.1) 0.8s, translate 1s cubic-bezier(0.2, 0.9, 0.3, 1.1) 0.8s;
+  transition: opacity 0.8s ease, transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1), translate 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .auth.play .hero { opacity: 1; transform: scale(var(--zoom, 1.7)); translate: 0 56px; }
 .auth.play.signup .hero { translate: 0 0; }
@@ -143,7 +143,7 @@ h1 span { color: var(--orange); }
   border: 1px solid rgba(255, 255, 255, 0.65);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(255, 255, 255, 0.35), 0 24px 50px rgba(120, 40, 0, 0.3);
   opacity: 0; transform: translateY(40px);
-  transition: opacity 0.7s ease 1.9s, transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 1.9s;
+  transition: opacity 0.8s ease, transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .auth.play .card { opacity: 1; transform: none; }
 

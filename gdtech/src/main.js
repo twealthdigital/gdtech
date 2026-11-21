@@ -51,7 +51,7 @@ function waveTo(id, originEl) {
     setTimeout(() => {
       wave.classList.remove("grow");
       $("auth").classList.add("play");
-      setTimeout(() => $("auth").classList.add("settled"), 3300);
+      setTimeout(() => $("auth").classList.add("settled"), 1100);
       busy = false;
     }, 1500);
     return;
