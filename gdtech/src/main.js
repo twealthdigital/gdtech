@@ -51,6 +51,7 @@ function waveTo(id, originEl) {
     setTimeout(() => {
       wave.classList.remove("grow");
       $("auth").classList.add("play");
+      setTimeout(() => $("auth").classList.add("settled"), 3300);
       busy = false;
     }, 1500);
     return;
@@ -78,11 +79,27 @@ setTimeout(() => show("onboarding"), 2400);
 
 // Auth
 const card = document.querySelector(".card");
+// Hero image: big on Sign in, shrinks up to fit above the card on Sign up
+function fitHero(up, cardTop) {
+  const auth = $("auth");
+  if (!up) {
+    auth.style.removeProperty("--zoom");
+    auth.style.removeProperty("--ty");
+    return;
+  }
+  const hero = auth.querySelector(".hero");
+  const boxBottom = auth.querySelector(".top").offsetHeight - 22;
+  const zoom = Math.max(0.4, Math.min(1.2, (cardTop - 24) / hero.offsetHeight));
+  auth.style.setProperty("--zoom", zoom);
+  auth.style.setProperty("--ty", `${cardTop - 12 - boxBottom}px`);
+}
+
 // Card grows upward when its content gets taller
 function rise(change) {
   const from = card.offsetHeight;
   change();
   const to = card.offsetHeight;
+  fitHero(card.classList.contains("up"), card.getBoundingClientRect().top - $("auth").getBoundingClientRect().top);
   card.style.overflow = "hidden";
   card.style.transition = "height 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)";
   card.style.height = from + "px";
