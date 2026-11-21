@@ -136,7 +136,7 @@ h1 span { color: var(--orange); }
 .auth.settled .hero { transition: translate 0.55s cubic-bezier(0.2, 0.8, 0.2, 1); }
 
 .card {
-  position: absolute; left: 16px; right: 16px;
+  position: absolute; left: 16px; right: 16px; z-index: 5;
   bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
   max-height: calc(100% - 70px); overflow-y: auto;
   padding: 16px; border-radius: 30px;
