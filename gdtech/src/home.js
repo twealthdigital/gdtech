@@ -1,4 +1,5 @@
 import "./base.css";
+import "./glass.js";
 import "./home.css";
 import "./filter.js";
 import "./categories.js";
@@ -6,8 +7,6 @@ import "./tradein.css";
 
 const $ = (id) => document.getElementById(id);
 
-// Only Chromium can bend the backdrop with an SVG filter; everything else keeps the blur glass
-if (navigator.userAgentData?.brands?.some((b) => /Chromium/.test(b.brand))) document.documentElement.classList.add("lg-refract");
 
 // Home: banners auto-slide, swipe by hand, dots follow
 const bTrack = $("b-track");

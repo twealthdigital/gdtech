@@ -1,4 +1,5 @@
 import "./base.css";
+import "./glass.js";
 import "./style.css";
 
 const $ = (id) => document.getElementById(id);

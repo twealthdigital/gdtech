@@ -117,7 +117,7 @@
 }
 .dock button.on::after { transform: scale(1); }
 
-/* Liquid glass: blur, saturation, bright rim and specular edge. Chromium also bends what is behind it. */
+/* Header glow so the glass has something to catch */
 .home::before {
   content: ""; position: absolute; left: 0; right: 0; top: 0; height: 260px; z-index: -1; pointer-events: none;
   background:
@@ -125,26 +125,4 @@
     radial-gradient(45% 60% at 8% 36%, rgba(255, 170, 100, 0.22), transparent 70%);
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 90px, #000 55%, transparent 100%);
   mask-image: linear-gradient(to bottom, transparent 0, #000 90px, #000 55%, transparent 100%);
-}
-.glass {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.16));
-  -webkit-backdrop-filter: blur(16px) saturate(2) brightness(1.05);
-  backdrop-filter: blur(16px) saturate(2) brightness(1.05);
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  box-shadow:
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -1.5px 1px rgba(255, 255, 255, 0.4),
-    inset 0 0 22px rgba(255, 255, 255, 0.35),
-    0 12px 30px rgba(120, 40, 0, 0.16);
-}
-.glass::before {
-  content: ""; position: absolute; inset: 0; padding: 1.5px; border-radius: inherit; pointer-events: none; z-index: 2;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0) 70%, rgba(255, 255, 255, 0.7));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-}
-.lg-refract .glass {
-  -webkit-backdrop-filter: url(#lg) blur(6px) saturate(2) brightness(1.05);
-  backdrop-filter: url(#lg) blur(6px) saturate(2) brightness(1.05);
 }
