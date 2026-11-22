@@ -1,6 +1,7 @@
 import "./base.css";
 import "./home.css";
 import "./filter.js";
+import "./tradein.css";
 
 const $ = (id) => document.getElementById(id);
 
