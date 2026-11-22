@@ -13,10 +13,28 @@
   position: absolute; top: 0; left: 0; right: 0; z-index: 15;
   display: flex; align-items: center; justify-content: space-between;
   padding: calc(env(safe-area-inset-top, 0px) + 16px) 20px 10px;
-  transition: background-color 0.25s ease, box-shadow 0.25s ease;
 }
-/* Once the page scrolls, the header gets a solid backing so content slides cleanly under it */
-.h-top.stuck { background: rgba(255, 255, 255, 0.96); box-shadow: 0 1px 0 rgba(11, 11, 12, 0.06), 0 8px 20px rgba(11, 11, 12, 0.05); }
+/* iOS-style header: content scrolling under it blurs and fades out, no hard edge.
+   Two stacked layers: a strong blur that fades out early, and a light blur that fades out later. */
+.h-top::before, .h-top::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; z-index: -1; pointer-events: none;
+  opacity: 0; transition: opacity 0.3s ease;
+}
+.h-top::before {
+  bottom: -6px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.55));
+  -webkit-backdrop-filter: blur(22px) saturate(1.7); backdrop-filter: blur(22px) saturate(1.7);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 55%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0, #000 55%, transparent 100%);
+}
+.h-top::after {
+  bottom: -34px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+  -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0, transparent 100%);
+}
+.h-top.stuck::before, .h-top.stuck::after { opacity: 1; }
 .h-top { gap: 10px; }
 .h-top .mark { flex: none; }
 
