@@ -58,7 +58,11 @@
 .banners {
   display: flex; gap: 12px; overflow-x: auto; padding: 66px 20px 34px;
   scroll-snap-type: x mandatory; scroll-padding-left: 20px; scrollbar-width: none;
+  overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y; cursor: grab;
 }
+.banners.dragging { scroll-snap-type: none; cursor: grabbing; }
+.banners.dragging * { pointer-events: none; }
+.banners img { -webkit-user-drag: none; pointer-events: none; }
 .banners::-webkit-scrollbar { display: none; }
 .b-card {
   position: relative; flex: 0 0 88%; scroll-snap-align: start;

@@ -13,7 +13,7 @@
 .fm {
   position: absolute; z-index: 31; left: 14px; right: 14px;
   top: calc(env(safe-area-inset-top, 0px) + 70px + var(--st, 0px));
-  max-height: calc(100dvh - 150px); overflow-y: auto; scrollbar-width: none;
+  max-height: calc(100dvh - 150px); overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-width: none;
   padding: 18px 18px 16px; border-radius: 30px;
   background: linear-gradient(150deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.5));
   transform-origin: var(--ox, 90%) var(--oy, 0%);
@@ -42,7 +42,7 @@
 
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip {
-  height: 34px; padding: 0 14px; border-radius: 99px; font-size: 13px; font-weight: 600; color: var(--black);
+  max-width: 100%; height: 34px; padding: 0 14px; border-radius: 99px; font-size: 13px; font-weight: 600; color: var(--black);
   background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(11, 11, 12, 0.08);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
   transition: background 0.25s ease, color 0.25s ease, transform 0.2s cubic-bezier(0.3, 1.5, 0.5, 1), border-color 0.25s ease;
@@ -51,7 +51,7 @@
 .chip.on { background: var(--black); color: var(--white); border-color: var(--black); }
 
 .seg {
-  position: relative; display: grid; grid-template-columns: repeat(3, 1fr); padding: 3px; border-radius: 99px;
+  position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 3px; border-radius: 99px;
   background: rgba(11, 11, 12, 0.06); --k: 0;
 }
 .seg i {
@@ -59,7 +59,7 @@
   background: var(--white); box-shadow: 0 2px 8px rgba(11, 11, 12, 0.14), inset 0 1px 0 #fff;
   transform: translateX(calc(var(--k) * 100%)); transition: transform 0.5s cubic-bezier(0.3, 1.4, 0.45, 1);
 }
-.seg button { position: relative; height: 34px; background: none; font-size: 13px; font-weight: 700; color: rgba(11, 11, 12, 0.5); transition: color 0.25s ease; }
+.seg button { position: relative; min-width: 0; padding: 0 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; height: 34px; background: none; font-size: 13px; font-weight: 700; color: rgba(11, 11, 12, 0.5); transition: color 0.25s ease; }
 .seg button.on { color: var(--black); }
 
 .fm input[type="range"] {
@@ -88,3 +88,26 @@
   font-size: 9.5px; font-weight: 800; font-style: normal; line-height: 1;
 }
 .s-badge.on { display: grid; }
+
+/* Everything inside a dropdown shrinks to fit: nothing is wider than the panel, so it never scrolls sideways */
+.fm > *, .fm-sec > * { min-width: 0; }
+.fm input[type="range"] { max-width: 100%; }
+.fm-label { gap: 8px; }
+.fm-label b { min-width: 0; text-align: right; }
+
+/* Smaller phones: tighter padding, smaller controls */
+@media (max-width: 400px) {
+  .fm { left: 10px; right: 10px; padding: 15px 14px 14px; border-radius: 26px; }
+  .fm:not(.open) { border-radius: 50px; }
+  .fm-head h3, .cm .fm-head h3 { font-size: 17px; }
+  .fm-label { margin: 12px 0 7px; font-size: 10.5px; letter-spacing: 0.04em; }
+  .chips { gap: 6px; }
+  .chip { height: 32px; padding: 0 11px; font-size: 12.5px; }
+  .seg button { height: 32px; font-size: 12px; }
+  .fm-apply { height: 50px; margin-top: 14px; border-radius: 18px; font-size: 14px; }
+}
+@media (max-width: 340px) {
+  .fm { left: 8px; right: 8px; padding: 13px 11px 12px; }
+  .chip { height: 30px; padding: 0 9px; font-size: 12px; }
+  .seg button { font-size: 11.5px; padding: 0 2px; }
+}
