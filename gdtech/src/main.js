@@ -78,6 +78,15 @@ $("ob-video").addEventListener("error", (e) => (e.target.style.display = "none")
 render();
 setTimeout(() => show("onboarding"), 2400);
 
+// Warm the cache for the home page while the user is still on onboarding and auth
+const warm = ["/home.html", "/phones/banner-1.webp", "/phones/banner-2.webp", "/phones/banner-3.webp"];
+setTimeout(() => warm.forEach((href) => {
+  const l = document.createElement("link");
+  l.rel = "prefetch";
+  l.href = href;
+  document.head.appendChild(l);
+}), 3000);
+
 // Auth
 const card = document.querySelector(".card");
 // Card grows upward when its content gets taller
