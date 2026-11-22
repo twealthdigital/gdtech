@@ -1,3 +1,4 @@
+import "./base.css";
 import "./style.css";
 
 const $ = (id) => document.getElementById(id);
@@ -137,7 +138,7 @@ function playCall() {
   }, 1100);
   // Swap to the home screen while the overlay is still solid,
   // so the sign in / sign up form is never seen again
-  setTimeout(() => show("home"), 2300);
+  setTimeout(() => location.replace("/home.html"), 2300);
   setTimeout(() => call.classList.add("leave"), 2900);       // then fade away
   setTimeout(() => {
     call.classList.remove("on", "rise", "ringing", "leave");
@@ -155,40 +156,5 @@ document.querySelectorAll(".eye").forEach((btn) => {
     const hidden = field.type === "password";
     field.type = hidden ? "text" : "password";
     btn.textContent = hidden ? "Hide" : "Show";
-  });
-});
-
-// Home: banners auto-slide, swipe by hand, dots follow
-const bTrack = $("b-track");
-const bDots = document.querySelectorAll("#b-dots i");
-let cur = 0;
-let holdUntil = 0;
-
-bTrack.addEventListener("scroll", () => {
-  const step = bTrack.children[0].offsetWidth + 12;
-  let i = Math.round(bTrack.scrollLeft / step);
-  if (bTrack.scrollLeft + bTrack.clientWidth >= bTrack.scrollWidth - 4) i = bDots.length - 1;
-  cur = i;
-  bDots.forEach((d, n) => d.classList.toggle("on", n === i));
-}, { passive: true });
-
-// While a finger is on the banners, pause the auto slide
-const hold = () => { holdUntil = Date.now() + 5000; };
-bTrack.addEventListener("touchstart", hold, { passive: true });
-bTrack.addEventListener("touchmove", hold, { passive: true });
-bTrack.addEventListener("touchend", hold, { passive: true });
-bTrack.addEventListener("pointerdown", hold);
-
-setInterval(() => {
-  if (!$("home").classList.contains("active") || Date.now() < holdUntil) return;
-  const step = bTrack.children[0].offsetWidth + 12;
-  const next = (cur + 1) % bDots.length;
-  bTrack.scrollTo({ left: next * step, behavior: "smooth" });
-}, 3500);
-
-// Home: bottom nav
-document.querySelectorAll("#dock button").forEach((b) => {
-  b.addEventListener("click", () => {
-    document.querySelectorAll("#dock button").forEach((x) => x.classList.toggle("on", x === b));
   });
 });
