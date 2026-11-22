@@ -46,7 +46,7 @@
 .has-img .k-art img { position: absolute; left: 50%; bottom: calc(-2% + var(--up, 0%)); width: calc(98% * var(--z, 1)); max-width: none; height: 100%; translate: -50% 0; pointer-events: none; object-fit: contain; object-position: center bottom; filter: drop-shadow(0 12px 12px rgba(0, 0, 0, 0.4)); }
 .has-img::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(to top, var(--card) 0%, transparent 38%); }
 /* Laptops are wide, so keep the fade at the bottom short or it washes out the base */
-.col-grid[data-cat="laptops"] .has-img::after { background: linear-gradient(to top, var(--card) 0%, transparent 22%); }
+.col-grid[data-cat="laptops"] .has-img::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 15%, transparent 44%); }
 .k-ico { align-self: center; width: 54%; max-width: 120px; aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.18); }
 .cream .k-ico { background: rgba(23, 23, 26, 0.08); }
 .k-ico svg { width: 56%; height: 56%; stroke-width: 1.5; }
