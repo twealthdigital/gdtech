@@ -71,6 +71,13 @@ function paint() {
   } else {
     apply.textContent = "Show all gadgets";
   }
+  document.dispatchEvent(new CustomEvent("shop:update"));
+}
+
+export function setCategory(id) {
+  picked.cat = id;
+  picked.brands = [];
+  paint();
 }
 
 function choose(id) {

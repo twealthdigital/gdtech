@@ -4,6 +4,7 @@ import "./home.css";
 import "./filter.js";
 import "./categories.js";
 import "./tradein.css";
+import "./shop.js";
 
 const $ = (id) => document.getElementById(id);
 

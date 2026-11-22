@@ -36,6 +36,7 @@ function sync() {
   const pct = ((filters.price - range.min) / (range.max - range.min)) * 100;
   range.style.setProperty("--p", pct + "%");
   priceVal.textContent = filters.price >= +range.max ? "Any price" : "Up to " + naira(filters.price);
+  document.dispatchEvent(new CustomEvent("shop:update"));
 }
 
 function count() {

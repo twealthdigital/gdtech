@@ -1,0 +1,87 @@
+/* Shop: solid, bold colour blocks that match the home banners. No glass here. */
+.shop { container-type: inline-size; margin: 34px 0 0; padding: 0 20px 28px; }
+
+.shop-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.shop-kick { font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--orange); }
+.shop h2 { margin-top: 2px; font-size: 34px; line-height: 1; font-weight: 800; letter-spacing: -0.01em; color: var(--black); }
+.shop-count { flex: none; height: 30px; padding: 0 14px; display: grid; place-items: center; border-radius: 99px; background: var(--black); color: var(--white); font-size: 12px; font-weight: 800; }
+
+/* Tabs: solid pills, the active one is black with orange text */
+.shop-tabs { display: flex; gap: 8px; margin: 16px -20px 0; padding: 2px 20px 4px; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; }
+.shop-tabs::-webkit-scrollbar { display: none; }
+.s-tab {
+  flex: none; height: 38px; padding: 0 16px; border-radius: 99px;
+  background: #f1eee8; color: var(--black); font-size: 13px; font-weight: 800; white-space: nowrap;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+.s-tab:active { transform: scale(0.95); }
+.s-tab.on { background: var(--black); color: var(--orange); }
+
+/* Grid: as many columns as fit, never narrower than 128px */
+.shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 12px; margin-top: 16px; }
+.shop-grid[hidden], .shop-empty[hidden] { display: none; }
+
+/* Cards use the banner colours */
+.p-card {
+  --card: var(--black); --glow: rgba(255, 122, 26, 0.5); --ink: #fff; --sub: rgba(255, 255, 255, 0.72);
+  position: relative; min-width: 0; display: flex; flex-direction: column; overflow: hidden;
+  border-radius: 24px; background-color: var(--card); color: var(--ink);
+  background-image: radial-gradient(circle at 50% 30%, var(--glow), transparent 62%);
+  transition: transform 0.2s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+.p-card:active { transform: scale(0.98); }
+.p-card.orange { --card: #f0721a; --glow: #ffa352; }
+.p-card.slate { --card: #52688a; --glow: #8fa8cb; }
+.p-card.cream { --card: #e4dcc8; --glow: #fbf7ec; --ink: #17171a; --sub: rgba(23, 23, 26, 0.62); }
+.p-card.ink { --card: #0b0b0c; --glow: rgba(255, 122, 26, 0.55); }
+
+.p-stage { position: relative; aspect-ratio: 1 / 1; display: grid; place-items: end center; padding: 14px 12px 0; }
+.p-stage img { width: 100%; height: 100%; object-fit: contain; object-position: center bottom; filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.4)); }
+.p-ico { align-self: center; width: 46%; aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.18); }
+.p-card.cream .p-ico { background: rgba(23, 23, 26, 0.08); }
+.p-ico svg { width: 58%; height: 58%; stroke-width: 1.6; }
+
+.p-tag { position: absolute; top: 12px; left: 12px; z-index: 2; height: 22px; padding: 0 9px; display: grid; place-items: center; border-radius: 99px; background: var(--black); color: var(--orange); font-size: 10px; font-weight: 800; letter-spacing: 0.08em; }
+.p-tag.used { background: var(--white); color: var(--black); }
+
+.p-info { flex: 1; display: flex; flex-direction: column; padding: 4px 14px 14px; }
+.p-brand { font-size: 10.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sub); }
+.p-name { margin-top: 3px; font-size: 15px; line-height: 1.12; font-weight: 800; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.p-spec { margin-top: 4px; font-size: 11.5px; font-weight: 600; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p-buy { display: flex; flex-direction: column; gap: 10px; margin-top: auto; padding-top: 12px; }
+.p-price { min-width: 0; font-size: 16px; font-weight: 800; letter-spacing: -0.02em; white-space: nowrap; }
+
+.p-add { width: 100%; height: 38px; padding: 0 12px; border-radius: 99px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12.5px; font-weight: 800; background: var(--black); color: var(--orange); transition: transform 0.15s ease, background 0.2s ease, color 0.2s ease; }
+.p-add:active { transform: scale(0.88); }
+.p-add svg { flex: none; width: 15px; height: 15px; }
+.p-add.on { background: var(--white); color: var(--black); }
+.p-card.ink .p-add { background: var(--orange); color: var(--black); }
+.p-card.ink .p-add.on { background: var(--white); }
+.p-card.orange .p-add.on, .p-card.slate .p-add.on { background: var(--black); color: var(--white); }
+
+/* Empty state */
+.shop-empty { margin-top: 16px; padding: 28px 20px; border-radius: 24px; text-align: center; background: var(--black); color: var(--white); }
+.shop-empty b { font-size: 24px; font-weight: 800; color: var(--orange); }
+.shop-empty p { margin: 6px 0 16px; font-size: 13px; font-weight: 600; color: rgba(255, 255, 255, 0.7); }
+.shop-empty button { height: 44px; padding: 0 22px; border-radius: 99px; background: var(--orange); color: var(--black); font-size: 13.5px; font-weight: 800; }
+
+/* Sizes follow the width of the shop, so small phones tighten up and wide ones breathe */
+@container (max-width: 300px) {
+  .shop-grid { gap: 9px; }
+  .p-card { border-radius: 20px; }
+  .p-stage { padding: 12px 10px 0; }
+  .p-tag { top: 9px; left: 9px; height: 20px; padding: 0 7px; font-size: 9px; }
+  .p-info { padding: 3px 11px 11px; }
+  .p-name { font-size: 13.5px; }
+  .p-spec { font-size: 10.5px; }
+  .p-price { font-size: 14.5px; }
+  .p-add { height: 34px; font-size: 12px; }
+  .p-add svg { width: 14px; height: 14px; }
+  .shop h2 { font-size: 30px; }
+}
+@container (min-width: 420px) {
+  .shop-grid { gap: 14px; }
+  .p-name { font-size: 16px; }
+  .p-price { font-size: 17px; }
+}
+@media (prefers-reduced-motion: reduce) { .p-card, .p-add, .s-tab { transition: none; } }
