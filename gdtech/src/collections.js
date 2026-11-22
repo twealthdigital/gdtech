@@ -32,12 +32,12 @@ function card(cat, brand, i) {
   const sub = title !== brand ? brand : "";
   const img = IMAGES[key];
   const art = img
-    ? `<img src="${img.src}" width="${img.w}" height="${img.h}" alt="${title}" loading="lazy" decoding="async" />`
+    ? `<img src="${img.src}" width="${img.w}" height="${img.h}" alt="${title}" loading="lazy" decoding="async" draggable="false" />`
     : `<span class="k-ico">${svg(cat.icon)}</span>`;
-  return `<button class="k-card ${TONES[i % TONES.length]}" type="button" data-cat="${cat.id}" data-brand="${brand}" style="--i:${i}">
+  return `<button class="k-card ${TONES[i % TONES.length]}${img ? " has-img" : ""}" type="button" data-cat="${cat.id}" data-brand="${brand}" style="--i:${i}">
     <span class="k-art">${art}</span>
     <span class="k-text">${sub ? `<small>${sub}</small>` : ""}<b>${title}</b></span>
-    <span class="k-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+    <span class="k-go glass" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
   </button>`;
 }
 
@@ -61,6 +61,31 @@ tabsEl.addEventListener("click", (e) => {
   const t = e.target.closest(".c-tab");
   if (t) setCategory(t.dataset.id);
 });
+
+// Tilt: the card leans toward the pointer and the phone rotates a little and shifts with it (mouse hover or finger)
+const lean = (card, e) => {
+  const r = card.getBoundingClientRect();
+  const px = Math.max(-1, Math.min(1, ((e.clientX - r.left) / r.width) * 2 - 1));
+  const py = Math.max(-1, Math.min(1, ((e.clientY - r.top) / r.height) * 2 - 1));
+  card.style.setProperty("--px", px.toFixed(3));
+  card.style.setProperty("--py", py.toFixed(3));
+  card.classList.add("hot");
+};
+const settle = (card) => {
+  card.classList.remove("hot");
+  card.style.removeProperty("--px");
+  card.style.removeProperty("--py");
+};
+const onMove = (e) => { const c = e.target.closest(".k-card"); if (c) lean(c, e); };
+gridEl.addEventListener("pointerover", onMove);
+gridEl.addEventListener("pointermove", onMove);
+gridEl.addEventListener("pointerdown", onMove);
+gridEl.addEventListener("pointerout", (e) => {
+  const c = e.target.closest(".k-card");
+  if (c && !c.contains(e.relatedTarget)) settle(c);
+});
+gridEl.addEventListener("pointerup", (e) => { const c = e.target.closest(".k-card"); if (c) setTimeout(() => settle(c), 220); });
+gridEl.addEventListener("pointercancel", (e) => { const c = e.target.closest(".k-card"); if (c) settle(c); });
 
 // Tapping a collection tells the rest of the app which one was opened
 gridEl.addEventListener("click", (e) => {

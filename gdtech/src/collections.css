@@ -23,10 +23,13 @@
   position: relative; min-width: 0; min-height: 190px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden;
   padding: 14px; border-radius: 24px; text-align: left; color: var(--ink);
   background-color: var(--card); background-image: radial-gradient(circle at 50% 34%, var(--glow), transparent 62%);
-  transition: transform 0.2s cubic-bezier(0.3, 1.5, 0.5, 1);
-  animation: k-in 0.5s cubic-bezier(0.2, 1.1, 0.4, 1) both; animation-delay: calc(var(--i, 0) * 55ms);
+  transform: perspective(700px) rotateX(calc(var(--py, 0) * -9deg)) rotateY(calc(var(--px, 0) * 11deg)) scale(var(--cs, 1));
+  transition: transform 0.65s cubic-bezier(0.2, 1.5, 0.35, 1), box-shadow 0.3s ease;
+  animation: k-in 0.5s cubic-bezier(0.2, 1.1, 0.4, 1) backwards; animation-delay: calc(var(--i, 0) * 55ms);
+  -webkit-user-select: none; user-select: none;
 }
-.k-card:active { transform: scale(0.97); }
+.k-card.hot { --cs: 1.03; box-shadow: 0 16px 30px rgba(11, 11, 12, 0.24); transition-duration: 0.14s; transition-timing-function: ease-out; }
+.k-card:active { --cs: 0.98; }
 .k-card.orange { --card: #f0721a; --glow: #ffa352; }
 .k-card.slate { --card: #52688a; --glow: #8fa8cb; }
 .k-card.cream { --card: #e4dcc8; --glow: #fbf7ec; --ink: #17171a; --sub: rgba(23, 23, 26, 0.6); }
@@ -34,21 +37,28 @@
 @keyframes k-in { from { opacity: 0; transform: translateY(14px) scale(0.96); } }
 
 .k-art { position: absolute; left: 0; right: 0; top: 0; bottom: 66px; display: grid; place-items: end center; padding: 14px 14px 0; }
-.k-art img { width: 100%; height: 100%; object-fit: contain; object-position: center bottom; filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.4)); }
+/* Photo cards: the phone is big and fills the card, cropped by its rounded edge, fading into the colour at the bottom */
+.has-img .k-art { inset: 0; display: block; padding: 0; transform-origin: 50% 85%;
+  transform: translate(calc(var(--px, 0) * -7px), calc(var(--py, 0) * -5px)) rotate(calc(var(--rz, 0deg) + var(--px, 0) * 7deg)) scale(var(--as, 1));
+  transition: transform 0.65s cubic-bezier(0.2, 1.5, 0.35, 1); }
+.has-img.hot .k-art { --rz: -4deg; --as: 1.1; transition-duration: 0.14s; transition-timing-function: ease-out; }
+.has-img .k-art img { position: absolute; left: 50%; bottom: -2%; width: 98%; max-width: none; height: 100%; translate: -50% 0; pointer-events: none; object-fit: contain; object-position: center bottom; filter: drop-shadow(0 12px 12px rgba(0, 0, 0, 0.4)); }
+.has-img::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(to top, var(--card) 0%, transparent 38%); }
 .k-ico { align-self: center; width: 54%; max-width: 120px; aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.18); }
 .cream .k-ico { background: rgba(23, 23, 26, 0.08); }
 .k-ico svg { width: 56%; height: 56%; stroke-width: 1.5; }
 
-.k-text { position: relative; z-index: 1; min-width: 0; padding-right: 40px; display: flex; flex-direction: column; gap: 2px; }
+.k-text { position: relative; z-index: 2; min-width: 0; padding-right: 40px; display: flex; flex-direction: column; gap: 2px; }
 .k-text small { font-size: 10.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sub); }
 .k-text b { font-size: 19px; line-height: 1.05; font-weight: 800; letter-spacing: -0.01em; overflow-wrap: anywhere; }
-.k-go { position: absolute; right: 12px; bottom: 12px; z-index: 1; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--black); color: var(--orange); }
-.k-go svg { width: 15px; height: 15px; }
-.ink .k-go { background: var(--orange); color: var(--black); }
+/* Arrow button: liquid glass (uses the shared .glass look from base.css) */
+.k-go { position: absolute; right: 12px; bottom: 12px; z-index: 3; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: var(--ink); }
+.k-go svg { position: relative; z-index: 1; width: 15px; height: 15px; }
+.ink .k-go { color: var(--orange); }
 
 /* A lone last card is wide: art sits to the right, text to the left */
 .k-card:last-child:nth-child(odd) { min-height: 150px; }
-.k-card:last-child:nth-child(odd) .k-art { left: 45%; bottom: 0; padding-bottom: 0; }
+.k-card:last-child:nth-child(odd):not(.has-img) .k-art { left: 45%; bottom: 0; padding-bottom: 0; }
 
 /* Sizes follow the width of the section */
 @container (max-width: 300px) {
@@ -57,11 +67,11 @@
   .k-card { min-height: 170px; padding: 12px; border-radius: 20px; }
   .k-art { bottom: 62px; padding: 12px 10px 0; }
   .k-text b { font-size: 17px; }
-  .k-go { right: 10px; bottom: 10px; width: 30px; height: 30px; }
+  .k-go { right: 10px; bottom: 10px; width: 32px; height: 32px; }
 }
 @container (min-width: 420px) {
   .col-grid { gap: 14px; }
   .k-card { min-height: 210px; }
   .k-text b { font-size: 21px; }
 }
-@media (prefers-reduced-motion: reduce) { .k-card { animation: none; transition: none; } .c-tab { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .k-card, .has-img .k-art { animation: none; transition: none; transform: none; } .c-tab { transition: none; } }
