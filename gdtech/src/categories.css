@@ -69,7 +69,7 @@
 .cm-brand-wrap.open { grid-template-rows: 1fr; }
 .cm-brand-wrap > div { overflow: hidden; min-height: 0; }
 .cm-brand-wrap .fm-label { margin-top: 16px; }
-.home.lock { overflow: hidden; }
+.home.lock .h-scroll { overflow: hidden; }
 
 @media (max-width: 400px) {
   .cm-grid { gap: 7px; }

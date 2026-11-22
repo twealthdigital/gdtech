@@ -1,10 +1,16 @@
 /* Home */
-.home { background: var(--white); overflow-y: auto; overflow-x: hidden; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 120px); scrollbar-width: none; overscroll-behavior-y: contain; }
-.home::-webkit-scrollbar { display: none; }
+.home { background: var(--white); overflow: hidden; }
+/* Only this inner area scrolls. The header and the dock sit outside it, so they never move. */
+.h-scroll {
+  position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior-y: contain; scrollbar-width: none;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 70px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 120px);
+}
+.h-scroll::-webkit-scrollbar { display: none; }
 .home.active { animation: home-in 0.5s ease both; }
 @keyframes home-in { from { opacity: 0; } }
 .h-top {
-  position: sticky; top: 0; z-index: 15;
+  position: absolute; top: 0; left: 0; right: 0; z-index: 15;
   display: flex; align-items: center; justify-content: space-between;
   padding: calc(env(safe-area-inset-top, 0px) + 16px) 20px 10px;
   transition: background-color 0.25s ease, box-shadow 0.25s ease;
@@ -103,7 +109,7 @@
 
 /* Floating glass nav */
 .dock {
-  position: fixed; left: 50%; z-index: 20;
+  position: absolute; left: 50%; z-index: 20;
   bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
   width: min(300px, calc(100% - 56px)); height: 64px; transform: translateX(-50%);
   display: flex; align-items: center; justify-content: space-around;
@@ -126,7 +132,7 @@
 .dock button.on::after { transform: scale(1); }
 
 /* Header glow so the glass has something to catch */
-.home::before {
+.h-scroll::before {
   content: ""; position: absolute; left: 0; right: 0; top: 0; height: 260px; z-index: -1; pointer-events: none;
   background:
     radial-gradient(55% 70% at 88% 30%, rgba(255, 122, 26, 0.30), transparent 70%),
