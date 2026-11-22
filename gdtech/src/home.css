@@ -14,10 +14,10 @@
 .search {
   position: relative; flex: 1; min-width: 0; height: 44px;
   display: flex; align-items: center; gap: 8px; padding: 0 6px 0 14px;
-  border-radius: 99px; background: #f4f1ec; border: 1.5px solid transparent;
+  border-radius: 99px; border: 1.5px solid transparent;
   transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
-.search:focus-within { background: var(--white); border-color: var(--orange); box-shadow: 0 0 0 4px var(--orange-soft); }
+.search:focus-within { background: rgba(255, 255, 255, 0.78); border-color: var(--orange); box-shadow: 0 0 0 4px var(--orange-soft); }
 .s-ico { flex: none; width: 18px; height: 18px; color: var(--orange); }
 .search input {
   position: relative; z-index: 1; flex: 1; min-width: 0; height: 100%;
@@ -116,3 +116,33 @@
   background: var(--orange); transform: scale(0); transition: transform 0.25s ease;
 }
 .dock button.on::after { transform: scale(1); }
+
+/* Liquid glass: blur, saturation, bright rim and specular edge. Chromium also bends what is behind it. */
+.home::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 260px; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(55% 70% at 88% 6%, rgba(255, 122, 26, 0.30), transparent 70%),
+    radial-gradient(45% 60% at 8% 14%, rgba(255, 170, 100, 0.22), transparent 70%);
+}
+.glass {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.16));
+  -webkit-backdrop-filter: blur(16px) saturate(2) brightness(1.05);
+  backdrop-filter: blur(16px) saturate(2) brightness(1.05);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1.5px 1px rgba(255, 255, 255, 0.4),
+    inset 0 0 22px rgba(255, 255, 255, 0.35),
+    0 12px 30px rgba(120, 40, 0, 0.16);
+}
+.glass::before {
+  content: ""; position: absolute; inset: 0; padding: 1.5px; border-radius: inherit; pointer-events: none; z-index: 2;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0) 70%, rgba(255, 255, 255, 0.7));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.lg-refract .glass {
+  -webkit-backdrop-filter: url(#lg) blur(6px) saturate(2) brightness(1.05);
+  backdrop-filter: url(#lg) blur(6px) saturate(2) brightness(1.05);
+}
