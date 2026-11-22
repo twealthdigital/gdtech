@@ -244,21 +244,3 @@
   transform: translateY(-120%);
   transition: transform 0.75s cubic-bezier(0.7, 0, 0.3, 1);
 }
-
-
-/* Reduce live blur on secondary glass controls on lower-powered devices. */
-.lg-balanced .skip,
-.lg-balanced .btn.ghost,
-.lg-balanced .f input,
-.lg-balanced .btn.outline {
-  -webkit-backdrop-filter: blur(8px) saturate(1.25);
-  backdrop-filter: blur(8px) saturate(1.25);
-}
-.lg-lite .skip,
-.lg-lite .btn.ghost,
-.lg-lite .f input,
-.lg-lite .btn.outline {
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-  background-color: rgba(255, 255, 255, 0.82);
-}
