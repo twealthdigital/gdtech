@@ -71,7 +71,7 @@ function paint() {
   } else {
     apply.textContent = "Show all gadgets";
   }
-  document.dispatchEvent(new CustomEvent("shop:update"));
+  document.dispatchEvent(new CustomEvent("category:change"));
 }
 
 export function setCategory(id) {
