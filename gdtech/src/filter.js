@@ -49,6 +49,9 @@ function paintBadge() {
 }
 
 function open() {
+  const home = $("home");
+  home.style.setProperty("--st", home.scrollTop + "px");
+  home.classList.add("lock");
   // grow from the button: set the panel's transform origin to the button centre
   const b = btn.getBoundingClientRect();
   const p = panel.getBoundingClientRect();
@@ -61,6 +64,7 @@ function open() {
 }
 
 function close() {
+  $("home").classList.remove("lock");
   panel.classList.remove("open");
   backdrop.classList.remove("open");
   btn.setAttribute("aria-expanded", "false");

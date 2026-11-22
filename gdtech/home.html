@@ -89,6 +89,15 @@
       </div>
       <div class="b-dots" id="b-dots"><i class="on"></i><i></i><i></i></div>
 
+      <section class="cats" aria-label="Categories">
+        <div class="cat-list" id="cat-list"></div>
+        <i class="cat-sep" aria-hidden="true"></i>
+        <button class="cat-all" id="cat-all" type="button" aria-label="All categories" aria-expanded="false" aria-controls="cm" data-tilt="orb">
+          <span class="c-orb glass"><span class="c-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="2"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="2"/></svg></span></span>
+          <span class="c-name">All</span>
+        </button>
+      </section>
+
       <section class="tradein" aria-label="Trade in">
         <button class="t-card" type="button">
           <span class="t-phone"><img src="/phones/banner-1.png" alt="" /></span>
@@ -122,6 +131,14 @@
           <div class="chips" data-key="sort"><button class="chip" type="button" data-v="Popular">Popular</button><button class="chip" type="button" data-v="Price low">Price low</button><button class="chip" type="button" data-v="Price high">Price high</button><button class="chip" type="button" data-v="Newest">Newest</button></div>
         </div>
         <div class="fm-sec" style="--i:6"><button class="fm-apply" id="fm-apply" type="button">Apply filters</button></div>
+      </section>
+
+      <div class="fm-backdrop" id="cm-bd"></div>
+      <section class="fm cm glass" id="cm" role="dialog" aria-label="All categories" aria-hidden="true">
+        <div class="fm-head fm-sec" style="--i:0"><h3>All categories</h3><button class="fm-reset" id="cm-clear" type="button">Clear</button></div>
+        <div class="cm-grid fm-sec" id="cm-grid" style="--i:1"></div>
+        <div class="cm-brand-wrap fm-sec" id="cm-brand-wrap" style="--i:2"><div><p class="fm-label">Brands</p><div class="chips" id="cm-brands"></div></div></div>
+        <div class="fm-sec" style="--i:3"><button class="fm-apply" id="cm-apply" type="button">Show all gadgets</button></div>
       </section>
 
       <nav class="dock glass" id="dock" aria-label="Main">

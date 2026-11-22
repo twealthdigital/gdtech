@@ -1,6 +1,6 @@
 /* Filter dropdown: drops out of the filter button like liquid, background blurs behind it */
 .fm-backdrop {
-  position: absolute; inset: 0; z-index: 30;
+  position: absolute; left: 0; right: 0; top: var(--st, 0px); height: 100%; z-index: 30;
   background: rgba(255, 255, 255, 0); pointer-events: none;
   -webkit-backdrop-filter: blur(0px) saturate(1); backdrop-filter: blur(0px) saturate(1);
   transition: background 0.45s ease, backdrop-filter 0.55s ease, -webkit-backdrop-filter 0.55s ease;
@@ -12,7 +12,7 @@
 
 .fm {
   position: absolute; z-index: 31; left: 14px; right: 14px;
-  top: calc(env(safe-area-inset-top, 0px) + 70px);
+  top: calc(env(safe-area-inset-top, 0px) + 70px + var(--st, 0px));
   max-height: calc(100dvh - 150px); overflow-y: auto; scrollbar-width: none;
   padding: 18px 18px 16px; border-radius: 30px;
   background: linear-gradient(150deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.5));
