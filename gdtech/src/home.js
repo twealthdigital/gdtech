@@ -42,3 +42,10 @@ document.querySelectorAll("#dock button").forEach((b) => {
     document.querySelectorAll("#dock button").forEach((x) => x.classList.toggle("on", x === b));
   });
 });
+
+// Home: header stays fixed at the top; give it a solid backing once content scrolls under it
+const homeEl = $("home");
+const hTop = homeEl.querySelector(".h-top");
+homeEl.addEventListener("scroll", () => {
+  hTop.classList.toggle("stuck", homeEl.scrollTop > 4);
+}, { passive: true });

@@ -1,5 +1,5 @@
 /* Trade in card: solid orange to black gradient, two big words, one small line */
-.tradein { margin: 22px 20px 0; }
+.tradein { margin: 22px 20px 0; padding-bottom: 240px; } /* empty space after Trade up so the page always scrolls */
 
 .t-card {
   position: relative; display: block; width: 100%; height: 150px; padding: 0 20px 0 0; margin-top: 22px;

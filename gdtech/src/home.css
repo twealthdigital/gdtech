@@ -1,12 +1,16 @@
 /* Home */
-.home { background: var(--white); overflow-y: auto; overflow-x: hidden; padding-bottom: 120px; scrollbar-width: none; }
+.home { background: var(--white); overflow-y: auto; overflow-x: hidden; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 120px); scrollbar-width: none; overscroll-behavior-y: contain; }
 .home::-webkit-scrollbar { display: none; }
 .home.active { animation: home-in 0.5s ease both; }
 @keyframes home-in { from { opacity: 0; } }
 .h-top {
+  position: sticky; top: 0; z-index: 15;
   display: flex; align-items: center; justify-content: space-between;
-  padding: calc(env(safe-area-inset-top, 0px) + 16px) 20px 6px;
+  padding: calc(env(safe-area-inset-top, 0px) + 16px) 20px 10px;
+  transition: background-color 0.25s ease, box-shadow 0.25s ease;
 }
+/* Once the page scrolls, the header gets a solid backing so content slides cleanly under it */
+.h-top.stuck { background: rgba(255, 255, 255, 0.96); box-shadow: 0 1px 0 rgba(11, 11, 12, 0.06), 0 8px 20px rgba(11, 11, 12, 0.05); }
 .h-top { gap: 10px; }
 .h-top .mark { flex: none; }
 
@@ -95,7 +99,7 @@
 
 /* Floating glass nav */
 .dock {
-  position: absolute; left: 50%; z-index: 20;
+  position: fixed; left: 50%; z-index: 20;
   bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
   width: min(300px, calc(100% - 56px)); height: 64px; transform: translateX(-50%);
   display: flex; align-items: center; justify-content: space-around;
