@@ -8,7 +8,7 @@ const DEFAULT_CAT = "mobile";
 // Display names for collections (falls back to the brand name)
 const TITLES = {
   "mobile:Apple": "iPhone", "mobile:Samsung": "Galaxy", "mobile:Google": "Pixel",
-  "laptops:Apple": "MacBook", "tablets:Apple": "iPad", "tablets:Samsung": "Galaxy Tab",
+  "laptops:Apple": "MacBook", "laptops:Samsung": "Galaxy Book", "tablets:Apple": "iPad", "tablets:Samsung": "Galaxy Tab",
   "headsets:Apple": "AirPods", "headsets:Beats": "Beats", "wearables:Apple Watch": "Apple Watch",
   "tvs:Samsung": "Samsung TV", "tvs:LG": "LG TV", "tvs:Sony": "Sony TV",
 };
@@ -18,16 +18,22 @@ const IMAGES = {
   "mobile:Samsung": { src: "/phones/banner-2.webp", w: 632, h: 760 },
   "mobile:Google": { src: "/phones/banner-3.webp", w: 512, h: 760 },
   "mobile:itel": { src: "/phones/itel.webp", w: 604, h: 760 },
-  "laptops:Apple": { src: "/laptops/apple.webp", w: 1150, h: 760 },
-  "laptops:Dell": { src: "/laptops/dell.webp", w: 599, h: 760 },
-  "laptops:HP": { src: "/laptops/hp.webp", w: 1227, h: 760 },
-  "laptops:Lenovo": { src: "/laptops/lenovo.webp", w: 844, h: 760 },
-  "laptops:Asus": { src: "/laptops/asus.webp", w: 1237, h: 760 },
+  "laptops:Apple": { src: "/laptops/apple.webp", w: 1150, h: 760, z: 1.06, up: 28 },
+  "laptops:Dell": { src: "/laptops/dell.webp", w: 599, h: 760, z: 1.0, up: 0 },
+  "laptops:HP": { src: "/laptops/hp.webp", w: 1227, h: 760, z: 1.06, up: 28 },
+  "laptops:Lenovo": { src: "/laptops/lenovo.webp", w: 844, h: 760, z: 0.9, up: 24 },
+  "laptops:Asus": { src: "/laptops/asus.webp", w: 1237, h: 760, z: 1.06, up: 28 },
+  "laptops:Samsung": { src: "/laptops/samsung.webp", w: 1238, h: 760, z: 1.06, up: 28 },
 };
 // Same colour blocks as the home banners
 const TONES = ["orange", "slate", "cream", "ink"];
 // Cards that need their own colour (matched to the phone)
-const TONE_OF = { "mobile:itel": "plum" };
+const TONE_OF = {
+  "mobile:itel": "plum",
+  // Laptops: light silver ones sit on dark cards, dark ones on light cards
+  "laptops:Apple": "ink", "laptops:Dell": "slate", "laptops:HP": "cream",
+  "laptops:Lenovo": "orange", "laptops:Asus": "orange", "laptops:Samsung": "plum",
+};
 
 const tabsEl = $("col-tabs");
 const gridEl = $("col-grid");
@@ -40,7 +46,7 @@ function card(cat, brand, i) {
   const sub = title !== brand ? brand : "";
   const img = IMAGES[key];
   const art = img
-    ? `<img src="${img.src}" width="${img.w}" height="${img.h}" alt="${title}" loading="lazy" decoding="async" draggable="false" />`
+    ? `<img src="${img.src}" width="${img.w}" height="${img.h}" alt="${title}"${img.z ? ` style="--z:${img.z};--up:${img.up}%"` : ""} loading="lazy" decoding="async" draggable="false" />`
     : `<span class="k-ico">${svg(cat.icon)}</span>`;
   return `<button class="k-card ${TONE_OF[key] || TONES[i % TONES.length]}${img ? " has-img" : ""}" type="button" data-cat="${cat.id}" data-brand="${brand}" style="--i:${i}">
     <span class="k-art">${art}</span>
