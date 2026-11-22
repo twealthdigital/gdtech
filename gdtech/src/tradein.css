@@ -1,40 +1,24 @@
-/* Trade in card: deep warm tone, orange kept as a soft glow and small accents */
-.tradein { margin: 26px 20px 0; }
-.t-eyebrow { display: flex; align-items: center; gap: 8px; margin: 0 2px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(11, 11, 12, 0.45); }
-.t-eyebrow::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(11, 11, 12, 0.14), transparent); }
-.t-eyebrow i { width: 7px; height: 7px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 0 4px var(--orange-soft); }
+/* Trade in card: solid orange to black gradient, two big words, one small line */
+.tradein { margin: 22px 20px 0; }
 
 .t-card {
-  position: relative; display: block; width: 100%; min-height: 150px; padding: 22px 20px 22px 152px; margin-top: 22px;
-  border-radius: 28px; text-align: left; color: #fff; overflow: visible;
-  background:
-    radial-gradient(70% 90% at 16% 60%, rgba(255, 122, 26, 0.34), transparent 70%),
-    linear-gradient(140deg, #2a1d15, #17110d 70%);
-  box-shadow: 0 18px 36px rgba(60, 28, 8, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  position: relative; display: block; width: 100%; height: 150px; padding: 0 20px 0 0; margin-top: 22px;
+  border-radius: 28px; text-align: right; color: #fff;
+  background: linear-gradient(100deg, #0b0b0c 0%, #0b0b0c 26%, #f0721a 72%, #f0721a 100%);
+  box-shadow: 0 16px 30px rgba(11, 11, 12, 0.2);
   transition: transform 0.2s cubic-bezier(0.3, 1.5, 0.5, 1);
 }
 .t-card:active { transform: scale(0.98); }
-.t-card::after {
-  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-  background: linear-gradient(120deg, rgba(255, 255, 255, 0.12), transparent 28%);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); padding: 1px;
-}
 
 .t-phone {
-  position: absolute; left: 6px; bottom: -14px; width: 150px; aspect-ratio: 1179 / 1334; transform: rotate(-12deg);
-  filter: drop-shadow(0 14px 14px rgba(0, 0, 0, 0.5)); animation: t-float 5s ease-in-out infinite;
+  position: absolute; left: 14px; bottom: -12px; width: 150px; aspect-ratio: 1179 / 1334; transform: rotate(-12deg);
+  filter: drop-shadow(0 14px 14px rgba(0, 0, 0, 0.55)); animation: t-float 5s ease-in-out infinite;
 }
 .t-phone img { width: 100%; height: 100%; object-fit: contain; display: block; }
 @keyframes t-float { 50% { transform: rotate(-9deg) translateY(-6px); } }
 @media (prefers-reduced-motion: reduce) { .t-phone { animation: none; } }
 
-.t-tag { display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #ffb27a; }
-.t-card h3 { margin-top: 6px; font-size: 20px; line-height: 1.15; font-weight: 800; letter-spacing: -0.01em; }
-.t-card p { margin-top: 6px; font-size: 13px; line-height: 1.4; font-weight: 500; color: rgba(255, 255, 255, 0.62); }
-.t-card p b { color: #fff; font-weight: 700; }
-.t-go {
-  display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; height: 34px; padding: 0 14px; border-radius: 99px;
-  font-size: 12.5px; font-weight: 700; color: #ffc9a1; background: rgba(255, 122, 26, 0.16); border: 1px solid rgba(255, 150, 70, 0.3);
-}
-.t-go svg { width: 13px; height: 13px; }
+.t-card h3 { position: absolute; top: 24px; right: 20px; font-size: 36px; line-height: 0.98; font-weight: 800; letter-spacing: -0.01em; }
+.t-card p { position: absolute; left: 172px; right: 70px; bottom: 22px; text-align: left; font-size: 12.5px; line-height: 1.35; font-weight: 600; color: rgba(255, 255, 255, 0.9); }
+.t-go { position: absolute; right: 16px; bottom: 16px; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--black); color: #fff; }
+.t-go svg { width: 16px; height: 16px; }
