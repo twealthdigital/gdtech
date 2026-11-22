@@ -1,7 +1,7 @@
 // One source for the category circles and the full category dropdown.
 // circle: true means it also shows as a bubble on the home page.
 export const CATS = [
-  { id: "mobile", name: "Mobile", circle: true, brands: ["Apple", "Samsung", "Google", "Tecno", "Infinix", "Xiaomi"],
+  { id: "mobile", name: "Mobile", circle: true, brands: ["Apple", "Samsung", "Google", "itel"],
     icon: '<rect x="7" y="2.5" width="10" height="19" rx="2.6"/><path d="M11 18.5h2"/>' },
   { id: "laptops", name: "Laptops", circle: true, brands: ["Apple", "Dell", "HP", "Lenovo", "Asus", "Acer"],
     icon: '<rect x="4" y="5" width="16" height="10.5" rx="2"/><path d="M2.5 19h19"/>' },

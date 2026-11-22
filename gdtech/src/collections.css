@@ -33,6 +33,7 @@
 .k-card.orange { --card: #f0721a; --glow: #ffa352; }
 .k-card.slate { --card: #52688a; --glow: #8fa8cb; }
 .k-card.cream { --card: #e4dcc8; --glow: #fbf7ec; --ink: #17171a; --sub: rgba(23, 23, 26, 0.6); }
+.k-card.plum { --card: #7b2955; --glow: #d9739f; }
 .k-card.ink { --card: #0b0b0c; --glow: rgba(255, 122, 26, 0.55); }
 @keyframes k-in { from { opacity: 0; transform: translateY(14px) scale(0.96); } }
 

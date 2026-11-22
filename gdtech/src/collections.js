@@ -17,9 +17,12 @@ const IMAGES = {
   "mobile:Apple": { src: "/phones/banner-1.webp", w: 672, h: 760 },
   "mobile:Samsung": { src: "/phones/banner-2.webp", w: 632, h: 760 },
   "mobile:Google": { src: "/phones/banner-3.webp", w: 512, h: 760 },
+  "mobile:itel": { src: "/phones/itel.webp", w: 604, h: 760 },
 };
 // Same colour blocks as the home banners
 const TONES = ["orange", "slate", "cream", "ink"];
+// Cards that need their own colour (matched to the phone)
+const TONE_OF = { "mobile:itel": "plum" };
 
 const tabsEl = $("col-tabs");
 const gridEl = $("col-grid");
@@ -34,7 +37,7 @@ function card(cat, brand, i) {
   const art = img
     ? `<img src="${img.src}" width="${img.w}" height="${img.h}" alt="${title}" loading="lazy" decoding="async" draggable="false" />`
     : `<span class="k-ico">${svg(cat.icon)}</span>`;
-  return `<button class="k-card ${TONES[i % TONES.length]}${img ? " has-img" : ""}" type="button" data-cat="${cat.id}" data-brand="${brand}" style="--i:${i}">
+  return `<button class="k-card ${TONE_OF[key] || TONES[i % TONES.length]}${img ? " has-img" : ""}" type="button" data-cat="${cat.id}" data-brand="${brand}" style="--i:${i}">
     <span class="k-art">${art}</span>
     <span class="k-text">${sub ? `<small>${sub}</small>` : ""}<b>${title}</b></span>
     <span class="k-go glass" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
