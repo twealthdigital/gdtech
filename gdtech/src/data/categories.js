@@ -3,7 +3,7 @@
 export const CATS = [
   { id: "mobile", name: "Mobile", circle: true, brands: ["Apple", "Samsung", "Google", "itel"],
     icon: '<rect x="7" y="2.5" width="10" height="19" rx="2.6"/><path d="M11 18.5h2"/>' },
-  { id: "laptops", name: "Laptops", circle: true, brands: ["Apple", "Dell", "HP", "Lenovo", "Asus", "Acer"],
+  { id: "laptops", name: "Laptops", circle: true, brands: ["Apple", "Dell", "HP", "Lenovo", "Asus"],
     icon: '<rect x="4" y="5" width="16" height="10.5" rx="2"/><path d="M2.5 19h19"/>' },
   { id: "headsets", name: "Headsets", circle: true, brands: ["Sony", "JBL", "Bose", "Apple", "Anker", "Beats"],
     icon: '<path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="6" rx="1.6"/><rect x="17" y="14" width="4" height="6" rx="1.6"/>' },

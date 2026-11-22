@@ -18,12 +18,11 @@ const IMAGES = {
   "mobile:Samsung": { src: "/phones/banner-2.webp", w: 632, h: 760 },
   "mobile:Google": { src: "/phones/banner-3.webp", w: 512, h: 760 },
   "mobile:itel": { src: "/phones/itel.webp", w: 604, h: 760 },
-  "laptops:Apple": { src: "/laptops/apple.webp", w: 833, h: 760 },
-  "laptops:Dell": { src: "/laptops/dell.webp", w: 833, h: 760 },
-  "laptops:HP": { src: "/laptops/hp.webp", w: 833, h: 760 },
-  "laptops:Lenovo": { src: "/laptops/lenovo.webp", w: 833, h: 760 },
-  "laptops:Asus": { src: "/laptops/asus.webp", w: 833, h: 760 },
-  "laptops:Acer": { src: "/laptops/acer.webp", w: 833, h: 760 },
+  "laptops:Apple": { src: "/laptops/apple.webp", w: 1150, h: 760 },
+  "laptops:Dell": { src: "/laptops/dell.webp", w: 599, h: 760 },
+  "laptops:HP": { src: "/laptops/hp.webp", w: 1227, h: 760 },
+  "laptops:Lenovo": { src: "/laptops/lenovo.webp", w: 844, h: 760 },
+  "laptops:Asus": { src: "/laptops/asus.webp", w: 1237, h: 760 },
 };
 // Same colour blocks as the home banners
 const TONES = ["orange", "slate", "cream", "ink"];
