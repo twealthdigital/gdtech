@@ -7,7 +7,47 @@
   display: flex; align-items: center; justify-content: space-between;
   padding: calc(env(safe-area-inset-top, 0px) + 16px) 20px 6px;
 }
-.bag { position: relative; width: 40px; height: 40px; display: grid; place-items: center; background: none; color: var(--black); }
+.h-top { gap: 10px; }
+.h-top .mark { flex: none; }
+
+/* Search: rotating hint, orange focus ring, filter button tucked inside */
+.search {
+  position: relative; flex: 1; min-width: 0; height: 44px;
+  display: flex; align-items: center; gap: 8px; padding: 0 6px 0 14px;
+  border-radius: 99px; background: #f4f1ec; border: 1.5px solid transparent;
+  transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.search:focus-within { background: var(--white); border-color: var(--orange); box-shadow: 0 0 0 4px var(--orange-soft); }
+.s-ico { flex: none; width: 18px; height: 18px; color: var(--orange); }
+.search input {
+  position: relative; z-index: 1; flex: 1; min-width: 0; height: 100%;
+  background: none; border: 0; outline: 0; font: inherit; font-size: 13.5px; font-weight: 600; color: var(--black);
+}
+.search input::placeholder { color: transparent; }
+.search input:focus::placeholder { color: var(--muted); font-weight: 500; }
+.search input::-webkit-search-cancel-button { display: none; }
+.hint {
+  position: absolute; left: 40px; right: 44px; top: 50%; margin-top: -10px; height: 20px;
+  display: flex; gap: 5px; font-size: 13.5px; line-height: 20px; font-weight: 600; color: var(--muted);
+  pointer-events: none; overflow: hidden; white-space: nowrap; transition: opacity 0.2s ease;
+}
+.tick { display: block; height: 20px; overflow: hidden; color: var(--black); }
+.tick span { display: block; height: 20px; animation: none; }
+.tick { position: relative; }
+.tick span:first-child { animation: tick 10s infinite; }
+.search:focus-within .hint, .search:has(input:not(:placeholder-shown)) .hint { opacity: 0; }
+@keyframes tick {
+  0%, 20% { margin-top: 0; }
+  25%, 45% { margin-top: -20px; }
+  50%, 70% { margin-top: -40px; }
+  75%, 95% { margin-top: -60px; }
+  100% { margin-top: -80px; }
+}
+.s-filter { position: relative; z-index: 1; flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--black); color: var(--orange); transition: transform 0.15s ease; }
+.s-filter:active { transform: scale(0.9); }
+.s-filter svg { width: 17px; height: 17px; }
+
+.bag { flex: none; position: relative; width: 40px; height: 40px; display: grid; place-items: center; background: none; color: var(--black); }
 .bag svg { width: 24px; height: 24px; }
 .bag b { position: absolute; top: 7px; right: 8px; width: 9px; height: 9px; border-radius: 50%; background: var(--orange); border: 2px solid var(--white); box-sizing: content-box; }
 
