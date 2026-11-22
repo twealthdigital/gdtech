@@ -44,7 +44,7 @@
             <span class="tick"><span>iPhone 16 Pro</span><span>Galaxy S25 Ultra</span><span>Pixel 9 Pro</span><span>fast chargers</span><span>iPhone 16 Pro</span></span>
           </span>
           <input type="search" placeholder="Type to search" aria-label="Search phones" autocomplete="off" />
-          <button class="s-filter" type="button" aria-label="Filters"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 8h9M17 8h3M4 16h3M11 16h9"/><circle cx="15" cy="8" r="2"/><circle cx="9" cy="16" r="2"/></svg></button>
+          <button class="s-filter" type="button" aria-label="Filters" aria-expanded="false" aria-controls="fm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 8h9M17 8h3M4 16h3M11 16h9"/><circle cx="15" cy="8" r="2"/><circle cx="9" cy="16" r="2"/></svg><i class="s-badge" id="fm-badge"></i></button>
         </label>
         <button class="bag" type="button" aria-label="Bag">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>
@@ -88,6 +88,32 @@
         </article>
       </div>
       <div class="b-dots" id="b-dots"><i class="on"></i><i></i><i></i></div>
+
+      <div class="fm-backdrop" id="fm-bd"></div>
+      <section class="fm glass" id="fm" role="dialog" aria-label="Search filters" aria-hidden="true">
+        <div class="fm-head fm-sec" style="--i:0"><h3>Filters</h3><button class="fm-reset" id="fm-reset" type="button">Reset</button></div>
+        <div class="fm-sec" style="--i:1">
+          <p class="fm-label">Category</p>
+          <div class="chips" data-key="cat"><button class="chip" type="button" data-v="Phones">Phones</button><button class="chip" type="button" data-v="Tablets">Tablets</button><button class="chip" type="button" data-v="Accessories">Accessories</button><button class="chip" type="button" data-v="Chargers">Chargers</button></div>
+        </div>
+        <div class="fm-sec" style="--i:2">
+          <p class="fm-label">Brand</p>
+          <div class="chips" data-key="brand"><button class="chip" type="button" data-v="Apple">Apple</button><button class="chip" type="button" data-v="Samsung">Samsung</button><button class="chip" type="button" data-v="Google">Google</button><button class="chip" type="button" data-v="Tecno">Tecno</button><button class="chip" type="button" data-v="Infinix">Infinix</button></div>
+        </div>
+        <div class="fm-sec" style="--i:3">
+          <p class="fm-label">Condition</p>
+          <div class="seg"><i></i><button type="button" data-v="Any">Any</button><button type="button" data-v="New">Brand new</button><button type="button" data-v="Used">Used</button></div>
+        </div>
+        <div class="fm-sec" style="--i:4">
+          <p class="fm-label">Max price <b id="fm-price-val"></b></p>
+          <input id="fm-price" type="range" min="50000" max="3000000" step="50000" value="3000000" aria-label="Maximum price" />
+        </div>
+        <div class="fm-sec" style="--i:5">
+          <p class="fm-label">Sort by</p>
+          <div class="chips" data-key="sort"><button class="chip" type="button" data-v="Popular">Popular</button><button class="chip" type="button" data-v="Price low">Price low</button><button class="chip" type="button" data-v="Price high">Price high</button><button class="chip" type="button" data-v="Newest">Newest</button></div>
+        </div>
+        <div class="fm-sec" style="--i:6"><button class="fm-apply" id="fm-apply" type="button">Apply filters</button></div>
+      </section>
 
       <nav class="dock glass" id="dock" aria-label="Main">
         <button class="on" type="button" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg></button>

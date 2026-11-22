@@ -1,5 +1,6 @@
 import "./base.css";
 import "./home.css";
+import "./filter.js";
 
 const $ = (id) => document.getElementById(id);
 
