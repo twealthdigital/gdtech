@@ -121,8 +121,10 @@
 .home::before {
   content: ""; position: absolute; left: 0; right: 0; top: 0; height: 260px; z-index: -1; pointer-events: none;
   background:
-    radial-gradient(55% 70% at 88% 6%, rgba(255, 122, 26, 0.30), transparent 70%),
-    radial-gradient(45% 60% at 8% 14%, rgba(255, 170, 100, 0.22), transparent 70%);
+    radial-gradient(55% 70% at 88% 30%, rgba(255, 122, 26, 0.30), transparent 70%),
+    radial-gradient(45% 60% at 8% 36%, rgba(255, 170, 100, 0.22), transparent 70%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 90px, #000 55%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 90px, #000 55%, transparent 100%);
 }
 .glass {
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.16));
