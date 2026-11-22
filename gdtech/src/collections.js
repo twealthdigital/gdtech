@@ -40,7 +40,7 @@ function card(cat, brand, i) {
   return `<button class="k-card ${TONE_OF[key] || TONES[i % TONES.length]}${img ? " has-img" : ""}" type="button" data-cat="${cat.id}" data-brand="${brand}" style="--i:${i}">
     <span class="k-art">${art}</span>
     <span class="k-text">${sub ? `<small>${sub}</small>` : ""}<b>${title}</b></span>
-    <span class="k-go glass" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+    <span class="k-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
   </button>`;
 }
 
