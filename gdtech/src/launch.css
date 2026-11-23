@@ -12,6 +12,9 @@
   overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y;
 }
 .d-track::-webkit-scrollbar { display: none; }
+.d-track { cursor: grab; }
+.d-track.dragging { scroll-snap-type: none; cursor: grabbing; }
+.d-track.dragging * { pointer-events: none; }
 .d-card {
   position: relative; flex: 0 0 88%; scroll-snap-align: start; overflow: hidden; border-radius: 26px; background: var(--d-bg, #0b0b0c); color: var(--d-ink, #fff);
   box-shadow: 0 14px 28px rgba(11, 11, 12, 0.2);

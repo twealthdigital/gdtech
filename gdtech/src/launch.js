@@ -24,11 +24,71 @@ if (track && dotsEl) {
     </article>`).join("");
   dotsEl.innerHTML = DEALS.map((_, i) => `<i${i ? "" : ' class="on"'}></i>`).join("");
   const dots = dotsEl.querySelectorAll("i");
+  const stepOf = () => track.firstElementChild.offsetWidth + 12;
+  let cur = 0;
+  let holdUntil = 0;
+  let visible = true;
+
+  // Dots follow the swipe
   track.addEventListener("scroll", () => {
-    const card = track.firstElementChild;
-    const step = card.offsetWidth + 12;
-    let i = Math.round(track.scrollLeft / step);
+    let i = Math.round(track.scrollLeft / stepOf());
     if (track.scrollLeft + track.clientWidth >= track.scrollWidth - 4) i = dots.length - 1;
+    cur = i;
     dots.forEach((d, k) => d.classList.toggle("on", k === i));
   }, { passive: true });
+
+  // Same as the hero banners: a finger or mouse pauses the auto slide for a few seconds
+  const hold = () => { holdUntil = Date.now() + 5000; };
+  ["touchstart", "touchmove", "touchend"].forEach((t) => track.addEventListener(t, hold, { passive: true }));
+  track.addEventListener("pointerdown", hold);
+
+  // Mouse / pen drag (touch already drags natively): grab, drag, release with a fling, snap to the nearest card
+  let drag = null;
+  let suppressClick = false;
+  track.addEventListener("pointerdown", (e) => {
+    if (e.pointerType === "touch" || e.button !== 0) return;
+    drag = { x: e.clientX, left: track.scrollLeft, lastX: e.clientX, lastT: performance.now(), v: 0, moved: false, id: e.pointerId };
+  });
+  track.addEventListener("pointermove", (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const dx = e.clientX - drag.x;
+    if (!drag.moved) {
+      if (Math.abs(dx) < 6) return;
+      drag.moved = true;
+      track.classList.add("dragging");
+      track.setPointerCapture(e.pointerId);
+    }
+    const now = performance.now();
+    drag.v = (e.clientX - drag.lastX) / Math.max(1, now - drag.lastT);
+    drag.lastX = e.clientX; drag.lastT = now;
+    track.scrollLeft = drag.left - dx;
+    hold();
+  });
+  const endDrag = (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const d = drag; drag = null;
+    if (!d.moved) return;
+    suppressClick = true;
+    setTimeout(() => { suppressClick = false; }, 0);
+    const step = stepOf();
+    const fling = Math.max(-1, Math.min(1, -d.v * 220 / step));
+    let i = Math.round(track.scrollLeft / step + fling);
+    i = Math.max(0, Math.min(dots.length - 1, i));
+    track.classList.remove("dragging");
+    track.scrollTo({ left: i * step, behavior: "smooth" });
+    hold();
+  };
+  track.addEventListener("pointerup", endDrag);
+  track.addEventListener("pointercancel", endDrag);
+  // A drag must not count as a tap on the Shop button
+  track.addEventListener("click", (e) => { if (suppressClick) { e.preventDefault(); e.stopPropagation(); } }, true);
+
+  // Auto slide, looping back to the first card; only while the section is on screen
+  new IntersectionObserver(([en]) => { visible = en.isIntersecting; }, { threshold: 0.4 }).observe(track);
+  if (DEALS.length > 1) {
+    setInterval(() => {
+      if (!visible || Date.now() < holdUntil) return;
+      track.scrollTo({ left: ((cur + 1) % dots.length) * stepOf(), behavior: "smooth" });
+    }, 4200);
+  }
 }
