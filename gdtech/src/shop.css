@@ -1,0 +1,117 @@
+/* Shop page: a layer inside the home screen. Solid, bold colour blocks like the banners. No glass here. */
+.shop {
+  position: absolute; inset: 0; z-index: 18; background: var(--white);
+  transform: translateX(104%); visibility: hidden;
+  box-shadow: -24px 0 48px rgba(11, 11, 12, 0.1);
+  transition: transform 0.55s cubic-bezier(0.22, 0.9, 0.26, 1), visibility 0s linear 0.55s;
+}
+.shop.open { transform: none; visibility: visible; transition-delay: 0s; }
+.shop.no-anim, .shop.no-anim ~ * { transition: none !important; }
+
+/* The home page steps back while the shop slides over it */
+.h-scroll { transition: transform 0.55s cubic-bezier(0.22, 0.9, 0.26, 1), opacity 0.55s ease; }
+.home.shop-open .h-scroll { transform: scale(0.94) translateX(-6%); opacity: 0.4; }
+
+/* Header: same fade-blur header as the home page (.h-top), with a solid back button */
+.shop .h-top { gap: 12px; }
+.sp-back, .sp-bag { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; }
+.sp-back { background: var(--black); color: var(--orange); transition: transform 0.15s ease; }
+.sp-back:active { transform: scale(0.9); }
+.sp-back svg { width: 17px; height: 17px; }
+.sp-bag { position: relative; background: none; color: var(--black); }
+.sp-bag svg { width: 24px; height: 24px; }
+.sp-bag b { position: absolute; top: 7px; right: 8px; min-width: 9px; height: 9px; border-radius: 50%; background: var(--orange); border: 2px solid var(--white); box-sizing: content-box; font-size: 0; display: none; }
+.sp-bag.has b { display: block; }
+.sp-title { flex: 1; min-width: 0; font-size: 17px; font-weight: 800; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.sp-scroll {
+  position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior-y: contain; scrollbar-width: none;
+  padding: calc(env(safe-area-inset-top, 0px) + 70px) 20px calc(env(safe-area-inset-bottom, 0px) + 120px);
+}
+.sp-scroll::-webkit-scrollbar { display: none; }
+
+/* Colour blocks (same palette as the collection cards) */
+.sp-hero, .sp-card { --card: #0b0b0c; --glow: rgba(255, 122, 26, 0.55); --ink: #fff; --sub: rgba(255, 255, 255, 0.75); }
+.sp-hero.orange, .sp-card.orange { --card: #f0721a; --glow: #ffa352; }
+.sp-hero.slate, .sp-card.slate { --card: #52688a; --glow: #8fa8cb; }
+.sp-hero.cream, .sp-card.cream { --card: #e4dcc8; --glow: #fbf7ec; --ink: #17171a; --sub: rgba(23, 23, 26, 0.6); }
+.sp-hero.plum, .sp-card.plum { --card: #7b2955; --glow: #d9739f; }
+.sp-hero.steel, .sp-card.steel { --card: #7f8fa3; --glow: #c3cfdd; }
+.sp-hero.silver, .sp-card.silver { --card: #85878d; --glow: #babcc3; }
+.sp-hero.graphite, .sp-card.graphite { --card: #26272b; --glow: #5d6069; }
+.sp-hero.pewter, .sp-card.pewter { --card: #6e7178; --glow: #a6a9b0; }
+.sp-hero.navy, .sp-card.navy { --card: #1f2f45; --glow: #4a6a9c; }
+.sp-hero.onyx, .sp-card.onyx { --card: #0e0e10; --glow: rgba(176, 64, 255, 0.5); }
+.sp-hero.ink, .sp-card.ink { --card: #0b0b0c; --glow: rgba(255, 122, 26, 0.55); }
+
+/* Hero */
+.sp-hero {
+  position: relative; overflow: hidden; min-height: 176px; padding: 18px 20px; border-radius: 28px;
+  display: flex; flex-direction: column; justify-content: flex-end; color: var(--ink);
+  background-color: var(--card); background-image: radial-gradient(circle at 78% 40%, var(--glow), transparent 65%);
+}
+.sp-hero img { position: absolute; right: -2%; bottom: -8%; height: 112%; width: auto; max-width: 60%; object-fit: contain; object-position: right bottom; pointer-events: none; filter: drop-shadow(0 12px 12px rgba(0, 0, 0, 0.4)); animation: sp-pop 0.7s cubic-bezier(0.2, 1.2, 0.35, 1) 0.15s backwards; }
+.sp-hero.fold { background-image: linear-gradient(90deg, rgba(8, 8, 14, 0.92) 20%, rgba(8, 8, 14, 0.3)), url("/foldable/galaxy-fold-poster.webp"); background-size: cover; background-position: center; }
+.sp-kick { position: relative; font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sub); }
+.sp-hero h2 { position: relative; margin-top: 2px; font-size: 38px; line-height: 1; font-weight: 800; letter-spacing: -0.01em; max-width: 62%; }
+.sp-hero.fold h2 { max-width: 100%; }
+@keyframes sp-pop { from { opacity: 0; transform: translateX(14%) scale(0.92); } }
+
+/* Series chips: same solid pills as the collection tabs */
+.sp-chips { display: flex; gap: 8px; margin: 18px -20px 0; padding: 2px 20px 4px; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; }
+.sp-chips::-webkit-scrollbar { display: none; }
+.sp-chips[hidden] { display: none; }
+
+/* Sections and cards */
+.sp-sec { margin-top: 24px; }
+.sp-sec h3 { font-size: 22px; line-height: 1.05; font-weight: 800; letter-spacing: -0.01em; }
+.sp-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+
+.sp-card {
+  position: relative; min-width: 0; display: flex; flex-direction: column; overflow: hidden; border-radius: 24px; color: var(--ink);
+  background-color: var(--card); background-image: radial-gradient(circle at 50% 32%, var(--glow), transparent 62%);
+  animation: k-in 0.5s cubic-bezier(0.2, 1.1, 0.4, 1) backwards; animation-delay: calc(var(--i, 0) * 55ms);
+}
+.sp-art { position: relative; aspect-ratio: 1 / 0.92; display: grid; place-items: center; padding: 14px 14px 4px; }
+.sp-art img { width: 100%; height: 100%; object-fit: contain; object-position: center bottom; filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.4)); }
+.sp-ico { width: 52%; max-width: 110px; aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.18); }
+.cream .sp-ico { background: rgba(23, 23, 26, 0.08); }
+.sp-ico svg { width: 56%; height: 56%; stroke-width: 1.5; }
+.sp-tag { position: absolute; top: 12px; left: 12px; z-index: 1; height: 22px; padding: 0 9px; display: grid; place-items: center; border-radius: 99px; background: var(--black); color: var(--orange); font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.sp-info { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 10px; padding: 4px 14px 14px; }
+.sp-info h4 { font-size: 16px; line-height: 1.1; font-weight: 800; letter-spacing: -0.01em; overflow-wrap: anywhere; }
+.sp-buy { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.sp-buy b { min-width: 0; font-size: 14.5px; font-weight: 800; letter-spacing: -0.02em; white-space: nowrap; }
+.sp-add { flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--black); color: var(--orange); transition: transform 0.15s ease; }
+.sp-add:active { transform: scale(0.88); }
+.sp-add svg { width: 17px; height: 17px; }
+.sp-card.ink .sp-add { background: var(--orange); color: var(--black); }
+
+/* A lone last card in a group stretches across, art left and name right */
+.sp-card.wide { grid-column: 1 / -1; flex-direction: row; align-items: center; }
+.sp-card.wide .sp-art { flex: none; width: 44%; aspect-ratio: 1 / 0.92; }
+.sp-card.wide .sp-info { padding: 14px 16px 14px 0; justify-content: center; }
+.sp-card.wide h4 { font-size: 18px; }
+
+/* Collections that have no shop page yet */
+.sp-soon { margin-top: 18px; padding: 30px 20px; border-radius: 28px; text-align: center; background: var(--black); color: var(--white); }
+.sp-soon b { font-size: 26px; font-weight: 800; color: var(--orange); }
+.sp-soon p { margin: 8px 0 18px; font-size: 13.5px; font-weight: 600; color: rgba(255, 255, 255, 0.72); }
+.sp-soon button { height: 46px; padding: 0 22px; border-radius: 99px; background: var(--orange); color: var(--black); font-size: 13.5px; font-weight: 800; }
+
+/* Smaller phones */
+@media (max-width: 360px) {
+  .sp-scroll { padding-left: 16px; padding-right: 16px; }
+  .sp-chips { margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }
+  .sp-hero { min-height: 160px; padding: 16px; border-radius: 24px; }
+  .sp-hero h2 { font-size: 32px; }
+  .sp-sec h3 { font-size: 19px; }
+  .sp-grid { gap: 9px; }
+  .sp-card { border-radius: 20px; }
+  .sp-info { padding: 2px 11px 12px; }
+  .sp-info h4 { font-size: 14.5px; }
+  .sp-buy b { font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shop, .h-scroll, .sp-card, .sp-hero img { transition: none !important; animation: none !important; }
+}

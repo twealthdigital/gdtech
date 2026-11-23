@@ -6,13 +6,13 @@ const $ = (id) => document.getElementById(id);
 const DEFAULT_CAT = "mobile";
 
 // Display names for collections (falls back to the brand name)
-const TITLES = {
+export const TITLES = {
   "mobile:Apple": "iPhone", "mobile:Samsung": "Galaxy", "mobile:Google": "Pixel",
   "laptops:Apple": "MacBook", "laptops:Samsung": "Galaxy Book", "tablets:Apple": "iPad", "tablets:Samsung": "Galaxy Tab",
   "headsets:Beats": "Beats",
 };
 // Photos we have so far. Everything else shows the category icon until you add one.
-const IMAGES = {
+export const IMAGES = {
   "mobile:Apple": { src: "/phones/banner-1.webp", w: 672, h: 760 },
   "mobile:Samsung": { src: "/phones/banner-2.webp", w: 632, h: 760 },
   "mobile:Google": { src: "/phones/banner-3.webp", w: 512, h: 760 },
@@ -42,7 +42,7 @@ const IMAGES = {
 // Same colour blocks as the home banners
 const TONES = ["orange", "slate", "cream", "ink"];
 // Cards that need their own colour (matched to the phone)
-const TONE_OF = {
+export const TONE_OF = {
   "mobile:itel": "plum",
   // Laptops: light silver ones sit on dark cards, dark ones on light cards
   "laptops:Apple": "silver", "laptops:Dell": "pewter", "laptops:HP": "navy",

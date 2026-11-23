@@ -11,6 +11,7 @@ import "./launch.js";
 import "./foldable.css";
 import "./foldable.js";
 import "./collections.js";
+import "./shop.js";
 
 const $ = (id) => document.getElementById(id);
 

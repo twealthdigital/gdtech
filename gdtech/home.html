@@ -54,7 +54,7 @@
           <svg class="s-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
           <span class="hint" aria-hidden="true">
             <span>Search</span>
-            <span class="tick"><span>iPhone 16 Pro</span><span>Galaxy S25 Ultra</span><span>Pixel 9 Pro</span><span>fast chargers</span><span>iPhone 16 Pro</span></span>
+            <span class="tick"><span>iPhone 18 Pro</span><span>Galaxy S26 Ultra</span><span>Pixel 11 Pro</span><span>Galaxy Z Fold8</span><span>iPhone 18 Pro</span></span>
           </span>
           <input type="search" placeholder="Type to search" aria-label="Search phones" autocomplete="off" />
           <button class="s-filter" type="button" aria-label="Filters" aria-expanded="false" aria-controls="fm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 8h9M17 8h3M4 16h3M11 16h9"/><circle cx="15" cy="8" r="2"/><circle cx="9" cy="16" r="2"/></svg><i class="s-badge" id="fm-badge"></i></button>
@@ -76,7 +76,7 @@
             <span class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2.6"/><path d="M11 18.5h2"/></svg><em>Phone image</em></span>
             <img src="/phones/banner-1.webp" width="672" height="760" alt="Orange iPhone, front and back" decoding="async" fetchpriority="high" onload="this.parentElement.classList.add('has')" onerror="this.remove()" />
           </div>
-          <button class="b-btn" type="button">Details <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+          <button class="b-btn" type="button" data-shop="mobile:Apple">Shop now <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5.7 8.6a1 1 0 0 1 1-.9h10.6a1 1 0 0 1 1 .9l.95 10.5a2 2 0 0 1-1.99 2.2H6.74a2 2 0 0 1-1.99-2.2L5.7 8.6z"/><path d="M9 9V6.5a3 3 0 0 1 6 0V9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
         </article>
         <article class="b-card slate">
           <div class="b-text">
@@ -87,7 +87,7 @@
             <span class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2.6"/><path d="M11 18.5h2"/></svg><em>Phone image</em></span>
             <img src="/phones/banner-2.webp" width="632" height="760" alt="Samsung Galaxy Ultra in titanium grey" decoding="async" onload="this.parentElement.classList.add('has')" onerror="this.remove()" />
           </div>
-          <button class="b-btn" type="button">Details <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+          <button class="b-btn" type="button" data-shop="mobile:Samsung">Shop now <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5.7 8.6a1 1 0 0 1 1-.9h10.6a1 1 0 0 1 1 .9l.95 10.5a2 2 0 0 1-1.99 2.2H6.74a2 2 0 0 1-1.99-2.2L5.7 8.6z"/><path d="M9 9V6.5a3 3 0 0 1 6 0V9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
         </article>
         <article class="b-card cream">
           <div class="b-text">
@@ -98,7 +98,7 @@
             <span class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2.6"/><path d="M11 18.5h2"/></svg><em>Phone image</em></span>
             <img src="/phones/banner-3.webp" width="512" height="760" alt="Google Pixel in cream" decoding="async" onload="this.parentElement.classList.add('has')" onerror="this.remove()" />
           </div>
-          <button class="b-btn" type="button">Details <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+          <button class="b-btn" type="button" data-shop="mobile:Google">Shop now <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5.7 8.6a1 1 0 0 1 1-.9h10.6a1 1 0 0 1 1 .9l.95 10.5a2 2 0 0 1-1.99 2.2H6.74a2 2 0 0 1-1.99-2.2L5.7 8.6z"/><path d="M9 9V6.5a3 3 0 0 1 6 0V9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
         </article>
       </div>
       <div class="b-dots" id="b-dots"><i class="on"></i><i></i><i></i></div>
@@ -147,11 +147,24 @@
           <div class="v-shade"></div>
           <div class="v-row">
             <div class="v-words" aria-hidden="true">Unfold<br>more<i>.</i></div>
-            <button class="d-btn" type="button">Shop foldables <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+            <button class="d-btn" type="button" data-shop="mobile:Samsung:fold">Shop foldables <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
           </div>
         </article>
       </section>
       </div>
+
+      <section class="shop" id="shop" aria-label="Shop" aria-hidden="true">
+        <header class="h-top">
+          <button class="sp-back" id="sp-back" type="button" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+          <p class="sp-title" id="sp-title"></p>
+          <button class="sp-bag" id="sp-bag" type="button" aria-label="Bag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><b></b></button>
+        </header>
+        <div class="sp-scroll" id="sp-scroll">
+          <div class="sp-hero" id="sp-hero"></div>
+          <div class="sp-chips" id="sp-chips" role="tablist" aria-label="Series"></div>
+          <div id="sp-body"></div>
+        </div>
+      </section>
 
       <div class="fm-backdrop" id="fm-bd"></div>
       <section class="fm glass" id="fm" role="dialog" aria-label="Search filters" aria-hidden="true">
