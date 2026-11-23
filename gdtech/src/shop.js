@@ -79,7 +79,7 @@ function card(item, tone, i, wide) {
     ? `<img class="${ph.kind === "cut" ? "" : "photo"}" src="${ph.src}" alt="${item.name}" loading="lazy" decoding="async" draggable="false" />`
     : `<span class="sp-ico">${svg(iconFor(item))}</span>`;
   const buy = item.price
-    ? `<div class="sp-buy"><b>${naira(priceFor(item, 0))}</b><span class="sp-add" aria-hidden="true">${BAG}</span></div>`
+    ? `<div class="sp-buy"><b>${naira(priceFor(item, 0))}</b></div>`
     : "";
   return `<article class="sp-card ${tone}${wide ? " wide" : ""}" style="--i:${i}" data-pid="${item.id}" role="button" tabindex="0" aria-label="View ${item.name}">
     <div class="sp-art">${item.fold ? '<span class="sp-tag">Foldable</span>' : ""}${art}</div>
