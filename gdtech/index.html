@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#ffffff" />
+  <script>try{if(localStorage.getItem("gd.session")||sessionStorage.getItem("gd.session"))location.replace("/home.html")}catch(e){}</script>
   <title>GDTech | Genuine phones, laptops and gadgets</title>
   <meta name="description" content="Shop genuine phones, laptops, headsets, tablets and smart gadgets at honest prices with fast delivery. Trade in your old phone and upgrade with GDTech." />
   <meta name="robots" content="index, follow, max-image-preview:large" />
@@ -93,24 +94,25 @@
           <button class="tab on" data-t="in" type="button">Sign in</button>
           <button class="tab" data-t="up" type="button">Sign up</button>
         </div>
-        <form id="auth-form">
-          <label class="f up-only"><input type="text" placeholder="Full name" /></label>
-          <label class="f in-only"><input type="text" placeholder="Email or phone number" /></label>
-          <label class="f up-only"><input type="email" placeholder="Email address" /></label>
-          <label class="f up-only"><input type="tel" placeholder="Phone number" /></label>
+        <form id="auth-form" novalidate>
+          <label class="f up-only"><input id="a-name" type="text" placeholder="Full name" autocomplete="name" /></label>
+          <label class="f in-only"><input id="a-id" type="text" placeholder="Email or phone number" autocomplete="username" /></label>
+          <label class="f up-only"><input id="a-email" type="email" placeholder="Email address" autocomplete="email" /></label>
+          <label class="f up-only"><input id="a-phone" type="tel" placeholder="Phone number" autocomplete="tel" /></label>
           <label class="f pw">
-            <input type="password" placeholder="Password" required />
+            <input id="a-pw" type="password" placeholder="Password" autocomplete="current-password" />
             <button class="eye" type="button">Show</button>
           </label>
           <label class="f pw up-only">
-            <input type="password" placeholder="Confirm password" />
+            <input id="a-pw2" type="password" placeholder="Confirm password" autocomplete="new-password" />
             <button class="eye" type="button">Show</button>
           </label>
           <div class="row in-only">
-            <label class="chk"><input type="checkbox" /> Remember me</label>
+            <label class="chk"><input id="a-remember" type="checkbox" checked /> Remember me</label>
             <button class="link" type="button">Forgot password?</button>
           </div>
-          <label class="chk up-only"><input type="checkbox" /> I agree to the Terms and Privacy Policy</label>
+          <label class="chk up-only"><input id="a-agree" type="checkbox" /> I agree to the Terms and Privacy Policy</label>
+          <p class="auth-err" id="auth-err" role="alert" hidden></p>
           <button class="btn dark" type="submit" id="auth-btn"><span class="lbl">Sign in</span><i class="spin" aria-hidden="true"></i></button>
         </form>
         <div class="or"><span>or</span></div>

@@ -1,0 +1,81 @@
+/* Profile drop up: grows out of the user icon like a drop of liquid. The page behind blurs; the header and the bar stay sharp. */
+.pf-backdrop {
+  position: absolute; inset: 0; z-index: 19; pointer-events: none;
+  background: rgba(255, 255, 255, 0);
+  -webkit-backdrop-filter: blur(0px) saturate(1); backdrop-filter: blur(0px) saturate(1);
+  /* the top band (status bar and header) is cut out, with a soft edge so it never looks clipped */
+  -webkit-mask-image: linear-gradient(to bottom, transparent calc(env(safe-area-inset-top, 0px) + 66px), #000 calc(env(safe-area-inset-top, 0px) + 92px));
+  mask-image: linear-gradient(to bottom, transparent calc(env(safe-area-inset-top, 0px) + 66px), #000 calc(env(safe-area-inset-top, 0px) + 92px));
+  transition: background 0.5s ease, backdrop-filter 0.65s ease, -webkit-backdrop-filter 0.65s ease;
+}
+.pf-backdrop.open {
+  background: rgba(255, 255, 255, 0.28);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6); backdrop-filter: blur(20px) saturate(1.6);
+}
+/* Catches a tap outside the sheet, below the header so the header buttons still work */
+.pf-catch { position: absolute; left: 0; right: 0; bottom: 0; top: calc(env(safe-area-inset-top, 0px) + 70px); z-index: 19; display: none; }
+.pf-catch.open { display: block; }
+
+.pf {
+  position: absolute; z-index: 21; box-sizing: border-box;
+  right: max(16px, calc((100% - 340px) / 2));
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 18px + 64px + 12px);
+  width: min(288px, calc(100% - 32px)); padding: 12px; border-radius: 30px;
+  --g1: 0.66; --g2: 0.4; background-color: rgba(255, 255, 255, 0.35);
+  transform-origin: calc(100% - 64px) 100%;
+  opacity: 0; visibility: hidden; transform: translateY(16px) scale(0.14, 0.08);
+  transition: transform 0.34s cubic-bezier(0.5, 0, 0.75, 0), opacity 0.22s ease 0.08s, border-radius 0.34s ease, visibility 0s linear 0.34s;
+}
+.pf:not(.open) { border-radius: 60px; }
+.pf.open {
+  opacity: 1; visibility: visible; transform: none;
+  transition: transform 0.9s cubic-bezier(0.22, 1.25, 0.36, 1), opacity 0.2s ease, border-radius 0.5s ease, visibility 0s;
+}
+
+/* Rows rise in one after the other once the drop has formed */
+.pf-sec { opacity: 0; transform: translateY(12px) scale(0.97); filter: blur(6px); transition: opacity 0.18s ease, transform 0.18s ease, filter 0.18s ease; }
+.pf.open .pf-sec {
+  opacity: 1; transform: none; filter: none;
+  transition: opacity 0.45s ease, transform 0.6s cubic-bezier(0.2, 1.2, 0.4, 1), filter 0.45s ease;
+  transition-delay: calc(var(--i, 0) * 55ms + 160ms);
+}
+.pf-view[hidden] { display: none; }
+.pf-view:not([data-view="main"]) { animation: pf-swap 0.4s cubic-bezier(0.2, 1.1, 0.4, 1); }
+@keyframes pf-swap { from { opacity: 0; transform: translateY(8px) scale(0.98); filter: blur(5px); } }
+
+.pf-user { display: flex; align-items: center; gap: 12px; padding: 4px 6px 12px; margin-bottom: 4px; border-bottom: 1px solid rgba(11, 11, 12, 0.08); }
+.pf-av { flex: none; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; background: var(--orange); color: #fff; font-size: 19px; font-weight: 800; text-transform: uppercase; box-shadow: 0 6px 14px rgba(255, 122, 26, 0.35); }
+.pf-who { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.pf-who b { font-size: 16px; font-weight: 800; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pf-who small { font-size: 12px; font-weight: 600; color: rgba(11, 11, 12, 0.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.pf-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 9px 8px; border-radius: 18px; background: none; text-align: left; font-size: 15px; font-weight: 700; color: var(--black); transition: background 0.2s ease, transform 0.2s cubic-bezier(0.3, 1.5, 0.45, 1); }
+.pf-row:active { background: rgba(11, 11, 12, 0.07); transform: scale(0.98); }
+.pf-lbl { flex: 1; min-width: 0; }
+.pf-ic { flex: none; width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; background: rgba(255, 122, 26, 0.14); color: var(--orange); }
+.pf-ic svg { width: 19px; height: 19px; }
+.pf-ic.big { width: 54px; height: 54px; border-radius: 18px; margin-bottom: 10px; }
+.pf-ic.big svg { width: 26px; height: 26px; }
+.pf-chev { flex: none; width: 16px; height: 16px; color: rgba(11, 11, 12, 0.35); }
+.pf-chev svg { width: 100%; height: 100%; }
+.pf-out { color: #d6342c; }
+.pf-out .pf-ic { background: rgba(214, 52, 44, 0.12); color: #d6342c; }
+
+.pf-head { display: flex; align-items: center; gap: 10px; padding: 2px 2px 10px; }
+.pf-head h3 { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
+.pf-back { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--black); color: var(--orange); }
+.pf-back svg { width: 15px; height: 15px; }
+.pf-list { display: flex; flex-direction: column; gap: 2px; margin: 0; }
+.pf-list div { padding: 9px 8px; border-radius: 14px; }
+.pf-list dt { font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(11, 11, 12, 0.45); }
+.pf-list dd { margin: 2px 0 0; font-size: 15px; font-weight: 700; overflow-wrap: anywhere; }
+.pf-empty { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 14px 10px 10px; }
+.pf-empty b { font-size: 16px; font-weight: 800; }
+.pf-empty p { margin-top: 4px; font-size: 13px; line-height: 1.4; font-weight: 600; color: rgba(11, 11, 12, 0.6); }
+.pf-care { display: flex; flex-direction: column; gap: 8px; padding: 6px 2px 2px; }
+.pf-cbtn { display: flex; align-items: center; justify-content: center; gap: 9px; height: 46px; border-radius: 99px; background: var(--black); color: #fff; font-size: 14px; font-weight: 800; }
+.pf-cbtn svg { width: 19px; height: 19px; color: var(--orange); }
+.pf-cbtn.alt { background: rgba(11, 11, 12, 0.07); color: var(--black); }
+.pf-cbtn[hidden] { display: none; }
+
+@media (prefers-reduced-motion: reduce) { .pf, .pf-sec, .pf-backdrop, .pf-view { transition: none !important; animation: none !important; } }

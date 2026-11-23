@@ -12,6 +12,7 @@ import "./foldable.css";
 import "./foldable.js";
 import "./collections.js";
 import "./shop.js";
+import "./profile.js";
 
 const $ = (id) => document.getElementById(id);
 

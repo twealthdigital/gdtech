@@ -1,6 +1,7 @@
 import "./base.css";
 import "./glass.js";
 import "./style.css";
+import { register, login } from "./auth.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -77,7 +78,14 @@ $("skip").addEventListener("click", (e) => waveTo("auth", e.currentTarget));
 $("ob-video").addEventListener("error", (e) => (e.target.style.display = "none"));
 
 render();
-setTimeout(() => show("onboarding"), 2400);
+if (location.hash === "#signin") {
+  // Signed out: go straight to the sign in card, no splash or onboarding
+  show("auth");
+  $("auth").classList.add("play");
+  setTimeout(() => $("auth").classList.add("settled"), 1100);
+} else {
+  setTimeout(() => show("onboarding"), 2400);
+}
 
 // Warm the cache for the home page while the user is still on onboarding and auth
 const warm = ["/home.html", "/phones/banner-1.webp", "/phones/banner-2.webp", "/phones/banner-3.webp"];
@@ -120,22 +128,57 @@ document.querySelectorAll(".tab").forEach((t) => {
   });
 });
 
-// Sign in: button loads first, then the phone rises, rings twice, then home
+// Sign in / sign up: validate, the button loads, then the phone rises, rings, then home
 let signing = false;
-function signIn(btn) {
-  if (signing) return;
+const errEl = $("auth-err");
+const val = (id) => $(id).value.trim();
+
+function showError(msg) {
+  rise(() => { errEl.textContent = msg; errEl.hidden = !msg; });
+}
+function busyOn(btn) {
   signing = true;
   btn.classList.add("loading");
   btn.disabled = true;
   $("google").disabled = true;
+}
+function busyOff(btn) {
+  signing = false;
+  btn.classList.remove("loading");
+  btn.disabled = false;
+  $("google").disabled = false;
+}
 
-  // Replace this wait with the real request; continue once it succeeds
-  setTimeout(() => {
-    btn.classList.remove("loading");
-    btn.disabled = false;
-    $("google").disabled = false;
-    playCall();
-  }, 1800);
+async function submitAuth() {
+  if (signing) return;
+  const btn = $("auth-btn");
+  const up = card.classList.contains("up");
+  if (!errEl.hidden) showError("");
+
+  let problem = "";
+  if (up) {
+    if (val("a-name").length < 2) problem = "Enter your full name.";
+    else if (!/^\S+@\S+\.\S+$/.test(val("a-email"))) problem = "Enter a valid email address.";
+    else if (val("a-phone").replace(/\D/g, "").length < 10) problem = "Enter a valid phone number.";
+    else if ($("a-pw").value.length < 6) problem = "Your password needs at least 6 characters.";
+    else if ($("a-pw").value !== $("a-pw2").value) problem = "The two passwords do not match.";
+    else if (!$("a-agree").checked) problem = "Please agree to the Terms and Privacy Policy.";
+  } else {
+    if (!val("a-id")) problem = "Enter your email or phone number.";
+    else if (!$("a-pw").value) problem = "Enter your password.";
+  }
+  if (problem) return showError(problem);
+
+  busyOn(btn);
+  const wait = new Promise((r) => setTimeout(r, 1200));
+  const result = up
+    ? await register({ name: val("a-name"), email: val("a-email"), phone: val("a-phone"), password: $("a-pw").value })
+    : await login(val("a-id"), $("a-pw").value, $("a-remember").checked);
+  await wait;
+  if (!result.ok) { busyOff(btn); return showError(result.error); }
+  busyOff(btn);
+  signing = true;               // stays locked until the page changes
+  playCall();
 }
 
 function playCall() {
@@ -152,12 +195,14 @@ function playCall() {
   setTimeout(() => call.classList.add("leave"), 2900);       // then fade away
   setTimeout(() => {
     call.classList.remove("on", "rise", "ringing", "leave");
-    signing = false;
   }, 3800);
 }
 
-$("auth-form").addEventListener("submit", (e) => { e.preventDefault(); signIn($("auth-btn")); });
-$("google").addEventListener("click", (e) => signIn(e.currentTarget));
+$("auth-form").addEventListener("submit", (e) => { e.preventDefault(); submitAuth(); });
+// Google needs a real backend, so for now it points people to email sign in
+$("google").addEventListener("click", () => { if (!signing) showError("Google sign in is not set up yet. Please use your email and password."); });
+// Switching between sign in and sign up clears any old message
+document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => { if (!errEl.hidden) { errEl.hidden = true; errEl.textContent = ""; } }));
 
 // Show or hide password
 document.querySelectorAll(".eye").forEach((btn) => {
