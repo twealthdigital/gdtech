@@ -247,3 +247,22 @@
 
 /* Auth messages */
 .auth-err { margin: 2px 2px 0; font-size: 12.5px; line-height: 1.35; font-weight: 700; color: #d6342c; }
+
+/* Adaptive device tiers for onboarding / auth */
+html.perf-mid .splash .glow { filter: blur(18px); }
+html.perf-mid .hero { filter: none; }
+
+html.perf-low .splash .glow { filter: none; animation: none; opacity: 0.7; }
+html.perf-low .skip,
+html.perf-low .btn.ghost,
+html.perf-low .f input,
+html.perf-low .btn.outline {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+html.perf-low .skip { background: rgba(11, 11, 12, 0.58); }
+html.perf-low .btn.ghost { background: rgba(11, 11, 12, 0.07); }
+html.perf-low .f input,
+html.perf-low .btn.outline { background: rgba(255, 255, 255, 0.92); }
+html.perf-low .hero,
+html.perf-low .call .phone { filter: none; }

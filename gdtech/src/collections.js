@@ -2,6 +2,7 @@ import "./collections.css";
 import { CATS, svg } from "./data/categories.js";
 import { picked, setCategory } from "./categories.js";
 import { lensBoost } from "./glass.js";
+import { isLow, isHigh, observeLazyImages } from "./perf.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -79,7 +80,7 @@ function cardHtml(cat, brand, i) {
   const catLabel = TAB_LABEL[cat.id] || cat.name;
   const searchStr = `${title} ${brand} ${catLabel}`.toLowerCase();
   const art = img
-    ? `<img src="${img.src}" width="${img.w}" height="${img.h}" alt="${title}"${img.z ? ` style="--z:${img.z};--up:${img.up}%${img.x ? `;--x:${img.x}%` : ""}"` : ""} loading="lazy" decoding="async" draggable="false" />`
+    ? `<img data-src="${img.src}" width="${img.w}" height="${img.h}" alt="${title}"${img.z ? ` style="--z:${img.z};--up:${img.up}%${img.x ? `;--x:${img.x}%` : ""}"` : ""} loading="lazy" decoding="async" draggable="false" />`
     : `<span class="k-ico">${svg(cat.icon)}</span>`;
   return `<button class="k-card ${TONE_OF[key] || TONES[i % TONES.length]}${img ? " has-img" : ""}" type="button" data-cat="${cat.id}" data-brand="${brand}" data-key="${key}" data-search="${searchStr}" style="--i:${i}">
     <span class="k-art">${art}</span>
@@ -96,12 +97,20 @@ for (const cat of CATS) {
     ALL_ENTRIES.push({ cat, brand, key: cat.id + ":" + brand, idx: idx++ });
   }
 }
-gridEl.innerHTML = ALL_ENTRIES.map((e) => cardHtml(e.cat, e.brand, e.idx)).join("");
-
 const cardByKey = new Map();
-gridEl.querySelectorAll(".k-card").forEach((el) => cardByKey.set(el.dataset.key, el));
-
 let activeTab = "all";
+let built = false;
+
+export function ensureCollectionsRendered() {
+  if (!built) {
+    built = true;
+    const ordered = orderedEntries(activeTab);
+    gridEl.innerHTML = ordered.map((e, i) => cardHtml(e.cat, e.brand, i)).join("");
+    gridEl.querySelectorAll(".k-card").forEach((el) => cardByKey.set(el.dataset.key, el));
+    updateWide();
+  }
+  observeLazyImages(scrollEl, gridEl);
+}
 
 function updateWide() {
   gridEl.querySelector(".sp-none")?.remove();
@@ -140,8 +149,12 @@ export function setCollectionFilter(tabId = "all", { animate = true, scrollTop =
     return;
   }
   activeTab = nextTab;
+  if (!built) {
+    if (scrollTop && scrollEl) scrollEl.scrollTop = 0;
+    return;
+  }
 
-  const canFlip = animate && !reduceMotion() && gridEl.offsetParent !== null;
+  const canFlip = animate && !isLow && !reduceMotion() && gridEl.offsetParent !== null;
   const firstRects = new Map();
   if (canFlip) {
     cardByKey.forEach((el, k) => {
@@ -157,6 +170,7 @@ export function setCollectionFilter(tabId = "all", { animate = true, scrollTop =
   });
   gridEl.appendChild(frag);
   updateWide();
+  observeLazyImages(scrollEl, gridEl);
 
   if (canFlip) {
     cardByKey.forEach((el, k) => {
@@ -182,16 +196,19 @@ export function resetCollectionSearch() {
   if (!qEl) return;
   qEl.value = "";
   midEl?.classList.remove("searching");
+  if (!built) return;
   cardByKey.forEach((el) => { el.hidden = false; });
   updateWide();
 }
 
 function filterGrid() {
+  if (!built) ensureCollectionsRendered();
   const q = (qEl?.value || "").trim().toLowerCase();
   cardByKey.forEach((el) => {
     el.hidden = q ? !el.dataset.search.includes(q) : false;
   });
   updateWide();
+  observeLazyImages(scrollEl, gridEl);
 }
 
 tabsEl.addEventListener("click", (e) => {
@@ -247,16 +264,18 @@ const settle = (card) => {
   card.style.removeProperty("--px");
   card.style.removeProperty("--py");
 };
-const onMove = (e) => { const c = e.target.closest(".k-card"); if (c) lean(c, e); };
-gridEl.addEventListener("pointerover", onMove);
-gridEl.addEventListener("pointermove", onMove);
-gridEl.addEventListener("pointerdown", onMove);
-gridEl.addEventListener("pointerout", (e) => {
-  const c = e.target.closest(".k-card");
-  if (c && !c.contains(e.relatedTarget)) settle(c);
-});
-gridEl.addEventListener("pointerup", (e) => { const c = e.target.closest(".k-card"); if (c) setTimeout(() => settle(c), 220); });
-gridEl.addEventListener("pointercancel", (e) => { const c = e.target.closest(".k-card"); if (c) settle(c); });
+if (!isLow) {
+  const onMove = (e) => { const c = e.target.closest(".k-card"); if (c) lean(c, e); };
+  gridEl.addEventListener("pointerover", onMove);
+  gridEl.addEventListener("pointermove", onMove);
+  gridEl.addEventListener("pointerdown", onMove);
+  gridEl.addEventListener("pointerout", (e) => {
+    const c = e.target.closest(".k-card");
+    if (c && !c.contains(e.relatedTarget)) settle(c);
+  });
+  gridEl.addEventListener("pointerup", (e) => { const c = e.target.closest(".k-card"); if (c) setTimeout(() => settle(c), 220); });
+  gridEl.addEventListener("pointercancel", (e) => { const c = e.target.closest(".k-card"); if (c) settle(c); });
+}
 
 // Tapping a collection card opens its brand shop on top of Collections
 gridEl.addEventListener("click", (e) => {
@@ -269,6 +288,9 @@ document.addEventListener("category:change", () => {
   setCollectionFilter(picked.cat || "all", { animate: false });
 });
 
-// Initial render: All tab active, all collections listed 2 by 2
+// Initial render: All tab active; pre-build in idle time only on high-end devices
 syncTabs("all", true);
-updateWide();
+if (isHigh) {
+  const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 700));
+  idle(() => ensureCollectionsRendered());
+}

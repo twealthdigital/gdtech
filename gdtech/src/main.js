@@ -1,4 +1,5 @@
 import "./base.css";
+import { isLow, isMid, isHigh, imgSrc } from "./perf.js";
 import "./glass.js";
 import "./style.css";
 import { register, login } from "./auth.js";
@@ -13,7 +14,28 @@ const slides = [
 
 let index = 0;
 
+const obVideo = $("ob-video");
+const authHero = document.querySelector(".auth .hero");
+const calmVideo = isLow || navigator.connection?.saveData || matchMedia("(prefers-reduced-motion: reduce)").matches;
+if (obVideo && obVideo.dataset.poster) obVideo.poster = imgSrc(obVideo.dataset.poster);
+
+function hydrateMediaFor(id) {
+  if (id === "onboarding" && obVideo) {
+    if (!calmVideo && obVideo.dataset.src && !obVideo.getAttribute("src")) {
+      obVideo.src = obVideo.dataset.src;
+    }
+    if (!calmVideo) obVideo.play().catch(() => {});
+  } else if (obVideo && !obVideo.paused) {
+    obVideo.pause();
+  }
+  if (id === "auth" && authHero && authHero.dataset.src) {
+    authHero.src = imgSrc(authHero.dataset.src);
+    authHero.removeAttribute("data-src");
+  }
+}
+
 function show(id) {
+  hydrateMediaFor(id);
   document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
   $(id).classList.add("active");
 
@@ -50,6 +72,10 @@ function waveTo(id, originEl) {
 
   wave.classList.add("grow");
   if (id === "auth") {
+    if (authHero && authHero.dataset.src) {
+      authHero.src = imgSrc(authHero.dataset.src);
+      authHero.removeAttribute("data-src");
+    }
     setTimeout(() => show("auth"), 850);
     setTimeout(() => {
       wave.classList.remove("grow");
@@ -88,13 +114,22 @@ if (location.hash === "#signin") {
 }
 
 // Warm the cache for the home page while the user is still on onboarding and auth
-const warm = ["/home.html", "/phones/banner-1.webp", "/phones/banner-2.webp", "/phones/banner-3.webp"];
+const warm = isLow
+  ? ["/home.html", "/lite/phones/banner-1.webp"]
+  : isMid
+    ? ["/home.html", "/lite/phones/banner-1.webp", "/lite/phones/banner-2.webp"]
+    : ["/home.html", "/phones/banner-1.webp", "/phones/banner-2.webp", "/phones/banner-3.webp"];
 setTimeout(() => warm.forEach((href) => {
   const l = document.createElement("link");
   l.rel = "prefetch";
   l.href = href;
   document.head.appendChild(l);
-}), 3000);
+}), isLow ? 3400 : 2800);
+if (isHigh && authHero && authHero.dataset.src) {
+  setTimeout(() => {
+    if (authHero.dataset.src) { authHero.src = authHero.dataset.src; authHero.removeAttribute("data-src"); }
+  }, 1500);
+}
 
 // Auth
 const card = document.querySelector(".card");

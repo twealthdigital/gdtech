@@ -1,4 +1,5 @@
 import "./cart.css";
+import { imgSrc } from "./perf.js";
 
 // Bag: a liquid-glass dropdown that grows out of the bag button (same panel as the filters).
 //
@@ -64,7 +65,7 @@ function row(p) {
   thumb.className = "ci-img";
   if (p.img) {
     const im = document.createElement("img");
-    im.src = p.img; im.alt = ""; im.decoding = "async";
+    im.src = imgSrc(p.img); im.alt = ""; im.decoding = "async";
     im.onerror = () => im.remove();
     thumb.appendChild(im);
   }

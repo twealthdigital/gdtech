@@ -1,5 +1,6 @@
 import "./categories.css";
 import { CATS, svg } from "./data/categories.js";
+import { isLow } from "./perf.js";
 
 const $ = (id) => document.getElementById(id);
 const home = $("home");
@@ -28,6 +29,7 @@ grid.innerHTML = CATS.map((c) => `
 
 // ---------- liquid hover and touch: zoom, tilt, the icon and label drift ----------
 function tilt(el) {
+  if (isLow) return;
   const strong = el.dataset.tilt === "orb";
   const max = strong ? 24 : 7;
   const move = (e) => {

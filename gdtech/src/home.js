@@ -1,4 +1,5 @@
 import "./base.css";
+import { imgSrc, observeLazyImages } from "./perf.js";
 import "./glass.js";
 import "./home.css";
 import "./filter.js";
@@ -16,9 +17,24 @@ import "./profile.js";
 
 const $ = (id) => document.getElementById(id);
 
+{
+  const p = document.createElement("link");
+  p.rel = "preload";
+  p.as = "image";
+  p.type = "image/webp";
+  p.href = imgSrc("/phones/banner-1.webp");
+  document.head.appendChild(p);
+}
+
 
 // Home: banners auto-slide, swipe by hand, dots follow
 const bTrack = $("b-track");
+const firstBanner = bTrack.querySelector("img[data-src]");
+if (firstBanner) {
+  firstBanner.src = imgSrc(firstBanner.dataset.src);
+  firstBanner.removeAttribute("data-src");
+}
+observeLazyImages(bTrack, bTrack);
 const bDots = document.querySelectorAll("#b-dots i");
 let cur = 0;
 let holdUntil = 0;
@@ -79,16 +95,20 @@ bTrack.addEventListener("pointercancel", endDrag);
 // A drag must not count as a tap on the Details button
 bTrack.addEventListener("click", (e) => { if (suppressClick) { e.preventDefault(); e.stopPropagation(); } }, true);
 
-setInterval(() => {
-  if (Date.now() < holdUntil) return;
-  const step = bTrack.children[0].offsetWidth + 12;
-  const next = (cur + 1) % bDots.length;
-  bTrack.scrollTo({ left: next * step, behavior: "smooth" });
-}, 3500);
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+if (!reduceMotion) {
+  setInterval(() => {
+    if (document.hidden || Date.now() < holdUntil) return;
+    const step = bTrack.children[0].offsetWidth + 12;
+    const next = (cur + 1) % bDots.length;
+    bTrack.scrollTo({ left: next * step, behavior: "smooth" });
+  }, 3500);
+}
 
 
 // Home: header stays fixed at the top; give it a solid backing once content scrolls under it
 const homeEl = $("h-scroll");
+observeLazyImages(homeEl, homeEl);
 const hTop = document.querySelector("#home .h-top");
 homeEl.addEventListener("scroll", () => {
   hTop.classList.toggle("stuck", homeEl.scrollTop > 4);

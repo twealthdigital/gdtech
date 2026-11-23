@@ -3,8 +3,10 @@
 // lens: a displacement map built from the element's real size and corner radius. The middle stays
 // clear and the rim bends the background inwards like a thick piece of glass, with a slight
 // red/green/blue split at the edge. Other browsers keep the CSS-only glass (blur, rim light, sheen).
+import { isHigh } from "./perf.js";
+
 const NS = "http://www.w3.org/2000/svg";
-const supported = !!navigator.userAgentData?.brands?.some((b) => /Chromium/.test(b.brand));
+const supported = isHigh && !!navigator.userAgentData?.brands?.some((b) => /Chromium/.test(b.brand));
 let boostImpl = () => {};
 // Make one element's lens stronger or weaker live (1 is normal). Used for the water swell while pressing and dragging.
 export const lensBoost = (node, m) => boostImpl(node, m);
@@ -114,7 +116,15 @@ if (supported) {
     for (const [dm, k] of lens.disp) dm.setAttribute("scale", (2 * lens.depth * k * m).toFixed(2));
   };
 
-  const ro = new ResizeObserver((entries) => entries.forEach((e) => build(e.target)));
+  const timers = new WeakMap();
+  const ro = new ResizeObserver((entries) => {
+    for (const e of entries) {
+      const node = e.target;
+      if (!lenses.has(node)) { build(node); continue; }
+      clearTimeout(timers.get(node));
+      timers.set(node, setTimeout(() => build(node), 90));
+    }
+  });
   const watch = (node) => { if (!lenses.has(node) && !node.__lgw) { node.__lgw = true; ro.observe(node); } };
   const scan = (root) => {
     if (root.matches?.(".glass")) watch(root);
@@ -126,7 +136,7 @@ if (supported) {
 }
 
 // Moving light: the rim highlight and the sheen drift with scroll, pointer and phone tilt, like light on real glass.
-{
+if (isHigh) {
   const root = document.documentElement;
   let px = 0, sy = 0, tilt = 0, raf = 0, last = "";
   const paint = () => {

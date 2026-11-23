@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <script>try{if(!localStorage.getItem("gd.session")&&!sessionStorage.getItem("gd.session"))location.replace("/")}catch(e){}</script>
+  <script>try{var q=new URLSearchParams(location.search).get("perf"),t=(q==="low"||q==="mid"||q==="high")?q:sessionStorage.getItem("gd.perf");if(!t){var c=navigator.connection,r=navigator.deviceMemory,k=navigator.hardwareConcurrency,m=matchMedia("(prefers-reduced-motion:reduce)").matches;t=(m||(c&&(c.saveData||c.effectiveType==="slow-2g"||c.effectiveType==="2g"))||(r!=null&&r<=2)||(k!=null&&k<=2))?"low":((r!=null&&r<=4)||(k!=null&&k<=4)||(c&&c.effectiveType==="3g"))?"mid":"high"}document.documentElement.classList.add("perf-"+t);document.documentElement.dataset.perf=t}catch(e){}</script>
   <meta name="theme-color" content="#ffffff" />
   <title>GDTech | Genuine phones, laptops and gadgets</title>
   <meta name="description" content="Shop genuine phones, laptops, headsets, tablets and smart gadgets at honest prices with fast delivery. Trade in your old phone and upgrade with GDTech." />
@@ -17,20 +18,12 @@
   <meta name="twitter:description" content="Shop genuine phones, laptops, headsets, tablets and smart gadgets at honest prices with fast delivery. Trade in your old phone and upgrade with GDTech." />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"Store","name":"GDTech","description":"Genuine phones, laptops, headsets, tablets and smart gadgets at honest prices with fast delivery.","areaServed":"NG","priceRange":"$$"}</script>
-  <link rel="preload" as="image" href="/phones/banner-1.webp" type="image/webp" fetchpriority="high" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&display=swap" /></noscript>
 </head>
 <body>
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <filter id="lg" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-      <feTurbulence type="fractalNoise" baseFrequency="0.011 0.02" numOctaves="2" seed="4" result="n" />
-      <feGaussianBlur in="n" stdDeviation="2.5" result="nb" />
-      <feDisplacementMap in="SourceGraphic" in2="nb" scale="26" xChannelSelector="R" yChannelSelector="G" />
-    </filter>
-  </svg>
   <svg width="0" height="0" style="position:absolute">
     <symbol id="logo-mark" viewBox="0 0 48 48">
       <rect width="48" height="48" rx="14" fill="#FF7A1A" />
@@ -75,7 +68,7 @@
           </div>
           <div class="b-img">
             <span class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2.6"/><path d="M11 18.5h2"/></svg><em>Phone image</em></span>
-            <img src="/phones/banner-1.webp" width="672" height="760" alt="Orange iPhone, front and back" decoding="async" fetchpriority="high" onload="this.parentElement.classList.add('has')" onerror="this.remove()" />
+            <img data-src="/phones/banner-1.webp" width="672" height="760" alt="Orange iPhone, front and back" decoding="async" fetchpriority="high" onload="this.parentElement.classList.add('has')" onerror="this.remove()" />
           </div>
           <button class="b-btn" type="button" data-shop="mobile:Apple">Shop now <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5.7 8.6a1 1 0 0 1 1-.9h10.6a1 1 0 0 1 1 .9l.95 10.5a2 2 0 0 1-1.99 2.2H6.74a2 2 0 0 1-1.99-2.2L5.7 8.6z"/><path d="M9 9V6.5a3 3 0 0 1 6 0V9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
         </article>
@@ -86,7 +79,7 @@
           </div>
           <div class="b-img">
             <span class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2.6"/><path d="M11 18.5h2"/></svg><em>Phone image</em></span>
-            <img src="/phones/banner-2.webp" width="632" height="760" alt="Samsung Galaxy Ultra in titanium grey" decoding="async" onload="this.parentElement.classList.add('has')" onerror="this.remove()" />
+            <img data-src="/phones/banner-2.webp" width="632" height="760" alt="Samsung Galaxy Ultra in titanium grey" loading="lazy" decoding="async" onload="this.parentElement.classList.add('has')" onerror="this.remove()" />
           </div>
           <button class="b-btn" type="button" data-shop="mobile:Samsung">Shop now <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5.7 8.6a1 1 0 0 1 1-.9h10.6a1 1 0 0 1 1 .9l.95 10.5a2 2 0 0 1-1.99 2.2H6.74a2 2 0 0 1-1.99-2.2L5.7 8.6z"/><path d="M9 9V6.5a3 3 0 0 1 6 0V9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
         </article>
@@ -97,7 +90,7 @@
           </div>
           <div class="b-img">
             <span class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2.6"/><path d="M11 18.5h2"/></svg><em>Phone image</em></span>
-            <img src="/phones/banner-3.webp" width="512" height="760" alt="Google Pixel in cream" decoding="async" onload="this.parentElement.classList.add('has')" onerror="this.remove()" />
+            <img data-src="/phones/banner-3.webp" width="512" height="760" alt="Google Pixel in cream" loading="lazy" decoding="async" onload="this.parentElement.classList.add('has')" onerror="this.remove()" />
           </div>
           <button class="b-btn" type="button" data-shop="mobile:Google">Shop now <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5.7 8.6a1 1 0 0 1 1-.9h10.6a1 1 0 0 1 1 .9l.95 10.5a2 2 0 0 1-1.99 2.2H6.74a2 2 0 0 1-1.99-2.2L5.7 8.6z"/><path d="M9 9V6.5a3 3 0 0 1 6 0V9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
         </article>
@@ -115,7 +108,7 @@
 
       <section class="tradein" aria-label="Trade in">
         <button class="t-card" type="button">
-          <span class="t-phone"><img src="/phones/banner-1.webp" width="672" height="760" alt="" loading="lazy" decoding="async" /></span>
+          <span class="t-phone"><img data-src="/phones/banner-1.webp" width="672" height="760" alt="" loading="lazy" decoding="async" /></span>
           <h3>TRADE<br>UP</h3>
           <p>Get credit for your old phone.</p>
           <span class="t-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
@@ -137,7 +130,7 @@
           <h2 id="fold-title">GALAXY FOLDABLE</h2>
         </div>
         <article class="v-card" id="v-card">
-          <video class="v-media" id="v-video" muted loop playsinline preload="none" width="540" height="540" poster="/foldable/galaxy-fold-poster.webp" data-src="/foldable/galaxy-fold.mp4" aria-label="Samsung Galaxy foldable phone video"></video>
+          <video class="v-media" id="v-video" muted loop playsinline preload="none" width="540" height="540" data-poster="/foldable/galaxy-fold-poster.webp" data-src="/foldable/galaxy-fold.mp4" aria-label="Samsung Galaxy foldable phone video"></video>
           <div class="v-shade"></div>
           <div class="v-row">
             <div class="v-words" aria-hidden="true">Unfold<br>more<i>.</i></div>

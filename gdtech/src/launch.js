@@ -1,3 +1,5 @@
+import { imgSrc, observeLazyImages } from "./perf.js";
+
 // Hottest deals carousel. Add a deal by adding one object here (photo in /public/launch, cropped wide and short).
 const DEALS = [
   { img: "/launch/iphone-18-pro.webp", w: 736, h: 440, alt: "iPhone 18 Pro in black, silver, blue and purple",
@@ -16,12 +18,13 @@ if (track && dotsEl) {
   dotsEl.dataset.n = DEALS.length;
   track.innerHTML = DEALS.map((d, i) => `
     <article class="d-card" style="--d-bg:${d.bg};--d-ink:${d.ink}">
-      <img src="${d.img}" width="${d.w}" height="${d.h}" style="--ar:${d.w} / ${d.h}" alt="${d.alt}" ${i ? 'loading="lazy"' : ""} decoding="async" draggable="false" />
+      <img ${i ? `data-src="${d.img}" loading="lazy"` : `src="${imgSrc(d.img)}"`} width="${d.w}" height="${d.h}" style="--ar:${d.w} / ${d.h}" alt="${d.alt}" decoding="async" draggable="false" />
       <div class="d-row">
         <div class="d-text"><span class="d-kick">${d.kick}</span><h3>${d.title}</h3></div>
         <button class="d-btn" type="button" data-shop="${d.shop}">${d.cta} ${arrow}</button>
       </div>
     </article>`).join("");
+  observeLazyImages(track, track);
   dotsEl.innerHTML = DEALS.map((_, i) => `<i${i ? "" : ' class="on"'}></i>`).join("");
   const dots = dotsEl.querySelectorAll("i");
   const stepOf = () => track.firstElementChild.offsetWidth + 12;
@@ -87,7 +90,7 @@ if (track && dotsEl) {
   new IntersectionObserver(([en]) => { visible = en.isIntersecting; }, { threshold: 0.4 }).observe(track);
   if (DEALS.length > 1) {
     setInterval(() => {
-      if (!visible || Date.now() < holdUntil) return;
+      if (document.hidden || !visible || Date.now() < holdUntil) return;
       track.scrollTo({ left: ((cur + 1) % dots.length) * stepOf(), behavior: "smooth" });
     }, 4200);
   }

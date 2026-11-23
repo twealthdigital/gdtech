@@ -94,3 +94,158 @@ h1 span { color: var(--orange); }
   -webkit-backdrop-filter: var(--lens, saturate(1)) blur(1.5px) saturate(1.9) brightness(1.07);
   backdrop-filter: var(--lens, saturate(1)) blur(1.5px) saturate(1.9) brightness(1.07);
 }
+
+/* Adaptive performance tiers (applied early on <html> via inline script + perf.js):
+   high: 100% original liquid glass, SVG lens refraction, shadows & animations
+   mid:  lightweight CSS blur only on main floating surfaces, /lite/ grid assets, no drop-shadows on cards
+   low:  zero backdrop-filter/blur, zero SVG refraction, zero drop-shadow/infinite idle animations, content-visibility */
+html.perf-mid .glass {
+  -webkit-backdrop-filter: blur(7px) saturate(1.4);
+  backdrop-filter: blur(7px) saturate(1.4);
+}
+html.perf-mid .sp-fav.glass {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background-color: rgba(11, 11, 12, 0.42);
+}
+html.perf-mid .sp-fav.glass.on { background-color: rgba(11, 11, 12, 0.78); }
+html.perf-mid .h-top::before {
+  -webkit-backdrop-filter: blur(10px) saturate(1.3);
+  backdrop-filter: blur(10px) saturate(1.3);
+}
+html.perf-mid .h-top::after { display: none; }
+html.perf-mid .fm-backdrop.open,
+html.perf-mid .pf-backdrop.open {
+  -webkit-backdrop-filter: blur(8px) saturate(1.2);
+  backdrop-filter: blur(8px) saturate(1.2);
+}
+html.perf-mid .b-img img,
+html.perf-mid .t-phone,
+html.perf-mid .has-img .k-art img,
+html.perf-mid .sp-hero img { filter: none; }
+html.perf-mid .pd-bg.blur { filter: blur(14px); }
+html.perf-mid .fm-sec,
+html.perf-mid .fm.open .fm-sec,
+html.perf-mid .pf-sec,
+html.perf-mid .pf.open .pf-sec,
+html.perf-mid .sp-opt,
+html.perf-mid .sp-drop.open .sp-opt { filter: none; }
+html.perf-mid .k-card,
+html.perf-mid .sp-card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 200px;
+}
+
+html.perf-low .glass {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(249, 248, 246, 0.94));
+  border: 1px solid rgba(11, 11, 12, 0.08);
+  box-shadow: 0 8px 20px rgba(11, 11, 12, 0.12);
+}
+html.perf-low .glass::before { display: none; }
+html.perf-low .dock-glass.glass {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(11, 11, 12, 0.08);
+  box-shadow: 0 8px 22px rgba(11, 11, 12, 0.14);
+}
+html.perf-low .dock-lens.glass,
+html.perf-low .dock.lifted .dock-lens.glass {
+  background: rgba(255, 122, 26, 0.14);
+  border: 1px solid rgba(255, 122, 26, 0.24);
+  box-shadow: none;
+  transition: transform 0.22s ease;
+}
+html.perf-low .sp-fav.glass {
+  background: rgba(11, 11, 12, 0.56);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: none;
+}
+html.perf-low .sp-fav.glass.on {
+  background: rgba(11, 11, 12, 0.85);
+  border-color: rgba(255, 122, 26, 0.45);
+}
+html.perf-low .sp-drop-glass.glass {
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(11, 11, 12, 0.1);
+  box-shadow: 0 12px 26px rgba(11, 11, 12, 0.16);
+}
+html.perf-low .sp-drop-lens.glass,
+html.perf-low .sp-drop.lifted .sp-drop-lens.glass {
+  background: rgba(255, 122, 26, 0.12);
+  border: 1px solid rgba(255, 122, 26, 0.22);
+  box-shadow: none;
+}
+html.perf-low .col-search.glass {
+  background: rgba(244, 242, 238, 0.96);
+  border: 1px solid rgba(11, 11, 12, 0.09);
+  box-shadow: 0 4px 12px rgba(11, 11, 12, 0.08);
+}
+html.perf-low .pf.glass {
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 14px 32px rgba(11, 11, 12, 0.18);
+}
+html.perf-low .h-top::before {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: linear-gradient(to bottom, #ffffff 0%, rgba(255, 255, 255, 0.96) 68%, rgba(255, 255, 255, 0));
+}
+html.perf-low .h-top::after,
+html.perf-low .home::after { display: none; }
+html.perf-low .fm-backdrop,
+html.perf-low .pf-backdrop {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  transition: background 0.2s ease;
+}
+html.perf-low .fm-backdrop.open,
+html.perf-low .pf-backdrop.open {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: rgba(11, 11, 12, 0.32);
+}
+html.perf-low .mark.big,
+html.perf-low .b-img img,
+html.perf-low .t-phone,
+html.perf-low .has-img .k-art img,
+html.perf-low .sp-hero img,
+html.perf-low .pd-img,
+html.perf-low .pd-img.wide,
+html.perf-low .pd-img.poster,
+html.perf-low .pd-img.ang-left,
+html.perf-low .pd-img.ang-right { filter: none; }
+html.perf-low .pd-bg.blur { display: none; }
+html.perf-low .t-phone,
+html.perf-low .tick span:first-child,
+html.perf-low .home.active,
+html.perf-low .k-card,
+html.perf-low .sp-card,
+html.perf-low .sp-hero.arrive img,
+html.perf-low .ci.new,
+html.perf-low .c-lbl.swap,
+html.perf-low .pf-view:not([data-view="main"]) { animation: none; }
+html.perf-low .fm-sec,
+html.perf-low .fm.open .fm-sec,
+html.perf-low .pf-sec,
+html.perf-low .pf.open .pf-sec,
+html.perf-low .sp-opt,
+html.perf-low .sp-drop.open .sp-opt {
+  filter: none;
+  transition-delay: 0s;
+}
+html.perf-low .shop,
+html.perf-low .collections,
+html.perf-low .fav,
+html.perf-low .pd {
+  box-shadow: none;
+  transition-duration: 0.28s;
+}
+html.perf-low .k-card,
+html.perf-low .sp-card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 200px;
+}
+html.perf-low .d-card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 230px;
+}

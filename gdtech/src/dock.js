@@ -5,6 +5,7 @@
 // The active tab opens up to show its name next to its icon, and the droplet is exactly that wide.
 // Taps and drags announce themselves with a "dock:go" event; pages that change the tab call back with "dock:set".
 import { lensBoost } from "./glass.js";
+import { isLow } from "./perf.js";
 
 const dock = document.getElementById("dock");
 
@@ -44,6 +45,10 @@ if (dock) {
   const hot = (i) => btns.forEach((b, n) => b.classList.toggle("hot", n === i));
 
   function paint() {
+    if (isLow) {
+      lens.style.transform = `translate3d(${(x - (W - 2) / 2).toFixed(1)}px,0,0) scale(${l.toFixed(3)})`;
+      return;
+    }
     const s = 1 + Math.min(Math.abs(vx) / 1100, 0.7);          // faster movement stretches it
     const sx = s * l, sy = l / Math.sqrt(s);
     lens.style.transform = `translate3d(${x - (W - 2) / 2}px,0,0) scale(${sx.toFixed(3)},${sy.toFixed(3)})`;
@@ -75,7 +80,14 @@ if (dock) {
     if (calm) { x = tx; l = tl; vx = vl = 0; p = vp = 0; paint(); raf = 0; return; }
     raf = requestAnimationFrame(step);
   }
-  const run = () => { if (!raf) { t0 = performance.now(); raf = requestAnimationFrame(step); } };
+  const run = () => {
+    if (isLow) {
+      x = tx; l = tl; vx = vl = p = vp = 0;
+      paint();
+      return;
+    }
+    if (!raf) { t0 = performance.now(); raf = requestAnimationFrame(step); }
+  };
 
   let down = false, moved = false, startX = 0, startTab = 0;
   const local = (e) => e.clientX - dock.getBoundingClientRect().left;

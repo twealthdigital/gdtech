@@ -3,8 +3,9 @@ import { CATS, svg } from "./data/categories.js";
 import { priceFor } from "./data/phones.js";
 import { SHOPS, OPT } from "./data/gadgets.js";
 import { galleryOf, cardPhoto, registerArt } from "./data/gallery.js";
-import { IMAGES, TITLES, TONE_OF, setCollectionFilter, resetCollectionSearch } from "./collections.js";
+import { IMAGES, TITLES, TONE_OF, setCollectionFilter, resetCollectionSearch, ensureCollectionsRendered } from "./collections.js";
 import { lensBoost } from "./glass.js";
+import { isLow, imgSrc, observeLazyImages } from "./perf.js";
 import { heroGeomCalc, reduceShopFilter, hasDropdownArrow, chipLabelFor, dropOptionIndexForY, toggleFavId, orderedFavIds } from "./shop-logic.js";
 
 // The shop page. Anything can open it:
@@ -95,7 +96,7 @@ function viewOf(route) {
 function card(item, tone, i, wide, liked = favs().includes(item.id)) {
   const ph = cardPhoto(item.id);
   const art = ph
-    ? `<img class="${ph.kind === "cut" ? "" : "photo"}" src="${ph.src}" alt="${item.name}" loading="lazy" decoding="async" draggable="false" />`
+    ? `<img class="${ph.kind === "cut" ? "" : "photo"}" data-src="${ph.src}" alt="${item.name}" loading="lazy" decoding="async" draggable="false" />`
     : `<span class="sp-ico">${svg(iconFor(item))}</span>`;
   const buy = item.price
     ? `<div class="sp-buy"><b>${naira(priceFor(item, 0))}</b></div>`
@@ -231,7 +232,7 @@ function stepDropLens(t) {
 function moveDropLens(targetY, { lift = false, instant = false } = {}) {
   dLens.ty = targetY;
   dLens.tl = lift ? 1.045 : 1;
-  if (instant || reduceMotion()) {
+  if (instant || isLow || reduceMotion()) {
     cancelAnimationFrame(dLens.raf);
     dLens.raf = 0;
     dLens.y = dLens.ty; dLens.l = dLens.tl; dLens.vy = dLens.vl = 0;
@@ -345,6 +346,7 @@ function renderBody(view, { instantChips = false, animateLabel = false } = {}) {
     chipsEl.hidden = false;
     syncChips({ scroll: !instantChips, instant: instantChips, animateLabel });
     bodyEl.innerHTML = renderGeneralBody();
+    observeLazyImages(scroller, bodyEl);
     return;
   }
   closeDrop();
@@ -356,6 +358,7 @@ function renderBody(view, { instantChips = false, animateLabel = false } = {}) {
   bodyEl.innerHTML = view.groups
     .filter((g) => !state.group || g.key === state.group)
     .map((g) => section(g.title, g.items, g.tone, (n += 2))).join("");
+  observeLazyImages(scroller, bodyEl);
 }
 
 /* ---------- the general shop hero ----------
@@ -378,7 +381,7 @@ function poolImg(key) {
   let im = pool.get(key);
   if (im && im.isConnected) return im;
   im = new Image();
-  im.alt = ""; im.decoding = "async"; im.draggable = false; im.src = IMAGES[key].src;
+  im.alt = ""; im.decoding = "async"; im.draggable = false; im.src = imgSrc(IMAGES[key].src);
   im.style.opacity = "0"; im.style.transform = PARKED;
   heroEl.prepend(im);
   pool.set(key, im);
@@ -416,6 +419,9 @@ function setHero(sel, { instant = false } = {}) {
       place(im, geo[j]);
       im.style.transitionDelay = instant ? "0s" : j * 0.05 + "s";
       im.style.opacity = "1"; im.style.transform = "none";
+    } else if (isLow) {
+      im.remove();
+      pool.delete(k);
     } else {
       im.style.transitionDelay = "0s";
       im.style.opacity = "0"; im.style.transform = PARKED;
@@ -455,6 +461,7 @@ function filterBody() {
     shown += vis.length;
   });
   if (!shown) bodyEl.insertAdjacentHTML("beforeend", `<div class="sp-none">Nothing matches "${q.replace(/[<>&"]/g, "")}"</div>`);
+  else observeLazyImages(scroller, bodyEl);
 }
 
 function render(route) {
@@ -492,7 +499,7 @@ function render(route) {
   arriveTimer = setTimeout(() => heroEl.classList.remove("arrive"), 1600);
   delete heroEl.dataset.focus;
   heroEl.innerHTML =
-    (fold ? "" : art ? `<img src="${art.src}" alt="" decoding="async" draggable="false" />` : "") +
+    (fold ? "" : art ? `<img src="${imgSrc(art.src)}" alt="" decoding="async" draggable="false" />` : "") +
     `<p class="sp-kick">${fold ? "Samsung Galaxy Z" : "Shop"}</p><h2>${title}</h2>`;
 
   if (view) {
@@ -520,6 +527,7 @@ function renderFavs({ animate = true } = {}) {
   if (recs.length) fvMeta.textContent = `${recs.length} saved gadget${recs.length === 1 ? "" : "s"}`;
   fvEmpty.hidden = recs.length > 0;
   fvGrid.innerHTML = recs.map((rec, i) => card(rec.item, rec.group.tone, i, recs.length % 2 === 1 && i === recs.length - 1, true)).join("");
+  observeLazyImages(fvScroll, fvGrid);
 }
 function syncFavButtons(id, on) {
   const rec = PRODUCTS[id];
@@ -584,7 +592,7 @@ function renderProduct(rec) {
   const off = item.was ? Math.round((1 - item.price / item.was) * 100) : 0;
   const tags = (group.isNew ? '<span class="pd-tag new">New</span>' : "") + (off > 0 ? `<span class="pd-tag off">Discount ${off}%</span>` : "");
   const thumbs = sel.gallery.length > 1
-    ? `<div class="pd-thumbs" role="tablist" aria-label="Product angles">${sel.gallery.map((p, i) => `<button class="pd-th${i ? "" : " on"}" type="button" role="tab" data-i="${i}" aria-selected="${i === 0}" aria-label="${p.label}"><img class="ang-${p.angle}" src="${p.src}" alt="" loading="lazy" decoding="async" draggable="false" /></button>`).join("")}</div>`
+    ? `<div class="pd-thumbs" role="tablist" aria-label="Product angles">${sel.gallery.map((p, i) => `<button class="pd-th${i ? "" : " on"}" type="button" role="tab" data-i="${i}" aria-selected="${i === 0}" aria-label="${p.label}"><img class="ang-${p.angle}" src="${imgSrc(p.src)}" alt="" loading="lazy" decoding="async" draggable="false" /></button>`).join("")}</div>`
     : "";
   const isFav = favs().includes(item.id);
   const opt = OPT[item.cat] || { label: "Select storage", guide: "Storage Guide", note: GUIDE };
@@ -623,12 +631,18 @@ function paintStage() {
   const img = $("pd-img");
   const bg = $("pd-bg");
   if (!p) { img.removeAttribute("src"); img.hidden = true; return; }
+  const stageSrc = imgSrc(p.src, { fullOnMid: true });
   img.hidden = false;
-  if (img.getAttribute("src") !== p.src) img.src = p.src;
+  if (img.getAttribute("src") !== stageSrc) img.src = stageSrc;
   img.className = "pd-img " + p.kind;
   img.dataset.angle = p.angle || "front";
-  bg.style.backgroundImage = p.kind === "cut" ? "" : `url("${p.src}")`;
-  bg.classList.toggle("blur", p.kind !== "cut");
+  if (isLow || p.kind === "cut") {
+    bg.style.backgroundImage = "";
+    bg.classList.remove("blur");
+  } else {
+    bg.style.backgroundImage = `url("${stageSrc}")`;
+    bg.classList.add("blur");
+  }
   pdBody.querySelectorAll(".pd-th").forEach((b, i) => { b.classList.toggle("on", i === sel.g); b.setAttribute("aria-selected", String(i === sel.g)); });
 }
 
@@ -652,7 +666,7 @@ async function fly(from, target) {
   const hb = home.getBoundingClientRect();
   const a = from.getBoundingClientRect();
   const t = target.getBoundingClientRect();
-  if (!from.animate || reduceMotion() || a.width < 4) return;
+  if (isLow || !from.animate || reduceMotion() || a.width < 4) return;
   const el = from.cloneNode(false);
   el.removeAttribute("id");
   el.className = from.className + " pd-fly";
@@ -851,6 +865,7 @@ function showCollections({ instant = false, trigger = null, cat = null } = {}) {
     colTop.classList.remove("stuck");
   }
   if (cat != null) setCollectionFilter(cat, { animate: false, scrollTop: true });
+  ensureCollectionsRendered();
   if (instant) colEl.classList.add("no-anim");
   colEl.inert = false;
   colEl.setAttribute("aria-hidden", "false");
