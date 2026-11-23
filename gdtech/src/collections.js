@@ -25,7 +25,7 @@ const IMAGES = {
   "laptops:Asus": { src: "/laptops/asus.webp", w: 1237, h: 760, z: 1.5, up: 10 },
   "laptops:Samsung": { src: "/laptops/samsung.webp", w: 1238, h: 760, z: 1.2, up: 20 },
   "tablets:Apple": { src: "/tablets/apple.webp", w: 664, h: 760, z: 0.78, up: 16 },
-  "tablets:Samsung": { src: "/tablets/samsung.webp", w: 1118, h: 760, z: 1.05, up: 26 },
+  "tablets:Samsung": { src: "/tablets/samsung.webp", w: 1118, h: 760, z: 1.05, up: 26, x: -7 },
   "tablets:Lenovo": { src: "/tablets/lenovo.webp", w: 1194, h: 760, z: 1.3, up: 14 },
   "tablets:Infinix": { src: "/tablets/infinix.webp", w: 505, h: 760, z: 1, up: 4 },
   "tablets:Huawei": { src: "/tablets/huawei.webp", w: 1050, h: 760, z: 1, up: 0 },
@@ -70,7 +70,7 @@ function card(cat, brand, i) {
   const sub = title !== brand ? brand : "";
   const img = IMAGES[key];
   const art = img
-    ? `<img src="${img.src}" width="${img.w}" height="${img.h}" alt="${title}"${img.z ? ` style="--z:${img.z};--up:${img.up}%"` : ""} loading="lazy" decoding="async" draggable="false" />`
+    ? `<img src="${img.src}" width="${img.w}" height="${img.h}" alt="${title}"${img.z ? ` style="--z:${img.z};--up:${img.up}%${img.x ? `;--x:${img.x}%` : ""}"` : ""} loading="lazy" decoding="async" draggable="false" />`
     : `<span class="k-ico">${svg(cat.icon)}</span>`;
   return `<button class="k-card ${TONE_OF[key] || TONES[i % TONES.length]}${img ? " has-img" : ""}" type="button" data-cat="${cat.id}" data-brand="${brand}" style="--i:${i}">
     <span class="k-art">${art}</span>

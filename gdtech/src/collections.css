@@ -50,7 +50,7 @@
   transform: translate(calc(var(--px, 0) * -7px), calc(var(--py, 0) * -5px)) rotate(calc(var(--rz, 0deg) + var(--px, 0) * 7deg)) scale(var(--as, 1));
   transition: transform 0.65s cubic-bezier(0.2, 1.5, 0.35, 1); }
 .has-img.hot .k-art { --rz: -4deg; --as: 1.1; transition-duration: 0.14s; transition-timing-function: ease-out; }
-.has-img .k-art img { position: absolute; left: 50%; bottom: calc(-2% + var(--up, 0%)); width: calc(98% * var(--z, 1)); max-width: none; height: 100%; translate: -50% 0; pointer-events: none; object-fit: contain; object-position: center bottom; filter: drop-shadow(0 12px 12px rgba(0, 0, 0, 0.4)); }
+.has-img .k-art img { position: absolute; left: calc(50% + var(--x, 0%)); bottom: calc(-2% + var(--up, 0%)); width: calc(98% * var(--z, 1)); max-width: none; height: 100%; translate: -50% 0; pointer-events: none; object-fit: contain; object-position: center bottom; filter: drop-shadow(0 12px 12px rgba(0, 0, 0, 0.4)); }
 .has-img::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(to top, var(--card) 0%, transparent 38%); }
 /* Laptops are wide, so keep the fade at the bottom short or it washes out the base */
 /* Fade height follows the label: 1-line names get a small fade, 2-line MacBook a medium one, 3-line Galaxy Book the biggest */
