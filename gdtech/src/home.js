@@ -2,6 +2,7 @@ import "./base.css";
 import "./glass.js";
 import "./home.css";
 import "./filter.js";
+import "./dock.js";
 import "./categories.js";
 import "./tradein.css";
 import "./launch.css";
@@ -82,12 +83,6 @@ setInterval(() => {
   bTrack.scrollTo({ left: next * step, behavior: "smooth" });
 }, 3500);
 
-// Home: bottom nav
-document.querySelectorAll("#dock button").forEach((b) => {
-  b.addEventListener("click", () => {
-    document.querySelectorAll("#dock button").forEach((x) => x.classList.toggle("on", x === b));
-  });
-});
 
 // Home: header stays fixed at the top; give it a solid backing once content scrolls under it
 const homeEl = $("h-scroll");

@@ -133,16 +133,24 @@
   display: flex; align-items: center; justify-content: space-around;
   border-radius: 99px; --g1: 0.5; --g2: 0.16;
 }
-.dock button { position: relative; width: 48px; height: 48px; display: grid; place-items: center; background: none; color: rgba(11, 11, 12, 0.55); transition: color 0.25s ease, transform 0.15s ease; }
-.dock button:active { transform: scale(0.9); }
-.dock button svg { width: 24px; height: 24px; }
-.dock button.on { color: var(--black); }
+.dock { touch-action: none; transition: transform 0.45s cubic-bezier(0.3, 1.5, 0.45, 1); }
+.dock.lifted { transform: translateX(-50%) scale(1.035); }
+.dock button { position: relative; z-index: 1; width: 52px; height: 52px; display: grid; place-items: center; background: none; color: rgba(11, 11, 12, 0.5); transition: color 0.25s ease, transform 0.3s cubic-bezier(0.3, 1.5, 0.45, 1); }
+.dock button svg { width: 24px; height: 24px; transition: transform 0.4s cubic-bezier(0.3, 1.6, 0.45, 1); }
+.dock button.on, .dock button.hot { color: var(--black); }
 .dock button.on svg { fill: currentColor; }
-.dock button::after {
-  content: ""; position: absolute; bottom: 3px; left: 50%; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%;
-  background: var(--orange); transform: scale(0); transition: transform 0.25s ease;
+.dock button.hot svg { transform: scale(1.14); }
+
+/* The droplet under the active icon. Its own glass (a nested backdrop would only see the bar), styled bright and thick. */
+.dock-lens { position: absolute; left: 0; top: 50%; width: 62px; height: 50px; margin-top: -25px; z-index: 0; pointer-events: none; }
+.dock-lens::before {
+  content: ""; position: absolute; inset: 0; border-radius: 99px; transition: transform 0.4s cubic-bezier(0.3, 1.5, 0.45, 1), box-shadow 0.3s ease;
+  background: radial-gradient(120% 95% at 28% 0%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.4) 55%, rgba(255, 255, 255, 0.22)),
+              linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 190, 140, 0.18));
+  box-shadow: inset 1.5px 1.5px 2px rgba(255, 255, 255, 1), inset -1.5px -2px 3px rgba(255, 255, 255, 0.7), inset 0 0 12px rgba(255, 255, 255, 0.5),
+              0 0 0 0.5px rgba(120, 100, 90, 0.14), 0 6px 14px rgba(90, 40, 0, 0.16);
 }
-.dock button.on::after { transform: scale(1); }
+.dock.lifted .dock-lens::before { transform: scale(1.2, 1.14); box-shadow: inset 1.5px 1.5px 2px #fff, inset -1.5px -2px 3px rgba(255, 255, 255, 0.8), inset 0 0 16px rgba(255, 255, 255, 0.7), 0 0 0 0.5px rgba(120, 100, 90, 0.14), 0 12px 24px rgba(90, 40, 0, 0.24); }
 
 /* Bottom glow: soft orange blur fading up from the edge, sits under the dock so the glass has something to bend */
 .home::after {

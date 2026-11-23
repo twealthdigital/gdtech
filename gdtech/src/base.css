@@ -66,7 +66,7 @@ h1 span { color: var(--orange); }
 .glass {
   --g1: 0.30; --g2: 0.08;
   background:
-    radial-gradient(130% 80% at 18% -8%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 55%),
+    radial-gradient(130% 80% at var(--sx, 18%) -8%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 55%),
     linear-gradient(160deg, rgba(255, 255, 255, var(--g1)), rgba(255, 255, 255, var(--g2)) 55%, rgba(255, 255, 255, calc(var(--g1) * 0.7)));
   -webkit-backdrop-filter: blur(9px) saturate(1.9) brightness(1.07);
   backdrop-filter: blur(9px) saturate(1.9) brightness(1.07);
@@ -85,7 +85,7 @@ h1 span { color: var(--orange); }
 }
 .glass::before {
   content: ""; position: absolute; inset: 0; padding: 1.5px; border-radius: inherit; pointer-events: none; z-index: 2;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.05) 26%, rgba(255, 255, 255, 0) 56%, rgba(255, 255, 255, 0.1) 74%, rgba(255, 255, 255, 0.9));
+  background: linear-gradient(var(--spec, 135deg), rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.05) 26%, rgba(255, 255, 255, 0) 56%, rgba(255, 255, 255, 0.1) 74%, rgba(255, 255, 255, 0.9));
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);

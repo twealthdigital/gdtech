@@ -113,3 +113,24 @@ if (supported) {
   new MutationObserver((ms) => ms.forEach((m) => m.addedNodes.forEach((n) => n.nodeType === 1 && scan(n))))
     .observe(document.documentElement, { childList: true, subtree: true });
 }
+
+// Moving light: the rim highlight and the sheen drift with scroll, pointer and phone tilt, like light on real glass.
+{
+  const root = document.documentElement;
+  let px = 0, sy = 0, tilt = 0, raf = 0, last = "";
+  const paint = () => {
+    raf = 0;
+    const a = Math.round(135 + Math.max(-45, Math.min(45, sy * 0.05)) + px * 40 + tilt);
+    const s = Math.round(18 + px * 34 + tilt * 0.8);
+    const key = a + "|" + s;
+    if (key === last) return;
+    last = key;
+    root.style.setProperty("--spec", a + "deg");
+    root.style.setProperty("--sx", s + "%");
+  };
+  const kick = () => { if (!raf) raf = requestAnimationFrame(paint); };
+  addEventListener("pointermove", (e) => { px = e.clientX / innerWidth - 0.5; kick(); }, { passive: true });
+  document.addEventListener("scroll", (e) => { if (e.target && e.target.scrollTop !== undefined) { sy = e.target.scrollTop; kick(); } }, { capture: true, passive: true });
+  addEventListener("deviceorientation", (e) => { if (e.gamma != null) { tilt = Math.max(-30, Math.min(30, e.gamma)) * 0.8; kick(); } }, { passive: true });
+}
+
