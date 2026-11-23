@@ -1,0 +1,22 @@
+/* Launch banner: the poster fades into black at the bottom, headline and button sit on the black */
+.launch { margin: 22px 20px 0; }
+.l-card {
+  position: relative; display: block; overflow: hidden; border-radius: 28px; background: #0b0b0c; color: #fff;
+  box-shadow: 0 16px 30px rgba(11, 11, 12, 0.22);
+}
+.l-card img {
+  display: block; width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: cover;
+  -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 100%); mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+}
+.l-row { position: relative; z-index: 1; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding: 0 18px 18px; margin-top: -54px; }
+.l-text { min-width: 0; }
+.l-kick { display: block; margin-bottom: 5px; font-size: 10.5px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--orange); }
+.l-card h3 { font-size: 23px; line-height: 1.05; font-weight: 800; letter-spacing: -0.01em; }
+.l-btn {
+  flex: none; display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 18px; border-radius: 99px;
+  font-size: 14px; font-weight: 700; color: #fff; background: var(--orange);
+  box-shadow: 0 10px 22px rgba(255, 122, 26, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: transform 0.15s ease;
+}
+.l-btn svg { width: 14px; height: 14px; }
+.l-card:active .l-btn, .l-btn:active { transform: scale(0.95); }
