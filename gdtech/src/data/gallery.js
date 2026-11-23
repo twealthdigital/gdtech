@@ -41,8 +41,12 @@ const BY_PREFIX = [
   ["itel-", [ITEL]],
 ];
 
+// Laptops, tablets, headsets and gaming use their brand photo until the product has its own (see shop.js)
+const brandArt = {};
+export const registerArt = (id, src) => { brandArt[id] = [cut(src)]; };
+
 export function galleryOf(id) {
-  const list = BY_ID[id] || (BY_PREFIX.find(([p]) => id.startsWith(p)) || [, []])[1];
+  const list = BY_ID[id] || brandArt[id] || (BY_PREFIX.find(([p]) => id.startsWith(p)) || [, []])[1];
   return own[id] ? [cut(own[id]), ...list] : list;
 }
 

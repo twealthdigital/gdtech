@@ -1,7 +1,8 @@
 import "./shop.css";
 import { CATS, svg } from "./data/categories.js";
-import { PHONE_SHOPS, priceFor } from "./data/phones.js";
-import { galleryOf, cardPhoto } from "./data/gallery.js";
+import { priceFor } from "./data/phones.js";
+import { SHOPS, OPT } from "./data/gadgets.js";
+import { galleryOf, cardPhoto, registerArt } from "./data/gallery.js";
 import { IMAGES, TITLES, TONE_OF } from "./collections.js";
 
 // The shop page. Anything can open it:
@@ -34,15 +35,24 @@ const ICONS = {
   fold: '<rect x="3" y="5" width="18" height="14" rx="2.4"/><path d="M12 5v14"/>',
   flip: '<rect x="6.5" y="3" width="11" height="18" rx="2.6"/><path d="M6.5 12h11"/>',
 };
-const iconFor = (item) => (!item.fold ? ICONS.phone : /flip/i.test(item.name) ? ICONS.flip : ICONS.fold);
+const iconFor = (item) => {
+  if (item.cat && item.cat !== "mobile") return (CATS.find((c) => c.id === item.cat) || CATS[0]).icon;
+  return !item.fold ? ICONS.phone : /flip/i.test(item.name) ? ICONS.flip : ICONS.fold;
+};
+const CAT_LABEL = { mobile: "Phones", laptops: "Laptops", headsets: "Headsets", tablets: "Tablets", gaming: "Gaming" };
+const brandsOf = (cat) => Object.values(SHOPS).filter((c) => c.cat === cat);
 const BAG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5.7 8.6a1 1 0 0 1 1-.9h10.6a1 1 0 0 1 1 .9l.95 10.5a2 2 0 0 1-1.99 2.2H6.74a2 2 0 0 1-1.99-2.2L5.7 8.6z"/><path d="M9 9V6.5a3 3 0 0 1 6 0V9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
 
-const state = { route: null, view: null, group: null, trigger: null, open: false, pid: null, ptrigger: null, pOpen: false };
+const state = { route: null, view: null, cat: null, group: null, searching: false, trigger: null, open: false, pid: null, ptrigger: null, pOpen: false };
 
 // Every phone by id, so a product page can find its photo, its series and its neighbours
 const PRODUCTS = {};
-for (const [brand, cfg] of Object.entries(PHONE_SHOPS)) {
-  for (const g of cfg.groups) for (const item of g.items) PRODUCTS[item.id] = { item, group: g, brand, cfg };
+for (const cfg of Object.values(SHOPS)) {
+  for (const g of cfg.groups) for (const item of g.items) {
+    PRODUCTS[item.id] = { item, group: g, brand: cfg.brand, cfg };
+    // Until a product has its own photo, laptops, tablets, headsets and gaming show their brand photo
+    if (cfg.cat !== "mobile" && IMAGES[cfg.art]) registerArt(item.id, IMAGES[cfg.art].src);
+  }
 }
 
 const parse = (str) => { const [cat, brand, focus] = String(str).split(":"); return { cat, brand, focus: focus || null }; };
@@ -58,16 +68,11 @@ function orderedGroups(cfg, focus) {
   return focus === "fold" ? [...gs.filter((g) => g.fold), ...gs.filter((g) => !g.fold)] : gs;
 }
 
-// One view = the chips on top and the sections below. A brand shop chips by series; the general shop chips by brand.
+// One view = the chips on top and the sections below. A brand shop chips by series. The general shop (All gadgets)
+// chips by category, and once a category is picked a second row chips by brand.
 function viewOf(route) {
-  if (route.cat === "all") {
-    const brands = Object.entries(PHONE_SHOPS);
-    return {
-      chips: brands.map(([k, c]) => ({ id: k, label: c.title })),
-      groups: brands.flatMap(([k, c]) => c.groups.map((g) => ({ ...g, key: k }))),
-    };
-  }
-  const cfg = route.cat === "mobile" ? PHONE_SHOPS[route.brand] : null;
+  if (route.cat === "all") return { general: true };
+  const cfg = SHOPS[route.cat + ":" + route.brand];
   if (!cfg) return null;
   const groups = orderedGroups(cfg, route.focus).map((g) => ({ ...g, key: g.id }));
   return { chips: groups.map((g) => ({ id: g.id, label: g.chip })), groups };
@@ -87,34 +92,142 @@ function card(item, tone, i, wide) {
   </article>`;
 }
 
+const chipsEl2 = $("sp-chips2");
+const tab = (attr, id, label, on) => `<button class="c-tab${on ? " on" : ""}" type="button" role="tab" data-${attr}="${id}">${label}</button>`;
+const section = (title, items, tone, n) => `<section class="sp-sec" aria-label="${title}">
+        <h3>${title}</h3>
+        <div class="sp-grid">${items.map((it, k) => card(it, tone, n + k, items.length % 2 === 1 && k === items.length - 1)).join("")}</div>
+      </section>`;
+
+// A few of the newest products from each brand of a category, one brand at a time, for the All gadgets overview
+function featured(cat, count = 4) {
+  const lists = brandsOf(cat).map((b) => b.groups[0].items.map((item) => ({ item, tone: b.groups[0].tone })));
+  const out = [];
+  for (let i = 0; out.length < count && lists.some((l) => l[i]); i++) lists.forEach((l) => { if (l[i] && out.length < count) out.push(l[i]); });
+  return out;
+}
+
+function renderGeneralBody() {
+  let n = 0;
+  if (state.searching) {
+    // Searching: every product, so nothing is hidden from the search
+    return CATS.flatMap((c) => brandsOf(c.id).flatMap((b) => b.groups.map((g) => section(g.title, g.items, g.tone, (n += 2))))).join("");
+  }
+  if (state.cat) {
+    return brandsOf(state.cat).filter((b) => !state.group || b.brand === state.group)
+      .flatMap((b) => b.groups.map((g) => section(g.title, g.items, g.tone, (n += 2)))).join("");
+  }
+  return CATS.map((c) => {
+    const picks = featured(c.id);
+    return `<section class="sp-sec" aria-label="${CAT_LABEL[c.id]}">
+        <div class="sp-sec-head"><h3>${CAT_LABEL[c.id]}</h3><button class="sp-more" type="button" data-cat="${c.id}">See all</button></div>
+        <div class="sp-grid">${picks.map((p, k) => card(p.item, p.tone, (n += 1) + k, false)).join("")}</div>
+      </section>`;
+  }).join("");
+}
+
 function renderBody(view) {
-  chipsEl.innerHTML =
-    `<button class="c-tab${state.group ? "" : " on"}" type="button" role="tab" data-g="">All</button>` +
-    view.chips.map((c) => `<button class="c-tab${state.group === c.id ? " on" : ""}" type="button" role="tab" data-g="${c.id}">${c.label}</button>`).join("");
+  if (view.general) {
+    chipsEl.innerHTML = tab("c", "", "All", !state.cat) + CATS.map((c) => tab("c", c.id, CAT_LABEL[c.id], state.cat === c.id)).join("");
+    if (state.cat) {
+      chipsEl2.innerHTML = tab("g", "", "All", !state.group) + brandsOf(state.cat).map((b) => tab("g", b.brand, b.title, state.group === b.brand)).join("");
+    }
+    chipsEl2.classList.toggle("show", !!state.cat);
+    chipsEl.hidden = false;
+    bodyEl.innerHTML = renderGeneralBody();
+    return;
+  }
+  chipsEl2.classList.remove("show");
+  chipsEl.innerHTML = tab("g", "", "All", !state.group) + view.chips.map((c) => tab("g", c.id, c.label, state.group === c.id)).join("");
   chipsEl.hidden = false;
   let n = 0;
   bodyEl.innerHTML = view.groups
     .filter((g) => !state.group || g.key === state.group)
-    .map((g) => `<section class="sp-sec" aria-label="${g.title}">
-        <h3>${g.title}</h3>
-        <div class="sp-grid">${g.items.map((it, k) => card(it, g.tone, n++, g.items.length % 2 === 1 && k === g.items.length - 1)).join("")}</div>
-      </section>`).join("");
+    .map((g) => section(g.title, g.items, g.tone, (n += 2))).join("");
 }
 
-// General shop hero: picking a brand chip slides the other phones out, the brand's phone settles into place,
-// and the colour and title change with it. "All" brings the fan back.
-let heroTimer = 0;
-function focusHero(key) {
-  if (!state.route || state.route.cat !== "all") return;
-  const cfg = key ? PHONE_SHOPS[key] : null;
-  heroEl.className = "sp-hero " + (cfg ? cfg.tone : "ink") + " fan";
-  if (cfg) heroEl.dataset.focus = key; else delete heroEl.dataset.focus;
+/* ---------- the general shop hero ----------
+   All gadgets shows a mix (phone, console, headphones, laptop). Pick a category and it becomes that category's fan
+   (for example All phones). Pick a brand and it becomes that brand's single hero. Every photo lives in one pool:
+   the ones that are not needed slide out to the right, the needed ones slide in and settle into new sizes. */
+const CAT_HERO = {
+  all: { tone: "ink", title: "All<br>gadgets", fan: ["mobile:Apple", "gaming:PS5", "headsets:Sony", "laptops:Apple"] },
+  mobile: { tone: "ink", title: "All<br>phones", fan: ["mobile:Apple", "mobile:Samsung", "mobile:Google"] },
+  laptops: { tone: "navy", title: "All<br>laptops", fan: ["laptops:Apple", "laptops:Dell", "laptops:Samsung"] },
+  headsets: { tone: "orange", title: "All<br>headsets", fan: ["headsets:Beats", "headsets:Sony", "headsets:Bose"] },
+  tablets: { tone: "slate", title: "All<br>tablets", fan: ["tablets:Apple", "tablets:Samsung", "tablets:Huawei"] },
+  gaming: { tone: "onyx", title: "All<br>gaming", fan: ["gaming:PS5", "gaming:Xbox", "gaming:Switch"] },
+};
+const BASES = [1, 0.88, 0.78, 0.7, 0.62];   // the front photo is tallest, the ones behind step down
+const PARKED = "translateX(130%)";
+const pool = new Map();
+let heroTimer = 0, arriveTimer = 0;
+
+function poolImg(key) {
+  let im = pool.get(key);
+  if (im && im.isConnected) return im;
+  im = new Image();
+  im.alt = ""; im.decoding = "async"; im.draggable = false; im.src = IMAGES[key].src;
+  im.style.opacity = "0"; im.style.transform = PARKED;
+  heroEl.prepend(im);
+  pool.set(key, im);
+  return im;
+}
+
+// Sizes and positions in pixels, front photo on the right, the others tucked behind it to the left
+function heroGeom(keys, single) {
+  const W = heroEl.clientWidth || 335, H = heroEl.clientHeight || 176, O = 0.42;
+  const items = keys.map((k, j) => { const h = H * (single ? 1.12 : BASES[j]); return { k, h, w: (h * IMAGES[k].w) / IMAGES[k].h }; });
+  let span = items[0].w;
+  for (let j = 1; j < items.length; j++) span += items[j].w * (1 - O);
+  const s = Math.min(1, ((single ? 0.62 : 0.62) * W) / span);
+  let prev = null;
+  items.forEach((it, j) => {
+    it.h *= s; it.w *= s;
+    it.right = prev ? prev.right + prev.w - O * it.w : -0.02 * W;
+    it.bottom = (single ? -0.08 : -0.06) * H;
+    it.z = 10 - j;
+    prev = it;
+  });
+  return items;
+}
+const place = (im, g) => { im.style.right = g.right + "px"; im.style.bottom = g.bottom + "px"; im.style.height = g.h + "px"; im.style.zIndex = g.z; };
+
+function setHero(sel, { instant = false } = {}) {
+  const cfg = sel.brand ? SHOPS[sel.cat + ":" + sel.brand] : null;
+  const def = CAT_HERO[sel.cat || "all"];
+  const keys = (cfg ? [sel.cat + ":" + sel.brand] : def.fan).filter((k) => IMAGES[k]);
+  const arrive = heroEl.classList.contains("arrive");
+  heroEl.className = "sp-hero " + (cfg ? cfg.tone : def.tone) + " fan" + (arrive ? " arrive" : "");
+  if (cfg) heroEl.dataset.focus = keys[0]; else delete heroEl.dataset.focus;
+
+  if (instant) heroEl.classList.add("no-t");
+  const geo = heroGeom(keys, !!cfg);
+  geo.forEach((g) => { const fresh = !pool.has(g.k); const im = poolImg(g.k); if (fresh) place(im, g); });
+  void heroEl.offsetWidth;                       // new photos start parked, then slide in
+  pool.forEach((im, k) => {
+    const j = geo.findIndex((g) => g.k === k);
+    if (j > -1) {
+      place(im, geo[j]);
+      im.style.transitionDelay = instant ? "0s" : j * 0.05 + "s";
+      im.style.opacity = "1"; im.style.transform = "none";
+    } else {
+      im.style.transitionDelay = "0s";
+      im.style.opacity = "0"; im.style.transform = PARKED;
+    }
+  });
+  if (instant) requestAnimationFrame(() => requestAnimationFrame(() => heroEl.classList.remove("no-t")));
+
   const h = heroEl.querySelector("h2"), k = heroEl.querySelector(".sp-kick");
   if (!h || !k) return;
-  h.classList.add("swap");
+  const title = cfg ? TITLES[keys[0]] || cfg.title : def.title;
+  const kick = cfg ? "Shop" : "GDTech";
   clearTimeout(heroTimer);
-  heroTimer = setTimeout(() => { h.innerHTML = cfg ? cfg.title : "All<br>phones"; k.textContent = cfg ? "Shop" : "GDTech"; h.classList.remove("swap"); }, 170);
+  if (instant) { h.innerHTML = title; k.textContent = kick; return; }
+  h.classList.add("swap");
+  heroTimer = setTimeout(() => { h.innerHTML = title; k.textContent = kick; h.classList.remove("swap"); }, 170);
 }
+const heroFor = () => setHero({ cat: state.cat || "all", brand: state.cat && state.group ? state.group : null });
 
 const qEl = $("sp-q");
 let filtered = false;
@@ -123,7 +236,7 @@ function filterBody() {
   const q = (qEl.value || "").trim().toLowerCase();
   bodyEl.querySelector(".sp-none")?.remove();
   if (!q) {
-    if (filtered) { filtered = false; if (state.view) renderBody(state.view); }
+    if (filtered) { filtered = false; state.searching = false; if (state.view) renderBody(state.view); }
     return;
   }
   filtered = true;
@@ -136,35 +249,41 @@ function filterBody() {
     sec.hidden = vis.length === 0;
     shown += vis.length;
   });
-  if (!shown) bodyEl.insertAdjacentHTML("beforeend", `<div class="sp-none">No phones match "${q.replace(/[<>&"]/g, "")}"</div>`);
+  if (!shown) bodyEl.insertAdjacentHTML("beforeend", `<div class="sp-none">Nothing matches "${q.replace(/[<>&"]/g, "")}"</div>`);
 }
 
 function render(route) {
   if (qEl) { qEl.value = ""; filtered = false; }
+  state.searching = false;
   const view = viewOf(route);
   state.view = view;
+  pool.clear();
 
-  // The general shop page: a fan of the phones, then every series
+  // The general shop page: a mix of everything, the categories below
   if (route.cat === "all") {
     titleEl.textContent = "Shop";
     heroEl.className = "sp-hero ink fan";
-    delete heroEl.dataset.focus;
-    heroEl.innerHTML =
-      ["Google", "Samsung", "Apple", "itel"].filter((b) => IMAGES["mobile:" + b]).map((b) => `<img data-b="${b}" src="${IMAGES["mobile:" + b].src}" alt="" decoding="async" draggable="false" />`).join("") +
-      `<p class="sp-kick">GDTech</p><h2>All<br>phones</h2>`;
+    heroEl.innerHTML = `<p class="sp-kick">GDTech</p><h2>All<br>gadgets</h2>`;
+    heroEl.classList.add("arrive");
+    clearTimeout(arriveTimer);
+    arriveTimer = setTimeout(() => heroEl.classList.remove("arrive"), 1600);
+    setHero({ cat: "all", brand: null }, { instant: true });
     renderBody(view);
     return;
   }
 
   const key = route.cat + ":" + route.brand;
-  const cfg = route.cat === "mobile" ? PHONE_SHOPS[route.brand] : null;
-  const fold = route.focus === "fold" && cfg;
+  const cfg = SHOPS[key] || null;
+  const fold = route.focus === "fold" && cfg && cfg.cat === "mobile";
   const title = fold ? "Foldables" : cfg ? cfg.title : TITLES[key] || route.brand;
   const tone = fold ? "ink" : cfg ? cfg.tone : TONE_OF[key] || "ink";
   const art = IMAGES[cfg ? cfg.art : key];
 
   titleEl.textContent = title;
-  heroEl.className = "sp-hero " + tone + (fold ? " fold" : "");
+  heroEl.className = "sp-hero " + tone + (fold ? " fold" : "") + " arrive";
+  clearTimeout(arriveTimer);
+  arriveTimer = setTimeout(() => heroEl.classList.remove("arrive"), 1600);
+  delete heroEl.dataset.focus;
   heroEl.innerHTML =
     (fold ? "" : art ? `<img src="${art.src}" alt="" decoding="async" draggable="false" />` : "") +
     `<p class="sp-kick">${fold ? "Samsung Galaxy Z" : "Shop"}</p><h2>${title}</h2>`;
@@ -174,6 +293,7 @@ function render(route) {
   } else {
     chipsEl.hidden = true;
     chipsEl.innerHTML = "";
+    chipsEl2.classList.remove("show");
     bodyEl.innerHTML = `<div class="sp-soon"><b>COMING SOON</b><p>We are adding the latest ${title} models.</p>
       <button type="button" id="sp-soon-back">Back to collections</button></div>`;
   }
@@ -209,6 +329,7 @@ function renderProduct(rec) {
     ? `<div class="pd-thumbs" role="tablist" aria-label="Photos">${sel.gallery.map((p, i) => `<button class="pd-th${i ? "" : " on"}" type="button" role="tab" data-i="${i}" aria-label="Photo ${i + 1}"><img src="${p.src}" alt="" loading="lazy" decoding="async" draggable="false" /></button>`).join("")}</div>`
     : "";
   const isFav = favs().includes(item.id);
+  const opt = OPT[item.cat] || { label: "Select storage", guide: "Storage Guide", note: GUIDE };
 
   pdBody.innerHTML = `
     <div class="pd-stage">
@@ -222,9 +343,9 @@ function renderProduct(rec) {
         <div><h2>${item.name}</h2><p>${group.title}</p></div>
         <button class="pd-fav${isFav ? " on" : ""}" id="pd-fav" type="button" aria-pressed="${isFav}" aria-label="Save ${item.name}">${HEART}</button>
       </div>
-      <div class="pd-label"><b>Select storage</b><button class="pd-guide" id="pd-guide" type="button" aria-expanded="false">Storage Guide</button></div>
-      <p class="pd-note" id="pd-note" hidden>${GUIDE}</p>
-      <div class="pd-sizes" role="radiogroup" aria-label="Storage">${item.storage.map((v, i) => `<button class="pd-chip${i ? "" : " on"}" type="button" role="radio" aria-checked="${i === 0}" data-s="${i}">${v}</button>`).join("")}</div>
+      <div class="pd-label"><b>${opt.label}</b>${opt.guide ? `<button class="pd-guide" id="pd-guide" type="button" aria-expanded="false">${opt.guide}</button>` : ""}</div>
+      ${opt.guide ? `<p class="pd-note" id="pd-note" hidden>${opt.note}</p>` : ""}
+      <div class="pd-sizes" role="radiogroup" aria-label="${opt.label.replace("Select ", "")}">${item.storage.map((v, i) => `<button class="pd-chip${i ? "" : " on"}" type="button" role="radio" aria-checked="${i === 0}" data-s="${i}">${v}</button>`).join("")}</div>
       <div class="pd-foot">
         <div class="pd-qty"><b>Qty</b>
           <div class="pd-step"><button class="pd-minus" type="button" aria-label="One less">${MINUS}</button>
@@ -402,6 +523,7 @@ const dockTab = (tab) => document.dispatchEvent(new CustomEvent("dock:set", { de
 function showShop(route, { instant = false, trigger = null } = {}) {
   const wasOpen = state.open;
   state.route = route;
+  state.cat = null;
   state.group = null;
   if (!wasOpen) state.trigger = trigger || document.activeElement;
   render(route);
@@ -553,22 +675,41 @@ document.addEventListener("keydown", (e) => {
   openProduct(c.dataset.pid, { trigger: c });
 });
 
-// Chips: All / each series (or each brand on the general shop)
+// Chips. General shop: the first row picks a category and the second row picks a brand, and the hero follows.
+// A brand shop: one row of series.
+function afterPick() {
+  qEl.value = "";
+  filtered = false;
+  state.searching = false;
+  if (state.view.general) heroFor();
+  renderBody(state.view);
+}
 chipsEl.addEventListener("click", (e) => {
   const c = e.target.closest(".c-tab");
   if (!c || !state.view) return;
-  state.group = c.dataset.g || null;
-  focusHero(state.group);
-  qEl.value = "";
-  filtered = false;
-  renderBody(state.view);
+  if (state.view.general) { state.cat = c.dataset.c || null; state.group = null; }
+  else state.group = c.dataset.g || null;
+  afterPick();
 });
-bodyEl.addEventListener("click", (e) => { if (e.target.closest("#sp-soon-back")) back(); });
+chipsEl2.addEventListener("click", (e) => {
+  const c = e.target.closest(".c-tab");
+  if (!c || !state.view || !state.view.general) return;
+  state.group = c.dataset.g || null;
+  afterPick();
+});
+bodyEl.addEventListener("click", (e) => {
+  if (e.target.closest("#sp-soon-back")) { back(); return; }
+  const m = e.target.closest(".sp-more");
+  if (m && state.view && state.view.general) { state.cat = m.dataset.cat; state.group = null; afterPick(); scroller.scrollTo({ top: 0, behavior: "smooth" }); }
+});
 
-// Search bar: typing searches every series, so any chip filter steps aside
+// Search bar: typing searches everything, so any chip filter steps aside
 qEl.addEventListener("input", () => {
   if (!state.view) return;
-  if (qEl.value.trim() && state.group) { state.group = null; focusHero(null); renderBody(state.view); }
+  if (qEl.value.trim()) {
+    if (state.view.general && !state.searching) { state.searching = true; state.cat = null; state.group = null; heroFor(); chipsEl2.classList.remove("show"); renderBody(state.view); }
+    else if (!state.view.general && state.group) { state.group = null; renderBody(state.view); }
+  }
   filterBody();
 });
 qEl.addEventListener("keydown", (e) => { if (e.key === "Enter") qEl.blur(); if (e.key === "Escape") e.stopPropagation(); });

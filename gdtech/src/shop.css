@@ -70,21 +70,11 @@
 @keyframes sp-in { from { opacity: 0; transform: translateX(70%) scale(0.94); } }
 .sp-hero { transition: --card 0.6s ease, --glow 0.6s ease, --ink 0.4s ease, --sub 0.4s ease; }
 /* The phones slide in once the page has arrived (started by .open, so it is seen) */
-.shop.open .sp-hero img { animation: sp-in 0.85s cubic-bezier(0.2, 1.05, 0.35, 1) 0.4s backwards; }
+.shop.open .sp-hero.arrive img { animation: sp-in 0.85s cubic-bezier(0.2, 1.05, 0.35, 1) 0.4s backwards; }
 .sp-hero h2, .sp-kick { transition: opacity 0.17s ease, transform 0.17s ease, font-size 0.5s ease, max-width 0.5s ease; }
 .sp-hero h2.swap { opacity: 0; transform: translateY(6px); }
-.sp-hero.fan img { transition: right 0.65s cubic-bezier(0.22, 0.9, 0.26, 1), height 0.65s cubic-bezier(0.22, 0.9, 0.26, 1), bottom 0.65s cubic-bezier(0.22, 0.9, 0.26, 1), transform 0.6s cubic-bezier(0.22, 0.9, 0.26, 1), opacity 0.45s ease; }
-.sp-hero.fan img[data-b="itel"] { right: -2%; bottom: -8%; height: 112%; max-width: none; opacity: 0; transform: translateX(130%); }
-/* A brand picked: the others slide out to the right, that phone settles into the single hero spot */
-.sp-hero.fan[data-focus] img { opacity: 0; transform: translateX(130%); }
-.sp-hero.fan[data-focus] img[data-b="Google"],
-.sp-hero.fan[data-focus] img[data-b="Samsung"],
-.sp-hero.fan[data-focus] img[data-b="Apple"],
-.sp-hero.fan[data-focus] img[data-b="itel"] { right: -2%; bottom: -8%; height: 112%; }
-.sp-hero.fan[data-focus="Google"] img[data-b="Google"],
-.sp-hero.fan[data-focus="Samsung"] img[data-b="Samsung"],
-.sp-hero.fan[data-focus="Apple"] img[data-b="Apple"],
-.sp-hero.fan[data-focus="itel"] img[data-b="itel"] { opacity: 1; transform: none; }
+.sp-hero.fan img { max-width: none; transition: right 0.7s cubic-bezier(0.22, 0.9, 0.26, 1), height 0.7s cubic-bezier(0.22, 0.9, 0.26, 1), bottom 0.7s cubic-bezier(0.22, 0.9, 0.26, 1), transform 0.65s cubic-bezier(0.22, 0.9, 0.26, 1), opacity 0.45s ease; }
+.sp-hero.fan.no-t img { transition: none; }
 .sp-hero.fan[data-focus] h2 { max-width: 62%; font-size: 38px; }
 
 /* Series chips: same solid pills as the collection tabs */
@@ -129,12 +119,8 @@
 .sp-card.wide .sp-info { padding: 14px 16px 14px 0; justify-content: center; }
 .sp-card.wide h4 { font-size: 18px; }
 
-/* General shop page: a fan of three phones instead of one */
-.sp-hero.fan h2 { max-width: 40%; font-size: 34px; }
-.sp-hero.fan img { max-width: none; height: 92%; bottom: -6%; }
-.sp-hero.fan img:nth-of-type(1) { right: 36%; height: 80%; animation-delay: 0.4s; }
-.sp-hero.fan img:nth-of-type(2) { right: 15%; height: 88%; animation-delay: 0.5s; }
-.sp-hero.fan img:nth-of-type(3) { right: -5%; height: 100%; animation-delay: 0.6s; }
+/* General shop page: a fan of products (positions are set in shop.js) */
+.sp-hero.fan h2 { max-width: 48%; font-size: 32px; }
 
 /* Cards are tappable: they open the product page */
 .sp-card { cursor: pointer; transition: transform 0.2s cubic-bezier(0.3, 1.4, 0.45, 1); }
@@ -305,3 +291,14 @@
 .sp-none { margin-top: 26px; padding: 26px 18px; border-radius: 24px; text-align: center; background: #f2efe9; font-size: 14px; font-weight: 700; color: rgba(11, 11, 12, 0.7); }
 .sp-sec[hidden] { display: none; }
 .sp-card[hidden] { display: none; }
+
+/* Second chip row: the brands of the category that was picked. It opens and closes smoothly. */
+.sp-chips2 { margin-top: 0; padding-top: 0; padding-bottom: 0; max-height: 0; opacity: 0; overflow: hidden; pointer-events: none; transition: max-height 0.45s cubic-bezier(0.3, 1.1, 0.45, 1), opacity 0.3s ease, margin 0.45s ease, padding 0.45s ease; }
+.sp-chips2.show { margin-top: 8px; padding-top: 2px; padding-bottom: 4px; max-height: 60px; opacity: 1; pointer-events: auto; }
+.sp-sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.sp-more { flex: none; padding: 6px 4px; background: none; font-size: 13px; font-weight: 800; color: var(--orange); }
+.sp-more:active { opacity: 0.6; }
+
+/* Hero text always sits above the photos */
+.sp-hero h2, .sp-kick { z-index: 20; }
+.sp-hero.fan h2 { font-size: 30px; }
