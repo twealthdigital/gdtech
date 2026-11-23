@@ -15,7 +15,7 @@
   top: calc(env(safe-area-inset-top, 0px) + 70px + var(--st, 0px));
   max-height: calc(100dvh - 150px); overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-width: none;
   padding: 18px 18px 16px; border-radius: 30px;
-  background: linear-gradient(150deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.5));
+  --g1: 0.55; --g2: 0.28;
   transform-origin: var(--ox, 90%) var(--oy, 0%);
   opacity: 0; visibility: hidden; transform: scale(0.18, 0.1);
   transition: transform 0.36s cubic-bezier(0.5, 0, 0.75, 0), opacity 0.25s ease 0.1s, border-radius 0.36s ease, visibility 0s linear 0.36s;
