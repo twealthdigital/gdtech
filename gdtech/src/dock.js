@@ -2,6 +2,8 @@
 // The droplet is its own glass (a sibling, not a child), so it bends the page behind it like a drop of water.
 // Motion is a spring: tapping stretches it across and it wobbles in, pressing lifts and magnifies it,
 // dragging stretches it with your speed. The lens swells with the movement.
+// The active tab opens up to show its name next to its icon, and the droplet is exactly that wide.
+// Taps and drags announce themselves with a "dock:go" event; pages that change the tab call back with "dock:set".
 import { lensBoost } from "./glass.js";
 
 const dock = document.getElementById("dock");
@@ -18,8 +20,10 @@ if (dock) {
   lens.setAttribute("aria-hidden", "true");
   dock.prepend(bar, lens);
 
-  const W = 62;
-  let centers = [];
+  // Layout model, kept in step with home.css: the active tab grows G times wider than the others.
+  const G = 2.35, PAD = 6;
+  let W = 120;                      // width of the active tab (and of the droplet)
+  let centers = [];                 // where the droplet sits for each tab, once that tab is the active one
   let cur = Math.max(0, btns.findIndex((b) => b.classList.contains("on")));
 
   // spring state
@@ -29,7 +33,12 @@ if (dock) {
   let downAt = 0, liftTimer = 0;
   let raf = 0, t0 = 0, dragging = false;
 
-  const measure = () => { centers = btns.map((b) => b.offsetLeft + b.offsetWidth / 2); };
+  const measure = () => {
+    const u = (dock.clientWidth - PAD * 2) / (btns.length - 1 + G);
+    W = u * G;
+    centers = btns.map((_, i) => PAD + i * u + W / 2);
+    lens.style.width = Math.round(W - 2) + "px";
+  };
   const nearest = (px) => centers.reduce((best, c, i) => (Math.abs(c - px) < Math.abs(centers[best] - px) ? i : best), 0);
   const mark = (i) => btns.forEach((b, n) => b.classList.toggle("on", n === i));
   const hot = (i) => btns.forEach((b, n) => b.classList.toggle("hot", n === i));
@@ -37,7 +46,7 @@ if (dock) {
   function paint() {
     const s = 1 + Math.min(Math.abs(vx) / 1100, 0.7);          // faster movement stretches it
     const sx = s * l, sy = l / Math.sqrt(s);
-    lens.style.transform = `translate3d(${x - W / 2}px,0,0) scale(${sx.toFixed(3)},${sy.toFixed(3)})`;
+    lens.style.transform = `translate3d(${x - (W - 2) / 2}px,0,0) scale(${sx.toFixed(3)},${sy.toFixed(3)})`;
     // the lens swells with speed and with the press
     lensBoost(lens, 1 + Math.min(Math.abs(vx) / 700, 1) * 0.9 + (l - 1) * 2.4);
     const pa = Math.abs(p);
@@ -68,18 +77,33 @@ if (dock) {
   }
   const run = () => { if (!raf) { t0 = performance.now(); raf = requestAnimationFrame(step); } };
 
-  let down = false, moved = false, startX = 0;
+  let down = false, moved = false, startX = 0, startTab = 0;
   const local = (e) => e.clientX - dock.getBoundingClientRect().left;
+  const tabOf = (btn) => btn?.dataset.tab;
+  const go = (i) => document.dispatchEvent(new CustomEvent("dock:go", { detail: { tab: tabOf(btns[i]), index: i } }));
+
+  // Move the active tab (and the droplet) to tab i
+  function activate(i, kick = true) {
+    if (i === cur) return;
+    const prev = cur;
+    cur = i;
+    mark(i);
+    if (kick) vp += 7 + Math.min(Math.abs(centers[i] - centers[prev]) / 50, 5);   // bigger jump, bigger ripple
+  }
 
   dock.addEventListener("pointerdown", (e) => {
     down = true; moved = false; dragging = false;
     startX = local(e);
+    startTab = cur;
     dock.setPointerCapture?.(e.pointerId);
     clearTimeout(liftTimer);
     downAt = performance.now();
     dock.classList.add("lifted");
     tl = 1.22;
-    tx = centers[nearest(startX)];
+    const under = btns.indexOf(e.target.closest("button"));
+    const i = under >= 0 ? under : nearest(startX);
+    activate(i);
+    tx = centers[i];
     vp += 4;
     run();
   });
@@ -90,34 +114,43 @@ if (dock) {
     if (!moved && Math.abs(px - startX) > 6) { moved = true; dragging = true; }
     if (!moved) return;
     tx = Math.min(Math.max(px, centers[0]), centers[centers.length - 1]);
+    activate(nearest(tx));
     run();
   });
 
-  const end = () => {
+  const end = (e) => {
     if (!down) return;
     down = false; dragging = false;
-    const prev = cur;
-    cur = nearest(moved ? x : tx);
+    activate(nearest(moved ? x : tx));
     tx = centers[cur]; tl = 1;
-    mark(cur); hot(-1);
-    if (cur !== prev) vp += 7 + Math.min(Math.abs(centers[cur] - centers[prev]) / 50, 5);   // bigger jump, bigger ripple
+    hot(-1);
     // a quick tap still gets the full lift: hold it for at least 220ms
     const hold = Math.max(0, 220 - (performance.now() - downAt));
     clearTimeout(liftTimer);
     liftTimer = setTimeout(() => dock.classList.remove("lifted"), hold);
     run();
+    if (e.type === "pointerup" && (!moved || cur !== startTab)) go(cur);
   };
   dock.addEventListener("pointerup", end);
   dock.addEventListener("pointercancel", end);
 
+  // Keyboard and screen readers (a pointer tap is handled above)
   btns.forEach((b, i) => b.addEventListener("click", (e) => {
-    if (e.detail !== 0 || i === cur) return;       // pointer taps are handled above
-    const prev = cur;
-    cur = i; tx = centers[i];
-    mark(i);
-    vp += 7 + Math.min(Math.abs(centers[i] - centers[prev]) / 50, 5);
+    if (e.detail !== 0) return;
+    activate(i);
+    tx = centers[i];
     run();
+    go(i);
   }));
+
+  // A page changed on its own (the shop opened, the shop closed): follow it without announcing it back
+  document.addEventListener("dock:set", (e) => {
+    const i = btns.findIndex((b) => tabOf(b) === e.detail?.tab);
+    if (i < 0 || down) return;
+    activate(i);
+    tx = centers[i];
+    run();
+  });
 
   const place = () => { measure(); x = tx = centers[cur]; paint(); };
   new ResizeObserver(place).observe(dock);
