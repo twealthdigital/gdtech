@@ -80,3 +80,25 @@ export function dropOptionIndexForY(tops, rowHeight, localY) {
   }
   return best;
 }
+
+export function toggleFavId(list, id) {
+  if (!id || typeof id !== "string") return Array.isArray(list) ? [...new Set(list.filter((x) => typeof x === "string" && x))] : [];
+  const cur = [...new Set(Array.isArray(list) ? list.filter((x) => typeof x === "string" && x) : [])];
+  const next = cur.filter((x) => x !== id);
+  return cur.includes(id) ? next : [...next, id];
+}
+
+export function orderedFavIds(list) {
+  if (!Array.isArray(list)) return [];
+  const seen = new Set();
+  const out = [];
+  for (let i = list.length - 1; i >= 0; i--) {
+    const id = list[i];
+    if (typeof id === "string" && id && !seen.has(id)) {
+      seen.add(id);
+      out.push(id);
+    }
+  }
+  return out;
+}
+

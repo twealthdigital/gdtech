@@ -5,7 +5,7 @@ import { SHOPS, OPT } from "./data/gadgets.js";
 import { galleryOf, cardPhoto, registerArt } from "./data/gallery.js";
 import { IMAGES, TITLES, TONE_OF } from "./collections.js";
 import { lensBoost } from "./glass.js";
-import { heroGeomCalc, reduceShopFilter, hasDropdownArrow, chipLabelFor, dropOptionIndexForY } from "./shop-logic.js";
+import { heroGeomCalc, reduceShopFilter, hasDropdownArrow, chipLabelFor, dropOptionIndexForY, toggleFavId, orderedFavIds } from "./shop-logic.js";
 
 // The shop page. Anything can open it:
 //   <button data-shop="mobile:Apple">          the iPhone shop
@@ -29,6 +29,12 @@ const pd = $("pd");
 const pdScroll = $("pd-scroll");
 const pdBody = $("pd-body");
 const pdTop = pd.querySelector(".h-top");
+const favEl = $("fav");
+const fvScroll = $("fv-scroll");
+const fvGrid = $("fv-grid");
+const fvMeta = $("fv-meta");
+const fvEmpty = $("fv-empty");
+const fvTop = favEl.querySelector(".h-top");
 const ALL = { cat: "all", brand: "all", focus: null };
 const naira = (n) => "₦" + Number(n).toLocaleString("en-NG");
 
@@ -45,9 +51,10 @@ const CAT_LABEL = { mobile: "Phones", laptops: "Laptops", headsets: "Headsets", 
 const brandsOf = (cat) => Object.values(SHOPS).filter((c) => c.cat === cat);
 const CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
 const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const CARD_HEART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9-9.6A4.9 4.9 0 0 1 12 7.6a4.9 4.9 0 0 1 9 3.3c-1.5 5-9 9.6-9 9.6z"/></svg>';
 const BAG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5.7 8.6a1 1 0 0 1 1-.9h10.6a1 1 0 0 1 1 .9l.95 10.5a2 2 0 0 1-1.99 2.2H6.74a2 2 0 0 1-1.99-2.2L5.7 8.6z"/><path d="M9 9V6.5a3 3 0 0 1 6 0V9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
 
-const state = { route: null, view: null, cat: null, group: null, dropOpen: false, searching: false, trigger: null, open: false, pid: null, ptrigger: null, pOpen: false };
+const state = { route: null, view: null, cat: null, group: null, dropOpen: false, searching: false, trigger: null, open: false, favOpen: false, fvTrigger: null, pid: null, ptrigger: null, pOpen: false };
 
 // Every phone by id, so a product page can find its photo, its series and its neighbours
 const PRODUCTS = {};
@@ -82,7 +89,7 @@ function viewOf(route) {
   return { chips: groups.map((g) => ({ id: g.id, label: g.chip })), groups };
 }
 
-function card(item, tone, i, wide) {
+function card(item, tone, i, wide, liked = favs().includes(item.id)) {
   const ph = cardPhoto(item.id);
   const art = ph
     ? `<img class="${ph.kind === "cut" ? "" : "photo"}" src="${ph.src}" alt="${item.name}" loading="lazy" decoding="async" draggable="false" />`
@@ -92,6 +99,7 @@ function card(item, tone, i, wide) {
     : "";
   return `<article class="sp-card ${tone}${wide ? " wide" : ""}" style="--i:${i}" data-pid="${item.id}" role="button" tabindex="0" aria-label="View ${item.name}">
     <div class="sp-art">${item.fold ? '<span class="sp-tag">Foldable</span>' : ""}${art}</div>
+    <button class="sp-fav glass${liked ? " on" : ""}" type="button" data-fav-btn="${item.id}" data-lens-bezel="0.5" data-lens-depth="1.4" aria-pressed="${liked}" aria-label="${liked ? `Remove ${item.name} from favourites` : `Save ${item.name} to favourites`}">${CARD_HEART}</button>
     <div class="sp-info"><h4>${item.name}</h4>${buy}</div>
   </article>`;
 }
@@ -502,6 +510,49 @@ function render(route) {
 const FAV_KEY = "gdtech-fav";
 const favs = () => { try { const a = JSON.parse(localStorage.getItem(FAV_KEY) || "[]"); return Array.isArray(a) ? a : []; } catch { return []; } };
 const saveFavs = (a) => { try { localStorage.setItem(FAV_KEY, JSON.stringify(a)); } catch { /* private mode */ } };
+function renderFavs({ animate = true } = {}) {
+  const recs = orderedFavIds(favs()).map((id) => PRODUCTS[id]).filter(Boolean);
+  fvGrid.classList.toggle("no-in", !animate);
+  fvMeta.hidden = recs.length === 0;
+  if (recs.length) fvMeta.textContent = `${recs.length} saved gadget${recs.length === 1 ? "" : "s"}`;
+  fvEmpty.hidden = recs.length > 0;
+  fvGrid.innerHTML = recs.map((rec, i) => card(rec.item, rec.group.tone, i, recs.length % 2 === 1 && i === recs.length - 1, true)).join("");
+}
+function syncFavButtons(id, on) {
+  const rec = PRODUCTS[id];
+  const name = rec ? rec.item.name : "gadget";
+  document.querySelectorAll(`[data-fav-btn="${id}"]`).forEach((b) => {
+    b.classList.toggle("on", on);
+    b.setAttribute("aria-pressed", String(on));
+    b.setAttribute("aria-label", on ? `Remove ${name} from favourites` : `Save ${name} to favourites`);
+  });
+  if (sel.rec && sel.rec.item.id === id) {
+    const b = $("pd-fav");
+    if (b) { b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); }
+  }
+}
+function toggleFav(id, { btnEl = null, cardEl = null } = {}) {
+  if (!PRODUCTS[id]) return false;
+  const next = toggleFavId(favs(), id);
+  const on = next.includes(id);
+  saveFavs(next);
+  syncFavButtons(id, on);
+  if (btnEl) {
+    btnEl.classList.remove("pop");
+    void btnEl.offsetWidth;
+    btnEl.classList.add("pop");
+    lensBoost(btnEl, 1.38);
+    setTimeout(() => lensBoost(btnEl, 1), 220);
+  }
+  if (!on && cardEl && cardEl.closest("#fv-grid") && !reduceMotion()) {
+    cardEl.classList.add("leaving");
+    setTimeout(() => renderFavs({ animate: false }), 175);
+  } else if (state.favOpen) {
+    renderFavs({ animate: false });
+  }
+  document.dispatchEvent(new CustomEvent("fav:change", { detail: { ids: next, id, on } }));
+  return on;
+}
 const HEART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9-9.6A4.9 4.9 0 0 1 12 7.6a4.9 4.9 0 0 1 9 3.3c-1.5 5-9 9.6-9 9.6z"/></svg>';
 const MINUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg>';
 const PLUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>';
@@ -681,13 +732,7 @@ pdBody.addEventListener("click", (e) => {
     note.hidden = !note.hidden;
     $("pd-guide").setAttribute("aria-expanded", String(!note.hidden));
   } else if (t.closest("#pd-fav")) {
-    const b = $("pd-fav");
-    const id = sel.rec.item.id;
-    const list = favs();
-    const on = !list.includes(id);
-    saveFavs(on ? [...list, id] : list.filter((x) => x !== id));
-    b.classList.toggle("on", on);
-    b.setAttribute("aria-pressed", on);
+    toggleFav(sel.rec.item.id, { btnEl: $("pd-fav") });
   } else if (t.closest("#pd-add")) addToBag();
 });
 
@@ -740,16 +785,49 @@ function showShop(route, { instant = false, trigger = null } = {}) {
   if (!instant && !wasOpen) setTimeout(() => $("sp-back").focus({ preventScroll: true }), 420);
 }
 
-function hideShop() {
+function hideShop({ quiet = false } = {}) {
   if (!state.open) return;
   closeDrop();
   state.open = false;
   shop.classList.remove("open", "behind");
-  if (!state.pOpen) { home.classList.remove("shop-open"); dockTab("home"); }
+  if (!state.pOpen && !state.favOpen && !quiet) { home.classList.remove("shop-open"); dockTab("home"); }
   shop.setAttribute("aria-hidden", "true");
   shop.inert = true;
-  const t = state.trigger;
-  if (t && t.isConnected && typeof t.focus === "function") t.focus({ preventScroll: true });
+  if (!quiet && !state.favOpen) {
+    const t = state.trigger;
+    if (t && t.isConnected && typeof t.focus === "function") t.focus({ preventScroll: true });
+  }
+}
+
+function showFavs({ instant = false, trigger = null } = {}) {
+  const wasOpen = state.favOpen;
+  if (!wasOpen) state.fvTrigger = trigger || document.activeElement;
+  renderFavs();
+  fvScroll.scrollTop = 0;
+  fvTop.classList.remove("stuck");
+
+  if (instant) favEl.classList.add("no-anim");
+  favEl.inert = false;
+  favEl.setAttribute("aria-hidden", "false");
+  favEl.classList.add("open");
+  home.classList.add("shop-open");
+  if (instant) requestAnimationFrame(() => requestAnimationFrame(() => favEl.classList.remove("no-anim")));
+  state.favOpen = true;
+  dockTab("fav");
+  if (!instant && !wasOpen) setTimeout(() => $("fv-back").focus({ preventScroll: true }), 420);
+}
+
+function hideFavs({ quiet = false } = {}) {
+  if (!state.favOpen) return;
+  state.favOpen = false;
+  favEl.classList.remove("open", "behind");
+  if (!state.pOpen && !state.open && !quiet) { home.classList.remove("shop-open"); dockTab("home"); }
+  favEl.setAttribute("aria-hidden", "true");
+  favEl.inert = true;
+  if (!quiet && !state.open) {
+    const t = state.fvTrigger;
+    if (t && t.isConnected && typeof t.focus === "function") t.focus({ preventScroll: true });
+  }
 }
 
 function showProduct(id, { instant = false, trigger = null } = {}) {
@@ -768,9 +846,10 @@ function showProduct(id, { instant = false, trigger = null } = {}) {
   pd.classList.add("open");
   home.classList.add("shop-open", "pd-open");
   if (state.open) shop.classList.add("behind");
+  if (state.favOpen) favEl.classList.add("behind");
   if (instant) requestAnimationFrame(() => requestAnimationFrame(() => pd.classList.remove("no-anim")));
   state.pOpen = true;
-  dockTab("shop");
+  dockTab(state.favOpen ? "fav" : "shop");
   if (!instant && !wasOpen) setTimeout(() => $("pd-back").focus({ preventScroll: true }), 420);
 }
 
@@ -780,19 +859,30 @@ function hideProduct(quiet = false) {
   pd.classList.remove("open");
   home.classList.remove("pd-open");
   shop.classList.remove("behind");
+  favEl.classList.remove("behind");
   pd.setAttribute("aria-hidden", "true");
   pd.inert = true;
-  if (!state.open) { home.classList.remove("shop-open"); if (!quiet) dockTab("home"); }
+  if (!state.open && !state.favOpen) { home.classList.remove("shop-open"); if (!quiet) dockTab("home"); }
+  else if (!quiet) dockTab(state.open ? "shop" : "fav");
   const t = state.ptrigger;
   if (t && t.isConnected && typeof t.focus === "function") t.focus({ preventScroll: true });
 }
 
 export function openShop(route, { push = true, instant = false, trigger = null } = {}) {
   if (!route || !route.cat || !route.brand) return;
-  const had = state.open || state.pOpen;
+  const had = state.open || state.favOpen || state.pOpen;
   hideProduct(true);
+  hideFavs({ quiet: true });
   showShop(route, { instant, trigger });
   if (push) writeHash("#shop=" + encodeURIComponent(keyOf(route)), had);
+}
+
+export function openFavs({ push = true, instant = false, trigger = null } = {}) {
+  const had = state.open || state.favOpen || state.pOpen;
+  hideProduct(true);
+  hideShop({ quiet: true });
+  showFavs({ instant, trigger });
+  if (push) writeHash("#fav", had);
 }
 
 export function openProduct(id, { push = true, instant = false, trigger = null } = {}) {
@@ -804,10 +894,11 @@ export function openProduct(id, { push = true, instant = false, trigger = null }
 
 // One step back: the page on top closes, whatever is under it shows again
 function back() {
-  if (!state.open && !state.pOpen) return;
+  if (!state.open && !state.favOpen && !state.pOpen) return;
   if (depth > 0) { history.back(); return; }
   hideProduct();
   hideShop();
+  hideFavs();
   if (location.hash) clean();
 }
 export function closeShop() { back(); }
@@ -816,24 +907,33 @@ export function closeShop() { back(); }
 function sync({ instant = false } = {}) {
   const p = location.hash.match(/^#product=(.+)$/);
   const s = location.hash.match(/^#shop=(.+)$/);
+  const f = /^#fav$/.test(location.hash);
   if (p) {
     const id = decodeURIComponent(p[1]);
     if (PRODUCTS[id]) { if (!state.pOpen || state.pid !== id) showProduct(id, { instant }); return; }
   }
   hideProduct();
   if (s) {
+    hideFavs({ quiet: true });
     const r = parse(decodeURIComponent(s[1]));
     if (!state.open || keyOf(state.route) !== keyOf(r)) showShop(r, { instant });
+  } else if (f) {
+    hideShop({ quiet: true });
+    if (!state.favOpen) showFavs({ instant });
   } else {
     hideShop();
+    hideFavs();
   }
 }
 
 /* ---------- wiring ---------- */
 shop.inert = true;
+favEl.inert = true;
 pd.inert = true;
 $("sp-back").addEventListener("click", back);
+$("fv-back").addEventListener("click", back);
 $("pd-back").addEventListener("click", back);
+$("fv-browse").addEventListener("click", () => openShop(ALL, { trigger: $("fv-browse") }));
 document.addEventListener("keydown", (e) => {
   if (e.key !== "Escape") return;
   if (state.dropOpen) { closeDrop(); return; }
@@ -841,17 +941,21 @@ document.addEventListener("keydown", (e) => {
 });
 window.addEventListener("popstate", (e) => { depth = (e.state && e.state.d) || 0; sync(); });
 
-// Bottom bar: Home goes back to the home page, Shop goes to the general shop page
+// Bottom bar: Home goes back to the home page, Shop goes to the general shop page, Favourites opens saved gadgets
 document.addEventListener("dock:go", (e) => {
   const tab = e.detail && e.detail.tab;
   if (tab === "home") {
-    if (!state.open && !state.pOpen) return;
+    if (!state.open && !state.favOpen && !state.pOpen) return;
     hideProduct(true);
     hideShop();
+    hideFavs();
     toBase();
   } else if (tab === "shop") {
     if (state.open && !state.pOpen && state.route.cat === "all") { scroller.scrollTo({ top: 0, behavior: "smooth" }); return; }
     openShop(ALL, { trigger: document.activeElement });
+  } else if (tab === "fav") {
+    if (state.favOpen && !state.pOpen) { fvScroll.scrollTo({ top: 0, behavior: "smooth" }); return; }
+    openFavs({ trigger: document.activeElement });
   }
 });
 
@@ -865,8 +969,14 @@ document.addEventListener("collection:open", (e) => {
   openShop({ cat, brand, focus: null }, { trigger: document.activeElement });
 });
 
-// Tap a product: its page opens (the bag button on a card only adds it to the bag)
+// Tap a card heart to save/remove, or tap anywhere else on a product card to open its page
 document.addEventListener("click", (e) => {
+  const favBtn = e.target.closest("[data-fav-btn]");
+  if (favBtn) {
+    e.stopPropagation();
+    toggleFav(favBtn.dataset.favBtn, { btnEl: favBtn, cardEl: favBtn.closest(".sp-card") });
+    return;
+  }
   if (e.target.closest("[data-add-to-cart]")) return;
   const c = e.target.closest(".sp-card[data-pid]");
   if (c) openProduct(c.dataset.pid, { trigger: c });
@@ -1053,10 +1163,11 @@ qEl.addEventListener("keydown", (e) => { if (e.key === "Enter") qEl.blur(); if (
 
 // Headers: fade-blur once content scrolls under them
 scroller.addEventListener("scroll", () => topEl.classList.toggle("stuck", scroller.scrollTop > 4), { passive: true });
+fvScroll.addEventListener("scroll", () => fvTop.classList.toggle("stuck", fvScroll.scrollTop > 4), { passive: true });
 pdScroll.addEventListener("scroll", () => pdTop.classList.toggle("stuck", pdScroll.scrollTop > 4), { passive: true });
 
 // Bag buttons here open the same bag panel as the home page
-const bags = [$("sp-bag"), $("pd-bag")];
+const bags = [$("sp-bag"), $("fv-bag"), $("pd-bag")];
 bags.forEach((b) => b.addEventListener("click", () => document.querySelector("#home > .h-top .bag").click()));
 const syncBag = () => {
   const n = window.GDCart ? window.GDCart.kinds() : 0;
@@ -1069,4 +1180,4 @@ document.addEventListener("cart:change", syncBag);
 syncBag();
 
 // Opened from a shared link or a refresh
-if (/^#(shop|product)=/.test(location.hash)) sync({ instant: true });
+if (/^#(shop=|product=|fav$)/.test(location.hash)) sync({ instant: true });

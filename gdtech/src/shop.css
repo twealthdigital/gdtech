@@ -1,24 +1,24 @@
-/* Shop page: a layer inside the home screen. Solid, bold colour blocks like the banners. No glass here. */
-.shop {
+/* Shop & Favourites pages: full-screen layers inside the home screen. */
+.shop, .fav {
   position: absolute; inset: 0; z-index: 18; background: var(--white);
   transform: translateX(104%); visibility: hidden;
   box-shadow: -24px 0 48px rgba(11, 11, 12, 0.1);
-  transition: transform 0.55s cubic-bezier(0.22, 0.9, 0.26, 1), visibility 0s linear 0.55s;
+  transition: transform 0.55s cubic-bezier(0.22, 0.9, 0.26, 1), opacity 0.55s ease, visibility 0s linear 0.55s;
 }
-.shop.open { transform: none; visibility: visible; transition-delay: 0s; }
-.shop.no-anim, .shop.no-anim ~ * { transition: none !important; }
+.shop:not(.open), .fav:not(.open) { z-index: 17; }
+.shop.open, .fav.open { transform: none; visibility: visible; transition-delay: 0s; }
+.shop.no-anim, .shop.no-anim ~ *, .fav.no-anim { transition: none !important; }
+.fv-grid.no-in .sp-card { animation: none !important; }
 
-/* The shop steps back while a product page slides over it, the same way home does */
-.shop.open.behind { transform: scale(0.94) translateX(-6%); opacity: 0.4; }
-.shop { transition: transform 0.55s cubic-bezier(0.22, 0.9, 0.26, 1), opacity 0.55s ease, visibility 0s linear 0.55s; }
-.shop.open { transition-delay: 0s; }
+/* Shop and Favourites step back while a product page slides over them */
+.shop.open.behind, .fav.open.behind { transform: scale(0.94) translateX(-6%); opacity: 0.4; }
 
-/* The home page steps back while the shop slides over it */
+/* The home page steps back while shop or favourites slides over it */
 .h-scroll { transition: transform 0.55s cubic-bezier(0.22, 0.9, 0.26, 1), opacity 0.55s ease; }
 .home.shop-open .h-scroll { transform: scale(0.94) translateX(-6%); opacity: 0.4; }
 
 /* Header: same fade-blur header as the home page (.h-top), with a solid back button */
-.shop .h-top { gap: 12px; }
+.shop .h-top, .fav .h-top { gap: 12px; }
 .sp-back, .sp-bag { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; }
 .sp-back { background: var(--black); color: var(--orange); transition: transform 0.15s ease; }
 .sp-back:active { transform: scale(0.9); }
@@ -123,7 +123,41 @@
 .sp-ico { width: 52%; max-width: 110px; aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.18); }
 .cream .sp-ico { background: rgba(23, 23, 26, 0.08); }
 .sp-ico svg { width: 56%; height: 56%; stroke-width: 1.5; }
-.sp-tag { position: absolute; top: 12px; left: 12px; z-index: 1; height: 22px; padding: 0 9px; display: grid; place-items: center; border-radius: 99px; background: var(--black); color: var(--orange); font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.sp-tag { position: absolute; top: 12px; left: 12px; z-index: 2; height: 22px; padding: 0 9px; display: grid; place-items: center; border-radius: 99px; background: var(--black); color: var(--orange); font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+/* Liquid glass wishlist heart orb (visible contrast across both light cream and dark card tones) */
+.sp-fav {
+  position: absolute; top: 10px; right: 10px; z-index: 4;
+  width: 34px; height: 34px; border-radius: 50%;
+  display: grid; place-items: center;
+  --g1: 0.34; --g2: 0.12;
+  background-color: rgba(11, 11, 12, 0.24);
+  color: #fff;
+  box-shadow:
+    inset 1.5px 1.5px 2px -0.5px rgba(255, 255, 255, 0.92),
+    inset -1.5px -1.5px 2px -0.5px rgba(255, 255, 255, 0.45),
+    inset 0 -4px 8px -3px rgba(11, 11, 12, 0.24),
+    0 0 0 0.5px rgba(11, 11, 12, 0.16),
+    0 6px 14px rgba(11, 11, 12, 0.2);
+  transition: transform 0.28s cubic-bezier(0.3, 1.8, 0.45, 1), background-color 0.22s ease, color 0.2s ease, box-shadow 0.22s ease;
+}
+.sp-fav::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; }
+.sp-fav svg { position: relative; z-index: 3; width: 16px; height: 16px; transition: transform 0.3s cubic-bezier(0.3, 1.8, 0.45, 1); }
+.sp-fav.on {
+  background-color: rgba(11, 11, 12, 0.64);
+  color: var(--orange);
+  --g1: 0.26; --g2: 0.08;
+  box-shadow:
+    inset 1.5px 1.5px 2px -0.5px rgba(255, 255, 255, 0.88),
+    inset -1.5px -1.5px 2px -0.5px rgba(255, 165, 95, 0.4),
+    inset 0 -4px 8px -3px rgba(11, 11, 12, 0.32),
+    0 0 0 0.5px rgba(11, 11, 12, 0.2),
+    0 8px 16px rgba(90, 40, 0, 0.22);
+}
+.sp-fav.on svg { fill: currentColor; }
+.sp-fav:active { transform: scale(0.86); }
+.sp-fav.pop svg { animation: fav-pop 0.38s cubic-bezier(0.3, 1.9, 0.45, 1); }
+@keyframes fav-pop { 45% { transform: scale(1.28); } }
+.sp-fav:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
 .sp-info { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 10px; padding: 4px 14px 14px; }
 .sp-info h4 { font-size: 16px; line-height: 1.1; font-weight: 800; letter-spacing: -0.01em; overflow-wrap: anywhere; }
 .sp-buy { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
@@ -417,3 +451,40 @@
 /* Hero text always sits above the photos */
 .sp-hero h2, .sp-kick { z-index: 20; }
 .sp-hero.fan h2 { font-size: 30px; }
+
+/* Favourites screen */
+.fav .fv-title { flex: 1; max-width: none; }
+.fv-scroll {
+  position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior-y: contain; scrollbar-width: none;
+  padding: calc(env(safe-area-inset-top, 0px) + 70px) 20px calc(env(safe-area-inset-bottom, 0px) + 120px);
+}
+.fv-scroll::-webkit-scrollbar { display: none; }
+.fv-meta { font-size: 12.5px; font-weight: 700; color: var(--muted); letter-spacing: 0.01em; margin-bottom: 12px; }
+.fv-meta[hidden] { display: none; }
+.fv-grid { margin-top: 0; }
+.sp-card.leaving { opacity: 0; transform: scale(0.92); transition: opacity 0.18s ease, transform 0.18s ease; pointer-events: none; }
+.fv-empty {
+  min-height: calc(100dvh - 230px); display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 24px 12px;
+}
+.fv-empty[hidden] { display: none; }
+.fv-empty-orb {
+  position: relative; width: 68px; height: 68px; border-radius: 50%; display: grid; place-items: center; margin-bottom: 16px;
+  --g1: 0.48; --g2: 0.16; background-color: rgba(11, 11, 12, 0.06); color: var(--orange);
+  box-shadow: inset 2px 2px 2px -1px #fff, inset -2px -2px 3px -1px rgba(255, 255, 255, 0.8), 0 0 0 0.5px rgba(120, 100, 90, 0.14), 0 12px 24px rgba(90, 40, 0, 0.14);
+}
+.fv-empty-orb svg { position: relative; z-index: 3; width: 28px; height: 28px; }
+.fv-empty h3 { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
+.fv-empty p { margin-top: 6px; max-width: 240px; font-size: 13.5px; line-height: 1.5; font-weight: 600; color: var(--muted); }
+.fv-cta {
+  margin-top: 20px; height: 48px; padding: 0 24px; border-radius: 99px;
+  background: var(--black); color: var(--white); font-size: 14px; font-weight: 800;
+  transition: transform 0.16s ease;
+}
+.fv-cta:active { transform: scale(0.95); }
+@media (max-width: 360px) {
+  .fv-scroll { padding-left: 16px; padding-right: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fav, .sp-fav, .sp-fav svg, .sp-card.leaving { transition: none !important; animation: none !important; }
+}
