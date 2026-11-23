@@ -136,8 +136,8 @@
 }
 .dock { touch-action: none; transition: transform 0.45s cubic-bezier(0.3, 1.5, 0.45, 1), opacity 0.35s ease, visibility 0s linear 0s; }
 .dock.lifted { transform: translateX(-50%) scale(1.035); }
-/* On the shop and product pages the bar drops away and fades; it rises back in whenever we return to the home page */
-.home.shop-open .dock, .home.shop-open .dock.lifted {
+/* On the product page (quantity and Add to Bag) the bar drops away and fades; it rises back in when we return to the shop or home */
+.home.pd-open .dock, .home.pd-open .dock.lifted {
   transform: translateX(-50%) translateY(150%); opacity: 0; visibility: hidden; pointer-events: none;
   transition: transform 0.5s cubic-bezier(0.5, 0, 0.75, 0), opacity 0.35s ease, visibility 0s linear 0.5s;
 }
@@ -177,7 +177,7 @@
   -webkit-mask-image: linear-gradient(to top, #000 30%, transparent 100%); mask-image: linear-gradient(to top, #000 30%, transparent 100%);
   transition: opacity 0.45s ease;
 }
-.home.shop-open::after { opacity: 0; }
+.home.pd-open::after { opacity: 0; }
 /* Header glow so the glass has something to catch */
 .h-scroll::before {
   content: ""; position: absolute; left: 0; right: 0; top: 0; height: 260px; z-index: -1; pointer-events: none;

@@ -404,7 +404,7 @@ function showProduct(id, { instant = false, trigger = null } = {}) {
   pd.inert = false;
   pd.setAttribute("aria-hidden", "false");
   pd.classList.add("open");
-  home.classList.add("shop-open");
+  home.classList.add("shop-open", "pd-open");
   if (state.open) shop.classList.add("behind");
   if (instant) requestAnimationFrame(() => requestAnimationFrame(() => pd.classList.remove("no-anim")));
   state.pOpen = true;
@@ -416,6 +416,7 @@ function hideProduct(quiet = false) {
   if (!state.pOpen) return;
   state.pOpen = false;
   pd.classList.remove("open");
+  home.classList.remove("pd-open");
   shop.classList.remove("behind");
   pd.setAttribute("aria-hidden", "true");
   pd.inert = true;
