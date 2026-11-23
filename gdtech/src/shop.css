@@ -116,10 +116,9 @@
 .sp-art { position: relative; aspect-ratio: 1 / 0.8; display: grid; place-items: center; overflow: hidden; }
 .sp-art img {
   position: absolute; inset: 18px 6px 0 6px; width: calc(100% - 12px); height: calc(100% - 18px); object-fit: cover; object-position: center top; filter: none; border-radius: 0;
-  /* soft fade on every edge so the photo melts into the card colour and never looks cropped */
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 16%, #000 52%, transparent 100%), linear-gradient(to right, transparent 0, #000 14%, #000 86%, transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0, #000 16%, #000 52%, transparent 100%), linear-gradient(to right, transparent 0, #000 14%, #000 86%, transparent 100%);
-  -webkit-mask-composite: source-in; mask-composite: intersect;
+  /* soft fade at the bottom so the photo melts cleanly above the title without blurring the top or sides */
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 56%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0, #000 56%, transparent 100%);
 }
 .sp-ico { width: 52%; max-width: 110px; aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.18); }
 .cream .sp-ico { background: rgba(23, 23, 26, 0.08); }
