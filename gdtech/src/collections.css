@@ -34,6 +34,13 @@
 .k-card.slate { --card: #52688a; --glow: #8fa8cb; }
 .k-card.cream { --card: #e4dcc8; --glow: #fbf7ec; --ink: #17171a; --sub: rgba(23, 23, 26, 0.6); }
 .k-card.plum { --card: #7b2955; --glow: #d9739f; }
+/* Laptop cards take the colour of their laptop */
+.k-card.steel { --card: #7f8fa3; --glow: #c3cfdd; }
+.k-card.silver { --card: #85878d; --glow: #babcc3; }
+.k-card.graphite { --card: #26272b; --glow: #5d6069; }
+.k-card.pewter { --card: #6e7178; --glow: #a6a9b0; }
+.k-card.navy { --card: #1f2f45; --glow: #4a6a9c; }
+.k-card.onyx { --card: #0e0e10; --glow: rgba(176, 64, 255, 0.5); }
 .k-card.ink { --card: #0b0b0c; --glow: rgba(255, 122, 26, 0.55); }
 @keyframes k-in { from { opacity: 0; transform: translateY(14px) scale(0.96); } }
 
@@ -60,7 +67,7 @@
 /* Arrow button: solid */
 .k-go { position: absolute; right: 12px; bottom: 12px; z-index: 3; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--black); color: var(--orange); }
 .k-go svg { width: 15px; height: 15px; }
-.ink .k-go { background: var(--orange); color: var(--black); }
+.ink .k-go, .onyx .k-go { background: var(--orange); color: var(--black); }
 
 /* A lone last card is wide: art sits to the right, text to the left */
 .k-card:last-child:nth-child(odd) { min-height: 150px; }

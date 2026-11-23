@@ -31,8 +31,8 @@ const TONES = ["orange", "slate", "cream", "ink"];
 const TONE_OF = {
   "mobile:itel": "plum",
   // Laptops: light silver ones sit on dark cards, dark ones on light cards
-  "laptops:Apple": "ink", "laptops:Dell": "slate", "laptops:HP": "cream",
-  "laptops:Lenovo": "orange", "laptops:Asus": "orange", "laptops:Samsung": "plum",
+  "laptops:Apple": "silver", "laptops:Dell": "pewter", "laptops:HP": "navy",
+  "laptops:Lenovo": "onyx", "laptops:Asus": "graphite", "laptops:Samsung": "steel",
 };
 
 const tabsEl = $("col-tabs");
