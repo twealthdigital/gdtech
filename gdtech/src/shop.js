@@ -4,6 +4,7 @@ import { priceFor } from "./data/phones.js";
 import { SHOPS, OPT } from "./data/gadgets.js";
 import { galleryOf, cardPhoto, registerArt } from "./data/gallery.js";
 import { IMAGES, TITLES, TONE_OF } from "./collections.js";
+import { heroGeomCalc, reduceShopFilter, hasDropdownArrow, chipLabelFor } from "./shop-logic.js";
 
 // The shop page. Anything can open it:
 //   <button data-shop="mobile:Apple">          the iPhone shop
@@ -41,9 +42,11 @@ const iconFor = (item) => {
 };
 const CAT_LABEL = { mobile: "Phones", laptops: "Laptops", headsets: "Headsets", tablets: "Tablets", gaming: "Gaming" };
 const brandsOf = (cat) => Object.values(SHOPS).filter((c) => c.cat === cat);
+const CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 const BAG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5.7 8.6a1 1 0 0 1 1-.9h10.6a1 1 0 0 1 1 .9l.95 10.5a2 2 0 0 1-1.99 2.2H6.74a2 2 0 0 1-1.99-2.2L5.7 8.6z"/><path d="M9 9V6.5a3 3 0 0 1 6 0V9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
 
-const state = { route: null, view: null, cat: null, group: null, searching: false, trigger: null, open: false, pid: null, ptrigger: null, pOpen: false };
+const state = { route: null, view: null, cat: null, group: null, dropOpen: false, searching: false, trigger: null, open: false, pid: null, ptrigger: null, pOpen: false };
 
 // Every phone by id, so a product page can find its photo, its series and its neighbours
 const PRODUCTS = {};
@@ -92,12 +95,136 @@ function card(item, tone, i, wide) {
   </article>`;
 }
 
-const chipsEl2 = $("sp-chips2");
-const tab = (attr, id, label, on) => `<button class="c-tab${on ? " on" : ""}" type="button" role="tab" data-${attr}="${id}">${label}</button>`;
+const dropEl = $("sp-drop");
+const dropBd = $("sp-drop-bd");
+dropEl.inert = true;
+let chipsMode = null;
+let pillRaf = 0;
+
+const catTab = (id, label) => `<button class="c-tab" type="button" role="tab" data-c="${id}"><span class="c-lbl">${label}</span>${id ? `<span class="c-chev" aria-hidden="true">${CHEV}</span>` : ""}</button>`;
+const seriesTab = (id, label, on) => `<button class="c-tab${on ? " on" : ""}" type="button" role="tab" data-g="${id}"><span class="c-lbl">${label}</span></button>`;
 const section = (title, items, tone, n) => `<section class="sp-sec" aria-label="${title}">
         <h3>${title}</h3>
         <div class="sp-grid">${items.map((it, k) => card(it, tone, n + k, items.length % 2 === 1 && k === items.length - 1)).join("")}</div>
       </section>`;
+
+function movePill(instant = false) {
+  cancelAnimationFrame(pillRaf);
+  pillRaf = requestAnimationFrame(() => {
+    const pill = chipsEl.querySelector(".sp-pill");
+    const active = chipsEl.querySelector(".c-tab.on");
+    if (!pill || !active) return;
+    if (instant || !pill.dataset.ready) chipsEl.classList.add("no-pill-t");
+    pill.style.width = active.offsetWidth + "px";
+    pill.style.transform = `translateX(${active.offsetLeft}px)`;
+    if (instant || !pill.dataset.ready) {
+      void pill.offsetWidth;
+      chipsEl.classList.remove("no-pill-t");
+      pill.dataset.ready = "1";
+    }
+  });
+}
+
+function centerChip(el, instant = false) {
+  if (!el) return;
+  const target = Math.max(0, el.offsetLeft - (chipsEl.clientWidth - el.offsetWidth) / 2);
+  chipsEl.scrollTo({ left: target, behavior: instant ? "auto" : "smooth" });
+}
+
+function syncChips({ scroll = true, instant = false, animateLabel = false } = {}) {
+  const isGeneral = Boolean(state.view && state.view.general);
+  let activeEl = null;
+  chipsEl.querySelectorAll(".c-tab").forEach((btn) => {
+    if (isGeneral) {
+      const id = btn.dataset.c || "";
+      const isAll = !id;
+      const active = isAll ? !state.cat : id === state.cat;
+      const arrow = hasDropdownArrow(true, id, state.cat);
+      const brandObj = active && state.group ? brandsOf(state.cat).find((b) => b.brand === state.group) : null;
+      const label = chipLabelFor(id, state.cat, state.group, isAll ? "All" : CAT_LABEL[id], brandObj ? brandObj.title : "");
+      const lbl = btn.querySelector(".c-lbl");
+      if (lbl && lbl.textContent !== label) {
+        lbl.textContent = label;
+        if (animateLabel) {
+          lbl.classList.remove("swap");
+          void lbl.offsetWidth;
+          lbl.classList.add("swap");
+        }
+      }
+      btn.classList.toggle("on", active);
+      btn.classList.toggle("has-arrow", arrow);
+      btn.setAttribute("aria-selected", String(active));
+      if (arrow) {
+        btn.setAttribute("aria-haspopup", "listbox");
+        btn.setAttribute("aria-expanded", String(state.dropOpen));
+      } else {
+        btn.removeAttribute("aria-haspopup");
+        btn.removeAttribute("aria-expanded");
+      }
+      if (active) activeEl = btn;
+    } else {
+      const id = btn.dataset.g || "";
+      const active = !id ? !state.group : id === state.group;
+      btn.classList.toggle("on", active);
+      btn.setAttribute("aria-selected", String(active));
+      if (active) activeEl = btn;
+    }
+  });
+  movePill(instant);
+  if (scroll && activeEl) centerChip(activeEl, instant);
+}
+
+function renderDrop() {
+  if (!state.cat) return;
+  const opts = [{ id: "", label: "All" }, ...brandsOf(state.cat).map((b) => ({ id: b.brand, label: b.title }))];
+  dropEl.innerHTML = opts.map((o, i) => {
+    const on = !o.id ? !state.group : state.group === o.id;
+    return `<button class="sp-opt${on ? " on" : ""}" type="button" role="option" aria-selected="${on}" data-g="${o.id}" style="--i:${i}"><span>${o.label}</span><span class="sp-opt-chk" aria-hidden="true">${CHECK}</span></button>`;
+  }).join("");
+}
+
+function positionDrop(anchor) {
+  const sr = shop.getBoundingClientRect();
+  const ar = anchor.getBoundingClientRect();
+  const dropW = Math.min(214, Math.max(168, sr.width - 32));
+  const top = Math.round(ar.bottom - sr.top + 8);
+  const left = Math.round(Math.max(16, Math.min(ar.left - sr.left, sr.width - dropW - 16)));
+  const ox = Math.round(ar.left + ar.width / 2 - sr.left - left);
+  dropBd.style.setProperty("--cut", Math.round(ar.bottom - sr.top + 4) + "px");
+  dropEl.style.top = top + "px";
+  dropEl.style.left = left + "px";
+  dropEl.style.width = dropW + "px";
+  dropEl.style.setProperty("--ox", ox + "px");
+  dropEl.style.setProperty("--oy", "-8px");
+}
+
+function openDrop() {
+  if (!state.view || !state.view.general || !state.cat) return;
+  const anchor = chipsEl.querySelector(".c-tab.on");
+  if (!anchor) return;
+  centerChip(anchor, true);
+  renderDrop();
+  positionDrop(anchor);
+  state.dropOpen = true;
+  scroller.classList.add("drop-lock");
+  dropEl.inert = false;
+  dropEl.setAttribute("aria-hidden", "false");
+  dropBd.classList.add("open");
+  dropEl.classList.add("open");
+  anchor.setAttribute("aria-expanded", "true");
+}
+
+function closeDrop() {
+  if (!state.dropOpen) return;
+  state.dropOpen = false;
+  dropEl.classList.remove("open");
+  dropBd.classList.remove("open");
+  scroller.classList.remove("drop-lock");
+  dropEl.setAttribute("aria-hidden", "true");
+  dropEl.inert = true;
+  const anchor = chipsEl.querySelector('.c-tab.on[aria-expanded]');
+  if (anchor) anchor.setAttribute("aria-expanded", "false");
+}
 
 // A few of the newest products from each brand of a category, one brand at a time, for the All gadgets overview
 function featured(cat, count = 4) {
@@ -126,20 +253,23 @@ function renderGeneralBody() {
   }).join("");
 }
 
-function renderBody(view) {
+function renderBody(view, { instantChips = false, animateLabel = false } = {}) {
   if (view.general) {
-    chipsEl.innerHTML = tab("c", "", "All", !state.cat) + CATS.map((c) => tab("c", c.id, CAT_LABEL[c.id], state.cat === c.id)).join("");
-    if (state.cat) {
-      chipsEl2.innerHTML = tab("g", "", "All", !state.group) + brandsOf(state.cat).map((b) => tab("g", b.brand, b.title, state.group === b.brand)).join("");
+    if (chipsMode !== "general") {
+      chipsEl.innerHTML = '<i class="sp-pill" aria-hidden="true"></i>' + catTab("", "All") + CATS.map((c) => catTab(c.id, CAT_LABEL[c.id])).join("");
+      chipsMode = "general";
+      instantChips = true;
     }
-    chipsEl2.classList.toggle("show", !!state.cat);
     chipsEl.hidden = false;
+    syncChips({ scroll: !instantChips, instant: instantChips, animateLabel });
     bodyEl.innerHTML = renderGeneralBody();
     return;
   }
-  chipsEl2.classList.remove("show");
-  chipsEl.innerHTML = tab("g", "", "All", !state.group) + view.chips.map((c) => tab("g", c.id, c.label, state.group === c.id)).join("");
+  closeDrop();
+  chipsMode = "brand";
+  chipsEl.innerHTML = '<i class="sp-pill" aria-hidden="true"></i>' + seriesTab("", "All", !state.group) + view.chips.map((c) => seriesTab(c.id, c.label, state.group === c.id)).join("");
   chipsEl.hidden = false;
+  syncChips({ scroll: false, instant: true });
   let n = 0;
   bodyEl.innerHTML = view.groups
     .filter((g) => !state.group || g.key === state.group)
@@ -158,7 +288,6 @@ const CAT_HERO = {
   tablets: { tone: "slate", title: "All<br>tablets", fan: ["tablets:Apple", "tablets:Samsung", "tablets:Huawei"] },
   gaming: { tone: "onyx", title: "All<br>gaming", fan: ["gaming:PS5", "gaming:Xbox", "gaming:Switch"] },
 };
-const BASES = [1, 0.88, 0.78, 0.7, 0.62];   // the front photo is tallest, the ones behind step down
 const PARKED = "translateX(130%)";
 const pool = new Map();
 let heroTimer = 0, arriveTimer = 0;
@@ -175,21 +304,15 @@ function poolImg(key) {
 }
 
 // Sizes and positions in pixels, front photo on the right, the others tucked behind it to the left
-function heroGeom(keys, single) {
-  const W = heroEl.clientWidth || 335, H = heroEl.clientHeight || 176, O = 0.42;
-  const items = keys.map((k, j) => { const h = H * (single ? 1.12 : BASES[j]); return { k, h, w: (h * IMAGES[k].w) / IMAGES[k].h }; });
-  let span = items[0].w;
-  for (let j = 1; j < items.length; j++) span += items[j].w * (1 - O);
-  const s = Math.min(1, ((single ? 0.62 : 0.62) * W) / span);
-  let prev = null;
-  items.forEach((it, j) => {
-    it.h *= s; it.w *= s;
-    it.right = prev ? prev.right + prev.w - O * it.w : -0.02 * W;
-    it.bottom = (single ? -0.08 : -0.06) * H;
-    it.z = 10 - j;
-    prev = it;
+function heroGeom(keys, single, cat) {
+  return heroGeomCalc({
+    keys,
+    single,
+    width: heroEl.clientWidth,
+    height: heroEl.clientHeight,
+    images: IMAGES,
+    cat,
   });
-  return items;
 }
 const place = (im, g) => { im.style.right = g.right + "px"; im.style.bottom = g.bottom + "px"; im.style.height = g.h + "px"; im.style.zIndex = g.z; };
 
@@ -202,7 +325,7 @@ function setHero(sel, { instant = false } = {}) {
   if (cfg) heroEl.dataset.focus = keys[0]; else delete heroEl.dataset.focus;
 
   if (instant) heroEl.classList.add("no-t");
-  const geo = heroGeom(keys, !!cfg);
+  const geo = heroGeom(keys, !!cfg, sel.cat || "all");
   geo.forEach((g) => { const fresh = !pool.has(g.k); const im = poolImg(g.k); if (fresh) place(im, g); });
   void heroEl.offsetWidth;                       // new photos start parked, then slide in
   pool.forEach((im, k) => {
@@ -262,13 +385,14 @@ function render(route) {
   // The general shop page: a mix of everything, the categories below
   if (route.cat === "all") {
     titleEl.textContent = "Shop";
+    delete heroEl.dataset.cat;
     heroEl.className = "sp-hero ink fan";
     heroEl.innerHTML = `<p class="sp-kick">GDTech</p><h2>All<br>gadgets</h2>`;
     heroEl.classList.add("arrive");
     clearTimeout(arriveTimer);
     arriveTimer = setTimeout(() => heroEl.classList.remove("arrive"), 1600);
     setHero({ cat: "all", brand: null }, { instant: true });
-    renderBody(view);
+    renderBody(view, { instantChips: true });
     return;
   }
 
@@ -280,6 +404,7 @@ function render(route) {
   const art = IMAGES[cfg ? cfg.art : key];
 
   titleEl.textContent = title;
+  heroEl.dataset.cat = route.cat;
   heroEl.className = "sp-hero " + tone + (fold ? " fold" : "") + " arrive";
   clearTimeout(arriveTimer);
   arriveTimer = setTimeout(() => heroEl.classList.remove("arrive"), 1600);
@@ -289,11 +414,12 @@ function render(route) {
     `<p class="sp-kick">${fold ? "Samsung Galaxy Z" : "Shop"}</p><h2>${title}</h2>`;
 
   if (view) {
-    renderBody(view);
+    renderBody(view, { instantChips: true });
   } else {
+    closeDrop();
     chipsEl.hidden = true;
     chipsEl.innerHTML = "";
-    chipsEl2.classList.remove("show");
+    chipsMode = null;
     bodyEl.innerHTML = `<div class="sp-soon"><b>COMING SOON</b><p>We are adding the latest ${title} models.</p>
       <button type="button" id="sp-soon-back">Back to collections</button></div>`;
   }
@@ -525,6 +651,7 @@ function showShop(route, { instant = false, trigger = null } = {}) {
   state.route = route;
   state.cat = null;
   state.group = null;
+  closeDrop();
   if (!wasOpen) state.trigger = trigger || document.activeElement;
   render(route);
   scroller.scrollTop = 0;
@@ -535,7 +662,8 @@ function showShop(route, { instant = false, trigger = null } = {}) {
   shop.setAttribute("aria-hidden", "false");
   shop.classList.add("open");
   home.classList.add("shop-open");
-  if (instant) requestAnimationFrame(() => requestAnimationFrame(() => shop.classList.remove("no-anim")));
+  if (instant) requestAnimationFrame(() => requestAnimationFrame(() => { shop.classList.remove("no-anim"); movePill(true); }));
+  else setTimeout(() => movePill(true), 60);
   state.open = true;
   dockTab("shop");
   if (!instant && !wasOpen) setTimeout(() => $("sp-back").focus({ preventScroll: true }), 420);
@@ -543,6 +671,7 @@ function showShop(route, { instant = false, trigger = null } = {}) {
 
 function hideShop() {
   if (!state.open) return;
+  closeDrop();
   state.open = false;
   shop.classList.remove("open", "behind");
   if (!state.pOpen) { home.classList.remove("shop-open"); dockTab("home"); }
@@ -634,7 +763,11 @@ shop.inert = true;
 pd.inert = true;
 $("sp-back").addEventListener("click", back);
 $("pd-back").addEventListener("click", back);
-document.addEventListener("keydown", (e) => { if (e.key === "Escape") back(); });
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  if (state.dropOpen) { closeDrop(); return; }
+  back();
+});
 window.addEventListener("popstate", (e) => { depth = (e.state && e.state.d) || 0; sync(); });
 
 // Bottom bar: Home goes back to the home page, Shop goes to the general shop page
@@ -675,40 +808,78 @@ document.addEventListener("keydown", (e) => {
   openProduct(c.dataset.pid, { trigger: c });
 });
 
-// Chips. General shop: the first row picks a category and the second row picks a brand, and the hero follows.
+// Chips. General shop: single row of gadget types; tapping a gadget type glides to it with All selected silently,
+// and tapping the active gadget type's dropdown arrow opens the liquid brand dropdown.
 // A brand shop: one row of series.
-function afterPick() {
+function afterPick({ animateLabel = false } = {}) {
   qEl.value = "";
   filtered = false;
   state.searching = false;
   if (state.view.general) heroFor();
-  renderBody(state.view);
+  renderBody(state.view, { animateLabel });
 }
 chipsEl.addEventListener("click", (e) => {
   const c = e.target.closest(".c-tab");
   if (!c || !state.view) return;
-  if (state.view.general) { state.cat = c.dataset.c || null; state.group = null; }
-  else state.group = c.dataset.g || null;
-  afterPick();
-});
-chipsEl2.addEventListener("click", (e) => {
-  const c = e.target.closest(".c-tab");
-  if (!c || !state.view || !state.view.general) return;
+  if (state.view.general) {
+    const catId = c.dataset.c || null;
+    const prevCat = state.cat;
+    const next = reduceShopFilter({ cat: state.cat, group: state.group, dropOpen: state.dropOpen }, { type: "pick-cat", catId });
+    if (catId && catId === prevCat) {
+      next.dropOpen ? openDrop() : closeDrop();
+      return;
+    }
+    closeDrop();
+    state.cat = next.cat;
+    state.group = next.group;
+    afterPick({ animateLabel: true });
+    return;
+  }
   state.group = c.dataset.g || null;
   afterPick();
+});
+dropEl.addEventListener("click", (e) => {
+  const opt = e.target.closest(".sp-opt");
+  if (!opt || !state.view || !state.view.general || !state.cat) return;
+  const next = reduceShopFilter({ cat: state.cat, group: state.group, dropOpen: state.dropOpen }, { type: "pick-brand", brand: opt.dataset.g || null });
+  closeDrop();
+  if (state.group === next.group) return;
+  state.group = next.group;
+  afterPick({ animateLabel: true });
+});
+dropBd.addEventListener("click", closeDrop);
+document.addEventListener("click", (e) => {
+  if (!state.dropOpen) return;
+  if (e.target.closest("#sp-drop") || e.target.closest("#sp-chips")) return;
+  closeDrop();
 });
 bodyEl.addEventListener("click", (e) => {
   if (e.target.closest("#sp-soon-back")) { back(); return; }
   const m = e.target.closest(".sp-more");
-  if (m && state.view && state.view.general) { state.cat = m.dataset.cat; state.group = null; afterPick(); scroller.scrollTo({ top: 0, behavior: "smooth" }); }
+  if (m && state.view && state.view.general) {
+    closeDrop();
+    state.cat = m.dataset.cat;
+    state.group = null;
+    afterPick({ animateLabel: true });
+    scroller.scrollTo({ top: 0, behavior: "smooth" });
+  }
 });
 
 // Search bar: typing searches everything, so any chip filter steps aside
 qEl.addEventListener("input", () => {
   if (!state.view) return;
   if (qEl.value.trim()) {
-    if (state.view.general && !state.searching) { state.searching = true; state.cat = null; state.group = null; heroFor(); chipsEl2.classList.remove("show"); renderBody(state.view); }
-    else if (!state.view.general && state.group) { state.group = null; renderBody(state.view); }
+    closeDrop();
+    if (state.view.general && !state.searching) {
+      state.searching = true;
+      state.cat = null;
+      state.group = null;
+      heroFor();
+      renderBody(state.view, { animateLabel: true });
+    } else if (!state.view.general && state.group) {
+      state.group = null;
+      renderBody(state.view);
+    }
   }
   filterBody();
 });

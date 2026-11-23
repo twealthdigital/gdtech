@@ -62,12 +62,15 @@
   background-color: var(--card); background-image: radial-gradient(circle at 78% 40%, var(--glow), transparent 65%);
 }
 .sp-hero img { position: absolute; right: -2%; bottom: -8%; height: 112%; width: auto; max-width: 60%; object-fit: contain; object-position: right bottom; pointer-events: none; filter: drop-shadow(0 12px 12px rgba(0, 0, 0, 0.4)); }
+.sp-hero:not(.fan)[data-cat="laptops"] img,
+.sp-hero:not(.fan)[data-cat="tablets"] img { right: -7%; bottom: 0; height: 120%; max-width: 72%; }
 .sp-hero.fold { background-image: linear-gradient(90deg, rgba(8, 8, 14, 0.92) 20%, rgba(8, 8, 14, 0.3)), url("/foldable/galaxy-fold-poster.webp"); background-size: cover; background-position: center; }
 .sp-kick { position: relative; font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sub); }
 .sp-hero h2 { position: relative; margin-top: 2px; font-size: 38px; line-height: 1; font-weight: 800; letter-spacing: -0.01em; max-width: 62%; }
 .sp-hero.fold h2 { max-width: 100%; }
 @keyframes sp-pop { from { opacity: 0; transform: translateX(14%) scale(0.92); } }
 @keyframes sp-in { from { opacity: 0; transform: translateX(70%) scale(0.94); } }
+@keyframes sp-lbl-swap { from { opacity: 0; transform: translateY(5px) scale(0.9); filter: blur(4px); } }
 .sp-hero { transition: --card 0.6s ease, --glow 0.6s ease, --ink 0.4s ease, --sub 0.4s ease; }
 /* The phones slide in once the page has arrived (started by .open, so it is seen) */
 .shop.open .sp-hero.arrive img { animation: sp-in 0.85s cubic-bezier(0.2, 1.05, 0.35, 1) 0.4s backwards; }
@@ -77,10 +80,28 @@
 .sp-hero.fan.no-t img { transition: none; }
 .sp-hero.fan[data-focus] h2 { max-width: 62%; font-size: 38px; }
 
-/* Series chips: same solid pills as the collection tabs */
-.sp-chips { display: flex; gap: 8px; margin: 18px -20px 0; padding: 2px 20px 4px; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; }
+/* Category & series chips: gliding black pill behind active chip, dropdown arrow on active gadget type */
+.sp-chips { position: relative; display: flex; align-items: center; gap: 8px; margin: 18px -20px 0; padding: 2px 20px 4px; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; }
 .sp-chips::-webkit-scrollbar { display: none; }
 .sp-chips[hidden] { display: none; }
+.sp-pill {
+  position: absolute; top: 2px; left: 0; height: 38px; border-radius: 99px;
+  background: var(--black); pointer-events: none; z-index: 1;
+  transition: transform 0.48s cubic-bezier(0.28, 1.22, 0.38, 1), width 0.48s cubic-bezier(0.28, 1.22, 0.38, 1);
+}
+.sp-chips.no-pill-t .sp-pill { transition: none; }
+.sp-chips .c-tab { position: relative; z-index: 2; display: inline-flex; align-items: center; justify-content: center; flex: none; }
+.sp-chips .c-tab.on { background: transparent; color: var(--orange); }
+.c-lbl { display: inline-block; }
+.c-lbl.swap { animation: sp-lbl-swap 0.34s cubic-bezier(0.22, 1.15, 0.36, 1) both; }
+.c-chev {
+  width: 0; height: 14px; margin-left: 0; opacity: 0; overflow: hidden; display: grid; place-items: center;
+  transform: scale(0.4) translateX(-4px);
+  transition: opacity 0.25s ease, transform 0.35s cubic-bezier(0.3, 1.5, 0.45, 1);
+}
+.c-chev svg { width: 14px; height: 14px; display: block; }
+.c-tab.has-arrow .c-chev { width: 14px; margin-left: 6px; opacity: 1; transform: scale(1) translateX(0); }
+.c-tab.has-arrow[aria-expanded="true"] .c-chev { transform: scale(1) rotate(180deg); }
 
 /* Sections and cards */
 .sp-sec { margin-top: 24px; }
@@ -292,9 +313,62 @@
 .sp-sec[hidden] { display: none; }
 .sp-card[hidden] { display: none; }
 
-/* Second chip row: the brands of the category that was picked. It opens and closes smoothly. */
-.sp-chips2 { margin-top: 0; padding-top: 0; padding-bottom: 0; max-height: 0; opacity: 0; overflow: hidden; pointer-events: none; transition: max-height 0.45s cubic-bezier(0.3, 1.1, 0.45, 1), opacity 0.3s ease, margin 0.45s ease, padding 0.45s ease; }
-.sp-chips2.show { margin-top: 8px; padding-top: 2px; padding-bottom: 4px; max-height: 60px; opacity: 1; pointer-events: auto; }
+/* Liquid glass brand dropdown anchored to the active gadget chip */
+.sp-scroll.drop-lock { overflow-y: hidden; }
+.sp-drop-bd {
+  position: absolute; top: var(--cut, 280px); left: 0; right: 0; bottom: 0; z-index: 30; pointer-events: none;
+  background: rgba(255, 255, 255, 0);
+  -webkit-backdrop-filter: blur(0px) saturate(1); backdrop-filter: blur(0px) saturate(1);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 22px);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 22px);
+  transition: background 0.35s ease, backdrop-filter 0.45s ease, -webkit-backdrop-filter 0.45s ease;
+}
+.sp-drop-bd.open {
+  background: rgba(255, 255, 255, 0.24); pointer-events: auto;
+  -webkit-backdrop-filter: blur(12px) saturate(1.4); backdrop-filter: blur(12px) saturate(1.4);
+}
+.sp-drop {
+  position: absolute; z-index: 31; box-sizing: border-box;
+  padding: 8px; border-radius: 24px;
+  --g1: 0.78; --g2: 0.52; background-color: rgba(255, 255, 255, 0.62);
+  max-height: min(340px, calc(100% - 260px)); overflow-y: auto; scrollbar-width: none;
+  transform-origin: var(--ox, 50%) var(--oy, -8px);
+  opacity: 0; visibility: hidden; transform: translateY(-8px) scale(0.32, 0.14);
+  transition: transform 0.28s cubic-bezier(0.5, 0, 0.75, 0), opacity 0.16s ease 0.04s, border-radius 0.28s ease, visibility 0s linear 0.28s;
+}
+.sp-drop::-webkit-scrollbar { display: none; }
+.sp-drop:not(.open) { border-radius: 50px; }
+.sp-drop.open {
+  opacity: 1; visibility: visible; transform: none; border-radius: 24px;
+  transition: transform 0.48s cubic-bezier(0.22, 1.22, 0.36, 1), opacity 0.16s ease, border-radius 0.32s ease, visibility 0s;
+}
+.sp-opt {
+  position: relative; z-index: 3; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  width: 100%; height: 42px; padding: 0 12px; border-radius: 16px; background: none; text-align: left;
+  font-size: 14px; font-weight: 700; color: var(--black);
+  opacity: 0; transform: translateY(-6px) scale(0.96); filter: blur(4px);
+  transition: opacity 0.16s ease, transform 0.16s ease, filter 0.16s ease, background 0.2s ease, color 0.2s ease;
+}
+.sp-drop.open .sp-opt {
+  opacity: 1; transform: none; filter: none;
+  transition: opacity 0.28s ease, transform 0.38s cubic-bezier(0.2, 1.2, 0.4, 1), filter 0.24s ease, background 0.2s ease, color 0.2s ease;
+  transition-delay: calc(var(--i, 0) * 24ms + 45ms);
+}
+.sp-opt:hover { background: rgba(11, 11, 12, 0.05); }
+.sp-opt:active { transform: scale(0.96); }
+.sp-opt.on { background: var(--black); color: var(--orange); }
+.sp-opt-chk {
+  flex: none; width: 16px; height: 16px; display: grid; place-items: center;
+  opacity: 0; transform: scale(0.5);
+  transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.3, 1.5, 0.45, 1);
+}
+.sp-opt-chk svg { width: 16px; height: 16px; }
+.sp-opt.on .sp-opt-chk { opacity: 1; transform: scale(1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .sp-pill, .c-chev, .c-lbl, .sp-drop, .sp-drop-bd, .sp-opt { transition: none !important; animation: none !important; }
+}
+
 .sp-sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .sp-more { flex: none; padding: 6px 4px; background: none; font-size: 13px; font-weight: 800; color: var(--orange); }
 .sp-more:active { opacity: 0.6; }
