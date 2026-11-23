@@ -158,6 +158,7 @@
 .dock button svg { fill: none; stroke-width: 2.6; }   /* thick black outline icons by default */
 .dock button.on svg { fill: currentColor; }   /* active tab is solid */
 .dock button .door { fill: none; }
+.dock button.on .door { stroke: #fff; }   /* door stays visible on the solid store */
 .dock button.hot svg { transform: scale(1.14); }
 .dock button.on.hot svg { transform: scale(1.06); }
 @media (max-width: 340px) { .dock button span { font-size: 11.5px; } .dock button.on span { margin-left: 5px; } }
