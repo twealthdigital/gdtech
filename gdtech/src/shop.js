@@ -636,13 +636,8 @@ function paintStage() {
   if (img.getAttribute("src") !== stageSrc) img.src = stageSrc;
   img.className = "pd-img " + p.kind;
   img.dataset.angle = p.angle || "front";
-  if (isLow || p.kind === "cut") {
-    bg.style.backgroundImage = "";
-    bg.classList.remove("blur");
-  } else {
-    bg.style.backgroundImage = `url("${stageSrc}")`;
-    bg.classList.add("blur");
-  }
+  bg.style.backgroundImage = p.kind === "cut" ? "" : `url("${stageSrc}")`;
+  bg.classList.toggle("blur", p.kind !== "cut");
   pdBody.querySelectorAll(".pd-th").forEach((b, i) => { b.classList.toggle("on", i === sel.g); b.setAttribute("aria-selected", String(i === sel.g)); });
 }
 

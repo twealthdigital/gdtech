@@ -47,6 +47,7 @@ if (dock) {
   function paint() {
     if (isLow) {
       lens.style.transform = `translate3d(${(x - (W - 2) / 2).toFixed(1)}px,0,0) scale(${l.toFixed(3)})`;
+      lensBoost(lens, l > 1.05 ? 1.6 : 1);
       return;
     }
     const s = 1 + Math.min(Math.abs(vx) / 1100, 0.7);          // faster movement stretches it

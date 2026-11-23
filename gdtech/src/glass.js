@@ -1,12 +1,15 @@
 // Liquid glass for every page.
 // Chromium can run an SVG filter on what is behind an element, so each .glass element gets its own
 // lens: a displacement map built from the element's real size and corner radius. The middle stays
-// clear and the rim bends the background inwards like a thick piece of glass, with a slight
-// red/green/blue split at the edge. Other browsers keep the CSS-only glass (blur, rim light, sheen).
-import { isHigh } from "./perf.js";
+// clear and the rim bends the background inwards like a thick piece of glass.
+// Optimization for low/mid devices:
+//  - High tier: full 1:1 displacement map + 3-channel RGB chromatic dispersion filter.
+//  - Mid/Low tiers: scaled displacement map + single-pass feDisplacementMap (8x fewer GPU passes)
+//    plus shared filter/map caches so identical glass orbs reuse a single SVG filter and PNG map.
+import { isHigh, isMid, isLow } from "./perf.js";
 
 const NS = "http://www.w3.org/2000/svg";
-const supported = isHigh && !!navigator.userAgentData?.brands?.some((b) => /Chromium/.test(b.brand));
+const supported = !!navigator.userAgentData?.brands?.some((b) => /Chromium/.test(b.brand));
 let boostImpl = () => {};
 // Make one element's lens stronger or weaker live (1 is normal). Used for the water swell while pressing and dragging.
 export const lensBoost = (node, m) => boostImpl(node, m);
@@ -23,8 +26,11 @@ if (supported) {
 
   let uid = 0;
   const lenses = new WeakMap();
+  const mapCache = new Map();
+  const sharedFilters = new Map();
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  const maxDim = isHigh ? Infinity : isMid ? 220 : 140;
 
   const el = (name, attrs) => {
     const n = document.createElementNS(NS, name);
@@ -35,7 +41,11 @@ if (supported) {
   // Displacement map: R and G hold the x and y shift, 128 means no shift.
   // Distance to the rounded-rect edge decides how strong it is (convex lens profile),
   // the direction is the edge normal pointing back into the glass.
-  function buildMap(w, h, radius, bezel, depth) {
+  function buildMap(w, h, radius, bezel) {
+    const sig = `${w}x${h}:${radius.toFixed(1)}:${bezel.toFixed(1)}`;
+    const hit = mapCache.get(sig);
+    if (hit) return hit;
+
     canvas.width = w; canvas.height = h;
     const img = ctx.createImageData(w, h), d = img.data;
     const hw = w / 2, hh = h / 2, r = Math.min(radius, hw, hh);
@@ -61,7 +71,10 @@ if (supported) {
       }
     }
     ctx.putImageData(img, 0, 0);
-    return canvas.toDataURL("image/png");
+    const url = canvas.toDataURL("image/png");
+    if (mapCache.size > 48) mapCache.clear();
+    mapCache.set(sig, url);
+    return url;
   }
 
   function radiusOf(cs, w, h) {
@@ -69,27 +82,18 @@ if (supported) {
     return v.endsWith("%") ? (parseFloat(v) / 100) * Math.min(w, h) : parseFloat(v) || 0;
   }
 
-  function build(node) {
-    const w = Math.round(node.offsetWidth), h = Math.round(node.offsetHeight);
-    if (w < 8 || h < 8) return;
-    let lens = lenses.get(node);
-    if (lens && lens.w === w && lens.h === h) return;
-    const cs = getComputedStyle(node);
-    const short = Math.min(w, h);
-    const bezel = Math.max(8, Math.min(30, short * (parseFloat(node.dataset.lensBezel) || 0.34)));
-    const depth = bezel * (short < 80 ? 0.72 : 0.85) * 1.12 * (parseFloat(node.dataset.lensDepth) || 1); // how far the rim pulls the background, in px
-    const url = buildMap(w, h, radiusOf(cs, w, h), bezel, depth);
-
-    if (!lens) {
-      const id = "lg" + ++uid;
-      const f = el("filter", { id, x: "0", y: "0", width: "100%", height: "100%", "color-interpolation-filters": "sRGB" });
-      const map = el("feImage", { result: "map", x: "0", y: "0", preserveAspectRatio: "none" });
-      f.appendChild(map);
-      // one displacement per colour channel, each a touch stronger or weaker, then recombined
+  function createFilter() {
+    const id = "lg" + ++uid;
+    const f = el("filter", { id, x: "0", y: "0", width: "100%", height: "100%", "color-interpolation-filters": "sRGB" });
+    const map = el("feImage", { result: "map", x: "0", y: "0", preserveAspectRatio: "none" });
+    f.appendChild(map);
+    let disp;
+    if (isHigh) {
+      // High-end: one displacement per colour channel, each a touch stronger or weaker, then recombined
       const chans = [["r", 1.0, "1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0"],
                      ["g", 0.9, "0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0"],
                      ["b", 0.8, "0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0"]];
-      const disp = chans.map(([c, k, mx]) => {
+      disp = chans.map(([c, k, mx]) => {
         const dm = el("feDisplacementMap", { in: "SourceGraphic", in2: "map", xChannelSelector: "R", yChannelSelector: "G", result: "d" + c });
         f.appendChild(dm);
         f.appendChild(el("feColorMatrix", { in: "d" + c, type: "matrix", values: mx, result: c }));
@@ -97,21 +101,80 @@ if (supported) {
       });
       f.appendChild(el("feBlend", { in: "r", in2: "g", mode: "screen", result: "rg" }));
       f.appendChild(el("feBlend", { in: "rg", in2: "b", mode: "screen" }));
-      defs.appendChild(f);
-      lens = { id, map, disp, w: 0, h: 0, depth: 0, boost: 1 };
-      lenses.set(node, lens);
-      node.style.setProperty("--lens", `url(#${id})`);
+    } else {
+      // Mid/Low: single-pass displacement keeps crisp liquid edge bending at ~8x lower GPU cost
+      const dm = el("feDisplacementMap", { in: "SourceGraphic", in2: "map", xChannelSelector: "R", yChannelSelector: "G" });
+      f.appendChild(dm);
+      disp = [[dm, 0.94]];
     }
-    lens.w = w; lens.h = h;
-    lens.map.setAttribute("width", w); lens.map.setAttribute("height", h);
-    lens.map.setAttribute("href", url);
-    lens.depth = depth;
-    for (const [dm, k] of lens.disp) dm.setAttribute("scale", (2 * depth * k * lens.boost).toFixed(2));
+    defs.appendChild(f);
+    return { id, map, disp };
+  }
+
+  function applyFilterData(flt, w, h, url, depth, boost) {
+    flt.map.setAttribute("width", w);
+    flt.map.setAttribute("height", h);
+    flt.map.setAttribute("href", url);
+    for (const [dm, k] of flt.disp) dm.setAttribute("scale", (2 * depth * k * boost).toFixed(2));
+  }
+
+  function build(node) {
+    const w = Math.round(node.offsetWidth), h = Math.round(node.offsetHeight);
+    if (w < 8 || h < 8) return;
+    let lens = lenses.get(node);
+    if (lens && lens.w === w && lens.h === h) return;
+
+    const cs = getComputedStyle(node);
+    const short = Math.min(w, h);
+    const bezel = Math.max(8, Math.min(30, short * (parseFloat(node.dataset.lensBezel) || 0.34)));
+    const depth = bezel * (short < 80 ? 0.72 : 0.85) * 1.12 * (parseFloat(node.dataset.lensDepth) || 1);
+    const radius = radiusOf(cs, w, h);
+
+    const scale = Math.min(1, maxDim / Math.max(w, h));
+    const mw = Math.max(8, Math.round(w * scale));
+    const mh = Math.max(8, Math.round(h * scale));
+    const url = buildMap(mw, mh, radius * scale, Math.max(4, bezel * scale));
+    const sig = `${w}x${h}:${radius.toFixed(1)}:${bezel.toFixed(1)}:${depth.toFixed(2)}`;
+
+    // Dynamic singleton controls keep their own dedicated filter; repeating items (e.g. cards/orbs) share cached filters
+    const isDynamic = node.classList.contains("dock-lens") || node.classList.contains("dock-glass") ||
+      node.classList.contains("sp-drop-glass") || node.classList.contains("sp-drop-lens") ||
+      node.classList.contains("col-search") || node.classList.contains("sp-search");
+
+    if (!isDynamic && (!lens || lens.shared)) {
+      let flt = sharedFilters.get(sig);
+      if (!flt) {
+        flt = createFilter();
+        applyFilterData(flt, w, h, url, depth, 1);
+        sharedFilters.set(sig, flt);
+      }
+      lens = { id: flt.id, map: flt.map, disp: flt.disp, w, h, depth, boost: 1, url, shared: true };
+      lenses.set(node, lens);
+      node.style.setProperty("--lens", `url(#${flt.id})`);
+      return;
+    }
+
+    if (!lens || lens.shared) {
+      const flt = createFilter();
+      lens = { id: flt.id, map: flt.map, disp: flt.disp, w: 0, h: 0, depth: 0, boost: lens ? lens.boost : 1, url, shared: false };
+      lenses.set(node, lens);
+      node.style.setProperty("--lens", `url(#${flt.id})`);
+    }
+    lens.w = w; lens.h = h; lens.depth = depth; lens.url = url;
+    applyFilterData(lens, w, h, url, depth, lens.boost);
   }
 
   boostImpl = (node, m) => {
-    const lens = lenses.get(node);
+    let lens = lenses.get(node);
     if (!lens || Math.abs(lens.boost - m) < 0.02) return;
+    if (lens.shared) {
+      const flt = createFilter();
+      applyFilterData(flt, lens.w, lens.h, lens.url, lens.depth, m);
+      lens = { id: flt.id, map: flt.map, disp: flt.disp, w: lens.w, h: lens.h, depth: lens.depth, boost: m, url: lens.url, shared: false };
+      lenses.set(node, lens);
+      node.style.setProperty("--lens", `url(#${flt.id})`);
+      return;
+    }
     lens.boost = m;
     for (const [dm, k] of lens.disp) dm.setAttribute("scale", (2 * lens.depth * k * m).toFixed(2));
   };
@@ -136,22 +199,31 @@ if (supported) {
 }
 
 // Moving light: the rim highlight and the sheen drift with scroll, pointer and phone tilt, like light on real glass.
-if (isHigh) {
+{
   const root = document.documentElement;
-  let px = 0, sy = 0, tilt = 0, raf = 0, last = "";
+  const minGap = isHigh ? 0 : isMid ? 75 : 140;
+  let px = 0, sy = 0, tilt = 0, raf = 0, last = "", lastAt = 0, timer = 0;
   const paint = () => {
     raf = 0;
-    const a = Math.round(135 + Math.max(-45, Math.min(45, sy * 0.05)) + px * 40 + tilt);
-    const s = Math.round(18 + px * 34 + tilt * 0.8);
+    timer = 0;
+    lastAt = performance.now();
+    const rawA = 135 + Math.max(-45, Math.min(45, sy * 0.05)) + px * 40 + tilt;
+    const rawS = 18 + px * 34 + tilt * 0.8;
+    const a = isLow ? Math.round(rawA / 4) * 4 : Math.round(rawA);
+    const s = isLow ? Math.round(rawS / 4) * 4 : Math.round(rawS);
     const key = a + "|" + s;
     if (key === last) return;
     last = key;
     root.style.setProperty("--spec", a + "deg");
     root.style.setProperty("--sx", s + "%");
   };
-  const kick = () => { if (!raf) raf = requestAnimationFrame(paint); };
+  const kick = () => {
+    if (!minGap) { if (!raf) raf = requestAnimationFrame(paint); return; }
+    const wait = minGap - (performance.now() - lastAt);
+    if (wait <= 0) { if (!raf) raf = requestAnimationFrame(paint); }
+    else if (!timer) timer = setTimeout(() => { timer = 0; if (!raf) raf = requestAnimationFrame(paint); }, wait);
+  };
   addEventListener("pointermove", (e) => { px = e.clientX / innerWidth - 0.5; kick(); }, { passive: true });
   document.addEventListener("scroll", (e) => { if (e.target && e.target.scrollTop !== undefined) { sy = e.target.scrollTop; kick(); } }, { capture: true, passive: true });
   addEventListener("deviceorientation", (e) => { if (e.gamma != null) { tilt = Math.max(-30, Math.min(30, e.gamma)) * 0.8; kick(); } }, { passive: true });
 }
-

@@ -96,34 +96,24 @@ h1 span { color: var(--orange); }
 }
 
 /* Adaptive performance tiers (applied early on <html> via inline script + perf.js):
-   high: 100% original liquid glass, SVG lens refraction, shadows & animations
-   mid:  lightweight CSS blur only on main floating surfaces, /lite/ grid assets, no drop-shadows on cards
-   low:  zero backdrop-filter/blur, zero SVG refraction, zero drop-shadow/infinite idle animations, content-visibility */
-html.perf-mid .glass {
-  -webkit-backdrop-filter: blur(7px) saturate(1.4);
-  backdrop-filter: blur(7px) saturate(1.4);
-}
-html.perf-mid .sp-fav.glass {
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-  background-color: rgba(11, 11, 12, 0.42);
-}
-html.perf-mid .sp-fav.glass.on { background-color: rgba(11, 11, 12, 0.78); }
+   Liquid glass (translucent body, specular ::before rim, inset bevels, SVG --lens refraction & blurs)
+   is preserved completely on every tier. Low/mid tiers optimize GPU cost via single-pass SVG lens caching
+   in glass.js, lighter blur radii, /lite/ scaled images, lazy loading, and content-visibility. */
 html.perf-mid .h-top::before {
-  -webkit-backdrop-filter: blur(10px) saturate(1.3);
-  backdrop-filter: blur(10px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.6);
+  backdrop-filter: blur(14px) saturate(1.6);
 }
 html.perf-mid .h-top::after { display: none; }
 html.perf-mid .fm-backdrop.open,
 html.perf-mid .pf-backdrop.open {
-  -webkit-backdrop-filter: blur(8px) saturate(1.2);
-  backdrop-filter: blur(8px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.45);
+  backdrop-filter: blur(12px) saturate(1.45);
 }
 html.perf-mid .b-img img,
 html.perf-mid .t-phone,
 html.perf-mid .has-img .k-art img,
 html.perf-mid .sp-hero img { filter: none; }
-html.perf-mid .pd-bg.blur { filter: blur(14px); }
+html.perf-mid .pd-bg.blur { filter: blur(16px) saturate(1.1); }
 html.perf-mid .fm-sec,
 html.perf-mid .fm.open .fm-sec,
 html.perf-mid .pf-sec,
@@ -137,72 +127,29 @@ html.perf-mid .sp-card {
 }
 
 html.perf-low .glass {
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(249, 248, 246, 0.94));
-  border: 1px solid rgba(11, 11, 12, 0.08);
-  box-shadow: 0 8px 20px rgba(11, 11, 12, 0.12);
+  -webkit-backdrop-filter: blur(6px) saturate(1.75) brightness(1.06);
+  backdrop-filter: blur(6px) saturate(1.75) brightness(1.06);
 }
-html.perf-low .glass::before { display: none; }
-html.perf-low .dock-glass.glass {
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(11, 11, 12, 0.08);
-  box-shadow: 0 8px 22px rgba(11, 11, 12, 0.14);
+html.perf-low.lg-refract .glass {
+  -webkit-backdrop-filter: var(--lens, saturate(1)) blur(1.5px) saturate(1.85) brightness(1.06);
+  backdrop-filter: var(--lens, saturate(1)) blur(1.5px) saturate(1.85) brightness(1.06);
 }
-html.perf-low .dock-lens.glass,
-html.perf-low .dock.lifted .dock-lens.glass {
-  background: rgba(255, 122, 26, 0.14);
-  border: 1px solid rgba(255, 122, 26, 0.24);
-  box-shadow: none;
+html.perf-low .dock-lens.glass {
   transition: transform 0.22s ease;
 }
-html.perf-low .sp-fav.glass {
-  background: rgba(11, 11, 12, 0.56);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  box-shadow: none;
-}
-html.perf-low .sp-fav.glass.on {
-  background: rgba(11, 11, 12, 0.85);
-  border-color: rgba(255, 122, 26, 0.45);
-}
-html.perf-low .sp-drop-glass.glass {
-  background: rgba(255, 255, 255, 0.98);
-  border: 1px solid rgba(11, 11, 12, 0.1);
-  box-shadow: 0 12px 26px rgba(11, 11, 12, 0.16);
-}
-html.perf-low .sp-drop-lens.glass,
-html.perf-low .sp-drop.lifted .sp-drop-lens.glass {
-  background: rgba(255, 122, 26, 0.12);
-  border: 1px solid rgba(255, 122, 26, 0.22);
-  box-shadow: none;
-}
-html.perf-low .col-search.glass {
-  background: rgba(244, 242, 238, 0.96);
-  border: 1px solid rgba(11, 11, 12, 0.09);
-  box-shadow: 0 4px 12px rgba(11, 11, 12, 0.08);
-}
-html.perf-low .pf.glass {
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 14px 32px rgba(11, 11, 12, 0.18);
-}
 html.perf-low .h-top::before {
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-  background: linear-gradient(to bottom, #ffffff 0%, rgba(255, 255, 255, 0.96) 68%, rgba(255, 255, 255, 0));
+  -webkit-backdrop-filter: blur(9px) saturate(1.5);
+  backdrop-filter: blur(9px) saturate(1.5);
 }
-html.perf-low .h-top::after,
-html.perf-low .home::after { display: none; }
+html.perf-low .h-top::after { display: none; }
 html.perf-low .fm-backdrop,
 html.perf-low .pf-backdrop {
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-  transition: background 0.2s ease;
+  transition: background 0.26s ease, backdrop-filter 0.26s ease, -webkit-backdrop-filter 0.26s ease;
 }
 html.perf-low .fm-backdrop.open,
 html.perf-low .pf-backdrop.open {
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-  background: rgba(11, 11, 12, 0.32);
+  -webkit-backdrop-filter: blur(8px) saturate(1.35);
+  backdrop-filter: blur(8px) saturate(1.35);
 }
 html.perf-low .mark.big,
 html.perf-low .b-img img,
@@ -214,7 +161,7 @@ html.perf-low .pd-img.wide,
 html.perf-low .pd-img.poster,
 html.perf-low .pd-img.ang-left,
 html.perf-low .pd-img.ang-right { filter: none; }
-html.perf-low .pd-bg.blur { display: none; }
+html.perf-low .pd-bg.blur { filter: blur(12px); }
 html.perf-low .t-phone,
 html.perf-low .tick span:first-child,
 html.perf-low .home.active,
