@@ -101,6 +101,21 @@ function renderBody(view) {
       </section>`).join("");
 }
 
+// General shop hero: picking a brand chip slides the other phones out, the brand's phone settles into place,
+// and the colour and title change with it. "All" brings the fan back.
+let heroTimer = 0;
+function focusHero(key) {
+  if (!state.route || state.route.cat !== "all") return;
+  const cfg = key ? PHONE_SHOPS[key] : null;
+  heroEl.className = "sp-hero " + (cfg ? cfg.tone : "ink") + " fan";
+  if (cfg) heroEl.dataset.focus = key; else delete heroEl.dataset.focus;
+  const h = heroEl.querySelector("h2"), k = heroEl.querySelector(".sp-kick");
+  if (!h || !k) return;
+  h.classList.add("swap");
+  clearTimeout(heroTimer);
+  heroTimer = setTimeout(() => { h.innerHTML = cfg ? cfg.title : "All<br>phones"; k.textContent = cfg ? "Shop" : "GDTech"; h.classList.remove("swap"); }, 170);
+}
+
 function render(route) {
   const view = viewOf(route);
   state.view = view;
@@ -109,8 +124,9 @@ function render(route) {
   if (route.cat === "all") {
     titleEl.textContent = "Shop";
     heroEl.className = "sp-hero ink fan";
+    delete heroEl.dataset.focus;
     heroEl.innerHTML =
-      ["mobile:Google", "mobile:Samsung", "mobile:Apple"].map((k) => `<img src="${IMAGES[k].src}" alt="" decoding="async" draggable="false" />`).join("") +
+      ["Google", "Samsung", "Apple", "itel"].filter((b) => IMAGES["mobile:" + b]).map((b) => `<img data-b="${b}" src="${IMAGES["mobile:" + b].src}" alt="" decoding="async" draggable="false" />`).join("") +
       `<p class="sp-kick">GDTech</p><h2>All<br>phones</h2>`;
     renderBody(view);
     return;
@@ -518,6 +534,7 @@ chipsEl.addEventListener("click", (e) => {
   const c = e.target.closest(".c-tab");
   if (!c || !state.view) return;
   state.group = c.dataset.g || null;
+  focusHero(state.group);
   renderBody(state.view);
 });
 bodyEl.addEventListener("click", (e) => { if (e.target.closest("#sp-soon-back")) back(); });

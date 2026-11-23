@@ -49,18 +49,43 @@
 .sp-hero.onyx, .sp-card.onyx, .pd-hero.onyx { --card: #0e0e10; --glow: rgba(176, 64, 255, 0.5); }
 .sp-hero.ink, .sp-card.ink, .pd-hero.ink { --card: #0b0b0c; --glow: rgba(255, 122, 26, 0.55); }
 
+/* Registered so the hero colour can glide between brands */
+@property --card { syntax: "<color>"; inherits: true; initial-value: #0b0b0c; }
+@property --glow { syntax: "<color>"; inherits: true; initial-value: rgba(255, 122, 26, 0.55); }
+@property --ink { syntax: "<color>"; inherits: true; initial-value: #ffffff; }
+@property --sub { syntax: "<color>"; inherits: true; initial-value: rgba(255, 255, 255, 0.75); }
+
 /* Hero */
 .sp-hero {
   position: relative; overflow: hidden; min-height: 176px; padding: 18px 20px; border-radius: 28px;
   display: flex; flex-direction: column; justify-content: flex-end; color: var(--ink);
   background-color: var(--card); background-image: radial-gradient(circle at 78% 40%, var(--glow), transparent 65%);
 }
-.sp-hero img { position: absolute; right: -2%; bottom: -8%; height: 112%; width: auto; max-width: 60%; object-fit: contain; object-position: right bottom; pointer-events: none; filter: drop-shadow(0 12px 12px rgba(0, 0, 0, 0.4)); animation: sp-pop 0.7s cubic-bezier(0.2, 1.2, 0.35, 1) 0.15s backwards; }
+.sp-hero img { position: absolute; right: -2%; bottom: -8%; height: 112%; width: auto; max-width: 60%; object-fit: contain; object-position: right bottom; pointer-events: none; filter: drop-shadow(0 12px 12px rgba(0, 0, 0, 0.4)); }
 .sp-hero.fold { background-image: linear-gradient(90deg, rgba(8, 8, 14, 0.92) 20%, rgba(8, 8, 14, 0.3)), url("/foldable/galaxy-fold-poster.webp"); background-size: cover; background-position: center; }
 .sp-kick { position: relative; font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sub); }
 .sp-hero h2 { position: relative; margin-top: 2px; font-size: 38px; line-height: 1; font-weight: 800; letter-spacing: -0.01em; max-width: 62%; }
 .sp-hero.fold h2 { max-width: 100%; }
 @keyframes sp-pop { from { opacity: 0; transform: translateX(14%) scale(0.92); } }
+@keyframes sp-in { from { opacity: 0; transform: translateX(70%) scale(0.94); } }
+.sp-hero { transition: --card 0.6s ease, --glow 0.6s ease, --ink 0.4s ease, --sub 0.4s ease; }
+/* The phones slide in once the page has arrived (started by .open, so it is seen) */
+.shop.open .sp-hero img { animation: sp-in 0.85s cubic-bezier(0.2, 1.05, 0.35, 1) 0.4s backwards; }
+.sp-hero h2, .sp-kick { transition: opacity 0.17s ease, transform 0.17s ease, font-size 0.5s ease, max-width 0.5s ease; }
+.sp-hero h2.swap { opacity: 0; transform: translateY(6px); }
+.sp-hero.fan img { transition: right 0.65s cubic-bezier(0.22, 0.9, 0.26, 1), height 0.65s cubic-bezier(0.22, 0.9, 0.26, 1), bottom 0.65s cubic-bezier(0.22, 0.9, 0.26, 1), transform 0.6s cubic-bezier(0.22, 0.9, 0.26, 1), opacity 0.45s ease; }
+.sp-hero.fan img[data-b="itel"] { right: -2%; bottom: -8%; height: 112%; max-width: none; opacity: 0; transform: translateX(130%); }
+/* A brand picked: the others slide out to the right, that phone settles into the single hero spot */
+.sp-hero.fan[data-focus] img { opacity: 0; transform: translateX(130%); }
+.sp-hero.fan[data-focus] img[data-b="Google"],
+.sp-hero.fan[data-focus] img[data-b="Samsung"],
+.sp-hero.fan[data-focus] img[data-b="Apple"],
+.sp-hero.fan[data-focus] img[data-b="itel"] { right: -2%; bottom: -8%; height: 112%; }
+.sp-hero.fan[data-focus="Google"] img[data-b="Google"],
+.sp-hero.fan[data-focus="Samsung"] img[data-b="Samsung"],
+.sp-hero.fan[data-focus="Apple"] img[data-b="Apple"],
+.sp-hero.fan[data-focus="itel"] img[data-b="itel"] { opacity: 1; transform: none; }
+.sp-hero.fan[data-focus] h2 { max-width: 62%; font-size: 38px; }
 
 /* Series chips: same solid pills as the collection tabs */
 .sp-chips { display: flex; gap: 8px; margin: 18px -20px 0; padding: 2px 20px 4px; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; }
@@ -107,9 +132,9 @@
 /* General shop page: a fan of three phones instead of one */
 .sp-hero.fan h2 { max-width: 40%; font-size: 34px; }
 .sp-hero.fan img { max-width: none; height: 92%; bottom: -6%; }
-.sp-hero.fan img:nth-of-type(1) { right: 36%; height: 80%; animation-delay: 0.05s; }
-.sp-hero.fan img:nth-of-type(2) { right: 15%; height: 88%; animation-delay: 0.12s; }
-.sp-hero.fan img:nth-of-type(3) { right: -5%; height: 100%; animation-delay: 0.2s; }
+.sp-hero.fan img:nth-of-type(1) { right: 36%; height: 80%; animation-delay: 0.4s; }
+.sp-hero.fan img:nth-of-type(2) { right: 15%; height: 88%; animation-delay: 0.5s; }
+.sp-hero.fan img:nth-of-type(3) { right: -5%; height: 100%; animation-delay: 0.6s; }
 
 /* Cards are tappable: they open the product page */
 .sp-card { cursor: pointer; transition: transform 0.2s cubic-bezier(0.3, 1.4, 0.45, 1); }
