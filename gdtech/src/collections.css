@@ -57,6 +57,9 @@
 .col-grid[data-cat="laptops"] .has-img::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 6%, transparent 26%); }
 .col-grid[data-cat="laptops"] .has-img[data-brand="Apple"]::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 11%, transparent 36%); }
 .col-grid[data-cat="laptops"] .has-img[data-brand="Samsung"]::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 15%, transparent 44%); }
+/* Headsets: tall images, so a short fade; "Soundcore / Anker" has a 2-line label and gets a little more */
+.col-grid[data-cat="headsets"] .has-img::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 6%, transparent 28%); }
+.col-grid[data-cat="headsets"] .has-img[data-brand="Anker"]::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 11%, transparent 36%); }
 .k-ico { align-self: center; width: 54%; max-width: 120px; aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.18); }
 .cream .k-ico { background: rgba(23, 23, 26, 0.08); }
 .k-ico svg { width: 56%; height: 56%; stroke-width: 1.5; }

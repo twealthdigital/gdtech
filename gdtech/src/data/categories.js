@@ -5,7 +5,7 @@ export const CATS = [
     icon: '<rect x="7" y="2.5" width="10" height="19" rx="2.6"/><path d="M11 18.5h2"/>' },
   { id: "laptops", name: "Laptops", circle: true, brands: ["Samsung", "Apple", "Asus", "Dell", "HP", "Lenovo"],
     icon: '<rect x="4" y="5" width="16" height="10.5" rx="2"/><path d="M2.5 19h19"/>' },
-  { id: "headsets", name: "Headsets", circle: true, brands: ["Sony", "JBL", "Bose", "Apple", "Anker", "Beats"],
+  { id: "headsets", name: "Headsets", circle: true, brands: ["Sony", "JBL", "Bose", "Anker", "Beats"],
     icon: '<path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="6" rx="1.6"/><rect x="17" y="14" width="4" height="6" rx="1.6"/>' },
   { id: "tablets", name: "Tablets", circle: true, brands: ["Apple", "Samsung", "Lenovo", "Xiaomi", "Huawei"],
     icon: '<rect x="5" y="3" width="14" height="18" rx="2.6"/><path d="M11 18h2"/>' },

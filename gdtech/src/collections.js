@@ -9,7 +9,7 @@ const DEFAULT_CAT = "mobile";
 const TITLES = {
   "mobile:Apple": "iPhone", "mobile:Samsung": "Galaxy", "mobile:Google": "Pixel",
   "laptops:Apple": "MacBook", "laptops:Samsung": "Galaxy Book", "tablets:Apple": "iPad", "tablets:Samsung": "Galaxy Tab",
-  "headsets:Apple": "AirPods", "headsets:Beats": "Beats", "wearables:Apple Watch": "Apple Watch",
+  "headsets:Anker": "Soundcore", "headsets:Beats": "Beats", "wearables:Apple Watch": "Apple Watch",
   "tvs:Samsung": "Samsung TV", "tvs:LG": "LG TV", "tvs:Sony": "Sony TV",
 };
 // Photos we have so far. Everything else shows the category icon until you add one.
@@ -24,6 +24,11 @@ const IMAGES = {
   "laptops:Lenovo": { src: "/laptops/lenovo.webp", w: 844, h: 760, z: 1.9, up: 5 },
   "laptops:Asus": { src: "/laptops/asus.webp", w: 1237, h: 760, z: 1.5, up: 10 },
   "laptops:Samsung": { src: "/laptops/samsung.webp", w: 1238, h: 760, z: 1.2, up: 20 },
+  "headsets:Sony": { src: "/headsets/sony.webp", w: 495, h: 760 },
+  "headsets:JBL": { src: "/headsets/jbl.webp", w: 494, h: 760 },
+  "headsets:Bose": { src: "/headsets/bose.webp", w: 578, h: 760 },
+  "headsets:Anker": { src: "/headsets/anker.webp", w: 614, h: 760 },
+  "headsets:Beats": { src: "/headsets/beats.webp", w: 597, h: 760 },
 };
 // Same colour blocks as the home banners
 const TONES = ["orange", "slate", "cream", "ink"];
@@ -33,6 +38,9 @@ const TONE_OF = {
   // Laptops: light silver ones sit on dark cards, dark ones on light cards
   "laptops:Apple": "silver", "laptops:Dell": "pewter", "laptops:HP": "navy",
   "laptops:Lenovo": "onyx", "laptops:Asus": "graphite", "laptops:Samsung": "steel",
+  // Headsets: colour contrasts with each headset
+  "headsets:Sony": "cream", "headsets:JBL": "orange", "headsets:Bose": "graphite",
+  "headsets:Anker": "cream", "headsets:Beats": "ink",
 };
 
 const tabsEl = $("col-tabs");
