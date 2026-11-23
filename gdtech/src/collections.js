@@ -9,8 +9,7 @@ const DEFAULT_CAT = "mobile";
 const TITLES = {
   "mobile:Apple": "iPhone", "mobile:Samsung": "Galaxy", "mobile:Google": "Pixel",
   "laptops:Apple": "MacBook", "laptops:Samsung": "Galaxy Book", "tablets:Apple": "iPad", "tablets:Samsung": "Galaxy Tab",
-  "headsets:Beats": "Beats", "wearables:Apple Watch": "Apple Watch",
-  "tvs:Samsung": "Samsung TV", "tvs:LG": "LG TV", "tvs:Sony": "Sony TV",
+  "headsets:Beats": "Beats",
 };
 // Photos we have so far. Everything else shows the category icon until you add one.
 const IMAGES = {
