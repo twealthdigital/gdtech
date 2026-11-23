@@ -180,7 +180,7 @@ function syncChips({ scroll = true, instant = false, animateLabel = false } = {}
 }
 
 // Liquid glass droplet spring inside the brand dropdown (matches bottom dock bar)
-const dLens = { y: 8, vy: 0, ty: 8, l: 1, vl: 0, tl: 1, raf: 0, t0: 0, tops: [], rowH: 42, activeIdx: 0, down: false, dragged: false, startY: 0, startIdx: 0, pickTimer: 0 };
+const dLens = { y: 8, vy: 0, ty: 8, l: 1, vl: 0, tl: 1, raf: 0, t0: 0, tops: [], rowH: 42, activeIdx: 0, down: false, dragged: false, startY: 0, startIdx: 0, pickTimer: 0, suppressClick: false };
 const optEls = () => [...dropItems.querySelectorAll(".sp-opt")];
 function measureDropLens() {
   const opts = optEls();
@@ -266,6 +266,8 @@ function openDrop() {
   const activeY = measureDropLens();
   moveDropLens(activeY, { instant: true });
   state.dropOpen = true;
+  dLens.suppressClick = false;
+  clearTimeout(dLens.pickTimer); dLens.pickTimer = 0;
   scroller.classList.add("drop-lock");
   dropEl.inert = false;
   dropEl.setAttribute("aria-hidden", "false");
@@ -915,9 +917,32 @@ function pickDropBrand(brand) {
   state.group = next.group;
   afterPick({ animateLabel: true });
 }
+function commitDropOpt(idx, delayMs = 120) {
+  const target = optEls()[idx];
+  if (!target) return;
+  const targetY = dLens.tops[idx] ?? 8;
+  markDropHot(idx);
+  moveDropLens(targetY, { lift: false });
+  clearTimeout(dLens.pickTimer);
+  const near = Math.abs(dLens.y - targetY) < 4;
+  const waitMs = (reduceMotion() || idx === dLens.activeIdx || delayMs <= 0 || near) ? 0 : delayMs;
+  dLens.suppressClick = true;
+  setTimeout(() => { dLens.suppressClick = false; }, 350);
+  if (waitMs === 0) {
+    dLens.pickTimer = 0;
+    markDropHot(-1);
+    pickDropBrand(target.dataset.g);
+    return;
+  }
+  dLens.pickTimer = setTimeout(() => {
+    dLens.pickTimer = 0;
+    markDropHot(-1);
+    pickDropBrand(target.dataset.g);
+  }, waitMs);
+}
 const dropLocalY = (e) => e.clientY - dropList.getBoundingClientRect().top + dropList.scrollTop;
 dropList.addEventListener("pointerover", (e) => {
-  if (!state.dropOpen || dLens.down || e.pointerType !== "mouse") return;
+  if (!state.dropOpen || dLens.down || dLens.pickTimer || e.pointerType !== "mouse") return;
   const opt = e.target.closest(".sp-opt");
   if (!opt) return;
   const idx = optEls().indexOf(opt);
@@ -926,19 +951,20 @@ dropList.addEventListener("pointerover", (e) => {
   moveDropLens(dLens.tops[idx] ?? 8);
 });
 dropList.addEventListener("pointerleave", () => {
-  if (!state.dropOpen || dLens.down) return;
+  if (!state.dropOpen || dLens.down || dLens.pickTimer) return;
   markDropHot(-1);
   moveDropLens(dLens.tops[dLens.activeIdx] ?? 8);
 });
 dropList.addEventListener("pointerdown", (e) => {
-  if (!state.dropOpen) return;
+  if (!state.dropOpen || dLens.pickTimer) return;
   const opt = e.target.closest(".sp-opt");
   if (!opt) return;
   if (!dLens.tops.length) measureDropLens();
   dLens.down = true;
   dLens.dragged = false;
   dLens.startY = dropLocalY(e);
-  const idx = Math.max(0, dropOptionIndexForY(dLens.tops, dLens.rowH, dLens.startY));
+  const optIdx = optEls().indexOf(opt);
+  const idx = optIdx >= 0 ? optIdx : Math.max(0, dropOptionIndexForY(dLens.tops, dLens.rowH, dLens.startY));
   dLens.startIdx = idx;
   dropEl.classList.add("lifted");
   dropList.setPointerCapture?.(e.pointerId);
@@ -960,42 +986,32 @@ dropList.addEventListener("pointermove", (e) => {
 const endDropPointer = (e) => {
   if (!dLens.down) return;
   const wasDragged = dLens.dragged;
-  const idx = dropOptionIndexForY(dLens.tops, dLens.rowH, dropLocalY(e));
+  const startIdx = dLens.startIdx;
+  if (dropList.hasPointerCapture?.(e.pointerId)) dropList.releasePointerCapture(e.pointerId);
   dLens.down = false;
   dLens.dragged = false;
   dropEl.classList.remove("lifted");
-  if (wasDragged && e.type === "pointerup" && idx >= 0) {
-    const target = optEls()[idx];
-    if (target) {
-      markDropHot(idx);
-      moveDropLens(dLens.tops[idx] ?? 8, { lift: false });
-      clearTimeout(dLens.pickTimer);
-      dLens.pickTimer = setTimeout(() => { markDropHot(-1); pickDropBrand(target.dataset.g); }, reduceMotion() ? 0 : 140);
-      return;
-    }
-  }
-  if (e.type === "pointercancel" || idx < 0) {
+  if (e.type === "pointercancel") {
     markDropHot(-1);
     moveDropLens(dLens.tops[dLens.activeIdx] ?? 8, { lift: false });
     return;
   }
-  moveDropLens(dLens.tops[idx] ?? 8, { lift: false });
+  const idx = wasDragged ? dropOptionIndexForY(dLens.tops, dLens.rowH, dropLocalY(e)) : startIdx;
+  if (idx >= 0) {
+    commitDropOpt(idx, wasDragged ? 140 : 120);
+    return;
+  }
+  markDropHot(-1);
+  moveDropLens(dLens.tops[dLens.activeIdx] ?? 8, { lift: false });
 };
 dropList.addEventListener("pointerup", endDropPointer);
 dropList.addEventListener("pointercancel", endDropPointer);
 dropEl.addEventListener("click", (e) => {
+  if (dLens.suppressClick || dLens.pickTimer) return;
   const opt = e.target.closest(".sp-opt");
-  if (!opt || dLens.pickTimer) return;
+  if (!opt) return;
   const idx = optEls().indexOf(opt);
-  if (idx >= 0) {
-    markDropHot(idx);
-    moveDropLens(dLens.tops[idx] ?? 8, { lift: false });
-    if (e.detail === 0 || reduceMotion() || idx === dLens.activeIdx) {
-      pickDropBrand(opt.dataset.g);
-    } else {
-      dLens.pickTimer = setTimeout(() => { markDropHot(-1); pickDropBrand(opt.dataset.g); }, 130);
-    }
-  }
+  if (idx >= 0) commitDropOpt(idx, e.detail === 0 ? 0 : 120);
 });
 dropBd.addEventListener("click", closeDrop);
 document.addEventListener("click", (e) => {
