@@ -1,5 +1,5 @@
 /* Galaxy Foldable: lazy video card with one short bold line over it */
-.fold { padding: 4px 0 44px; }
+.fold { padding: 4px 0 8px; }
 .v-card {
   position: relative; margin: 16px 20px 0; aspect-ratio: 2 / 1; overflow: hidden; border-radius: 26px; background: #0b0b0c; color: #fff;
   box-shadow: 0 14px 28px rgba(11, 11, 12, 0.22); isolation: isolate;

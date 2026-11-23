@@ -4,7 +4,7 @@
 .h-scroll {
   position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior-y: contain; scrollbar-width: none;
   padding-top: calc(env(safe-area-inset-top, 0px) + 70px);
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 120px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 100px);
 }
 .h-scroll::-webkit-scrollbar { display: none; }
 .home.active { animation: home-in 0.5s ease both; }
