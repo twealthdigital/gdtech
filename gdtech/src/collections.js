@@ -29,6 +29,11 @@ const IMAGES = {
   "tablets:Lenovo": { src: "/tablets/lenovo.webp", w: 1194, h: 760, z: 1.05, up: 24 },
   "tablets:Infinix": { src: "/tablets/infinix.webp", w: 505, h: 760, z: 1, up: 4 },
   "tablets:Huawei": { src: "/tablets/huawei.webp", w: 1050, h: 760, z: 1.05, up: 26 },
+  "gaming:PS5": { src: "/gaming/playstation.webp", w: 525, h: 760, z: 1, up: 4 },
+  "gaming:Xbox": { src: "/gaming/xbox.webp", w: 644, h: 760, z: 1, up: 4 },
+  "gaming:Switch": { src: "/gaming/nintendo.webp", w: 956, h: 760, z: 1.05, up: 18 },
+  "gaming:ROG": { src: "/gaming/rog.webp", w: 1320, h: 760, z: 1.1, up: 24 },
+  "gaming:Logitech": { src: "/gaming/logitech.webp", w: 2227, h: 760, z: 1.1, up: 28 },
   "headsets:Sony": { src: "/headsets/sony.webp", w: 495, h: 760 },
   "headsets:JBL": { src: "/headsets/jbl.webp", w: 494, h: 760 },
   "headsets:Bose": { src: "/headsets/bose.webp", w: 578, h: 760 },
@@ -46,6 +51,9 @@ const TONE_OF = {
   // Tablets
   "tablets:Apple": "cream", "tablets:Samsung": "slate", "tablets:Lenovo": "orange",
   "tablets:Infinix": "cream", "tablets:Huawei": "ink",
+  // Gaming
+  "gaming:PS5": "slate", "gaming:Xbox": "cream", "gaming:Switch": "steel",
+  "gaming:ROG": "orange", "gaming:Logitech": "plum",
   // Headsets: colour contrasts with each headset
   "headsets:Sony": "cream", "headsets:JBL": "orange", "headsets:Bose": "graphite",
   "headsets:Anker": "cream", "headsets:Beats": "ink",

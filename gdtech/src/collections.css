@@ -95,3 +95,6 @@
 .col-grid[data-cat="tablets"] .has-img::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 6%, transparent 26%); }
 .col-grid[data-cat="tablets"] .has-img[data-brand="Apple"]::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 11%, transparent 36%); }
 .col-grid[data-cat="tablets"] .has-img[data-brand="Samsung"]::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 15%, transparent 44%); }
+
+/* Gaming: every label is one short line, so a small fade */
+.col-grid[data-cat="gaming"] .has-img::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 6%, transparent 26%); }
