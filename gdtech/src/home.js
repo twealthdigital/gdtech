@@ -5,6 +5,7 @@ import "./filter.js";
 import "./categories.js";
 import "./tradein.css";
 import "./launch.css";
+import "./launch.js";
 import "./collections.js";
 
 const $ = (id) => document.getElementById(id);

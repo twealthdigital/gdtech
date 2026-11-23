@@ -1,22 +1,36 @@
-/* Launch banner: the poster fades into black at the bottom, headline and button sit on the black */
-.launch { margin: 22px 20px 0; }
-.l-card {
-  position: relative; display: block; overflow: hidden; border-radius: 28px; background: #0b0b0c; color: #fff;
-  box-shadow: 0 16px 30px rgba(11, 11, 12, 0.22);
+/* Hottest deals: heading plus a swipe carousel of deal cards. Each photo is cropped short and fades into black,
+   headline and button sit on the black. */
+.deals { margin: 6px 0 0; padding: 0 0 28px; }
+.deals-head { padding: 0 20px; }
+.deals-head .col-kick { font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--orange); }
+.deals-head h2 { margin-top: 2px; font-size: 34px; line-height: 1; font-weight: 800; letter-spacing: -0.01em; color: var(--black); }
+@media (max-width: 400px) { .deals-head h2 { font-size: 29px; } }
+
+.d-track {
+  display: flex; gap: 12px; overflow-x: auto; padding: 16px 20px 36px;
+  scroll-snap-type: x mandatory; scroll-padding-left: 20px; scrollbar-width: none;
+  overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y;
 }
-.l-card img {
-  display: block; width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: cover;
-  -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 100%); mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+.d-track::-webkit-scrollbar { display: none; }
+.d-card {
+  position: relative; flex: 0 0 88%; scroll-snap-align: start; overflow: hidden; border-radius: 26px; background: #0b0b0c; color: #fff;
+  box-shadow: 0 14px 28px rgba(11, 11, 12, 0.2);
 }
-.l-row { position: relative; z-index: 1; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding: 0 18px 18px; margin-top: -54px; }
-.l-text { min-width: 0; }
-.l-kick { display: block; margin-bottom: 5px; font-size: 10.5px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--orange); }
-.l-card h3 { font-size: 23px; line-height: 1.05; font-weight: 800; letter-spacing: -0.01em; }
-.l-btn {
-  flex: none; display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 18px; border-radius: 99px;
-  font-size: 14px; font-weight: 700; color: #fff; background: var(--orange);
-  box-shadow: 0 10px 22px rgba(255, 122, 26, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  transition: transform 0.15s ease;
+.d-track[data-n="1"] .d-card { flex-basis: 100%; }
+.d-card img {
+  display: block; width: 100%; height: auto; aspect-ratio: var(--ar, 736 / 440); object-fit: cover; pointer-events: none; -webkit-user-drag: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 60%, transparent 100%); mask-image: linear-gradient(to bottom, #000 60%, transparent 100%);
 }
-.l-btn svg { width: 14px; height: 14px; }
-.l-card:active .l-btn, .l-btn:active { transform: scale(0.95); }
+.d-row { position: relative; z-index: 1; display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; padding: 0 16px 16px; margin-top: -52px; }
+.d-text { min-width: 0; }
+.d-kick { display: block; margin-bottom: 4px; font-size: 10px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--orange); }
+.d-card h3 { font-size: 20px; line-height: 1.05; font-weight: 800; letter-spacing: -0.01em; }
+.d-btn {
+  flex: none; display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 16px; border-radius: 99px;
+  font-size: 13.5px; font-weight: 700; color: #fff; background: var(--orange);
+  box-shadow: 0 10px 22px rgba(255, 122, 26, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4); transition: transform 0.15s ease;
+}
+.d-btn svg { width: 13px; height: 13px; }
+.d-btn:active { transform: scale(0.95); }
+.d-dots { justify-content: center; margin-top: -18px; }
+.d-dots:empty, .d-dots[data-n="1"] { display: none; }
