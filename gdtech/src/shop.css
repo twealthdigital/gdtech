@@ -289,8 +289,18 @@
 }
 
 /* Search bar in the shop header */
-.sp-title { flex: none; max-width: 30%; }
-.sp-search { height: 40px; }
+/* Liquid glass pill. Compact beside the title; when tapped it grows over the title and takes the whole header row. */
+.sp-title { flex: none; max-width: 30%; transition: max-width 0.5s cubic-bezier(0.3, 1.1, 0.45, 1), opacity 0.25s ease, margin 0.5s cubic-bezier(0.3, 1.1, 0.45, 1); }
+.shop .sp-search {
+  --g1: 0.55; --g2: 0.2; height: 42px; flex: 0 1 150px; margin-left: auto; background-color: rgba(11, 11, 12, 0.05);
+  box-shadow: inset 2px 2px 2px -1px #fff, inset -2px -2px 3px -1px rgba(255, 255, 255, 0.85), inset 0 0 14px rgba(255, 255, 255, 0.5), 0 0 0 0.5px rgba(120, 100, 90, 0.2), 0 8px 18px rgba(90, 40, 0, 0.14);
+  transition: flex-basis 0.6s cubic-bezier(0.3, 1.25, 0.45, 1), background 0.25s ease, border-color 0.25s ease, box-shadow 0.35s ease, transform 0.4s cubic-bezier(0.3, 1.5, 0.45, 1);
+}
+.shop .sp-search:active { transform: scale(1.03); }
+.shop .h-top:has(.sp-search:focus-within) .sp-search,
+.shop .h-top:has(.sp-search input:not(:placeholder-shown)) .sp-search { flex-basis: 100%; }
+.shop .h-top:has(.sp-search:focus-within) .sp-title,
+.shop .h-top:has(.sp-search input:not(:placeholder-shown)) .sp-title { max-width: 0; opacity: 0; margin-right: -12px; }
 .sp-search input::placeholder { color: var(--muted); font-weight: 500; }
 .sp-none { margin-top: 26px; padding: 26px 18px; border-radius: 24px; text-align: center; background: #f2efe9; font-size: 14px; font-weight: 700; color: rgba(11, 11, 12, 0.7); }
 .sp-sec[hidden] { display: none; }
