@@ -90,3 +90,8 @@
   .k-text b { font-size: 21px; }
 }
 @media (prefers-reduced-motion: reduce) { .k-card, .has-img .k-art { animation: none; transition: none; transform: none; } .c-tab { transition: none; } }
+
+/* Tablets: fade follows the label size (Samsung biggest, Apple medium, one-line names small) */
+.col-grid[data-cat="tablets"] .has-img::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 6%, transparent 26%); }
+.col-grid[data-cat="tablets"] .has-img[data-brand="Apple"]::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 11%, transparent 36%); }
+.col-grid[data-cat="tablets"] .has-img[data-brand="Samsung"]::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 15%, transparent 44%); }

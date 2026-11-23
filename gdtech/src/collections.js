@@ -24,6 +24,11 @@ const IMAGES = {
   "laptops:Lenovo": { src: "/laptops/lenovo.webp", w: 844, h: 760, z: 1.9, up: 5 },
   "laptops:Asus": { src: "/laptops/asus.webp", w: 1237, h: 760, z: 1.5, up: 10 },
   "laptops:Samsung": { src: "/laptops/samsung.webp", w: 1238, h: 760, z: 1.2, up: 20 },
+  "tablets:Apple": { src: "/tablets/apple.webp", w: 664, h: 760, z: 1, up: 4 },
+  "tablets:Samsung": { src: "/tablets/samsung.webp", w: 1118, h: 760, z: 1.05, up: 26 },
+  "tablets:Lenovo": { src: "/tablets/lenovo.webp", w: 1194, h: 760, z: 1.05, up: 24 },
+  "tablets:Infinix": { src: "/tablets/infinix.webp", w: 505, h: 760, z: 1, up: 4 },
+  "tablets:Huawei": { src: "/tablets/huawei.webp", w: 1050, h: 760, z: 1.05, up: 26 },
   "headsets:Sony": { src: "/headsets/sony.webp", w: 495, h: 760 },
   "headsets:JBL": { src: "/headsets/jbl.webp", w: 494, h: 760 },
   "headsets:Bose": { src: "/headsets/bose.webp", w: 578, h: 760 },
@@ -38,6 +43,9 @@ const TONE_OF = {
   // Laptops: light silver ones sit on dark cards, dark ones on light cards
   "laptops:Apple": "silver", "laptops:Dell": "pewter", "laptops:HP": "navy",
   "laptops:Lenovo": "onyx", "laptops:Asus": "graphite", "laptops:Samsung": "steel",
+  // Tablets
+  "tablets:Apple": "cream", "tablets:Samsung": "slate", "tablets:Lenovo": "orange",
+  "tablets:Infinix": "cream", "tablets:Huawei": "ink",
   // Headsets: colour contrasts with each headset
   "headsets:Sony": "cream", "headsets:JBL": "orange", "headsets:Bose": "graphite",
   "headsets:Anker": "cream", "headsets:Beats": "ink",
