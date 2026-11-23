@@ -59,7 +59,7 @@
           <input type="search" placeholder="Type to search" aria-label="Search phones" autocomplete="off" />
           <button class="s-filter" type="button" aria-label="Filters" aria-expanded="false" aria-controls="fm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 8h9M17 8h3M4 16h3M11 16h9"/><circle cx="15" cy="8" r="2"/><circle cx="9" cy="16" r="2"/></svg><i class="s-badge" id="fm-badge"></i></button>
         </label>
-        <button class="bag" type="button" aria-label="Bag">
+        <button class="bag" type="button" aria-label="Bag" aria-expanded="false" aria-controls="cart">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>
           <b></b>
         </button>
@@ -185,6 +185,26 @@
         <div class="cm-grid fm-sec" id="cm-grid" style="--i:1"></div>
         <div class="cm-brand-wrap fm-sec" id="cm-brand-wrap" style="--i:2"><div><p class="fm-label">Brands</p><div class="chips" id="cm-brands"></div></div></div>
         <div class="fm-sec" style="--i:3"><button class="fm-apply" id="cm-apply" type="button">Show all gadgets</button></div>
+      </section>
+
+      <div class="fm-backdrop" id="cart-bd"></div>
+      <section class="fm cart glass" id="cart" role="dialog" aria-label="Your bag" aria-hidden="true">
+        <div class="cart-head fm-sec" style="--i:0">
+          <h3>Your bag</h3><span class="cart-pill" id="cart-count" hidden>0</span>
+          <button class="cart-x" id="cart-close" type="button" aria-label="Close bag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        </div>
+        <ul class="cart-list fm-sec" id="cart-list" style="--i:1" hidden></ul>
+        <div class="cart-empty fm-sec" id="cart-empty" style="--i:1">
+          <span class="cart-empty-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg></span>
+          <h4>Your bag is empty</h4>
+          <p>Add a phone, laptop or gadget and it will show up here.</p>
+          <button class="fm-apply" id="cart-shop" type="button">Start shopping</button>
+        </div>
+        <div class="cart-foot fm-sec" id="cart-foot" style="--i:2" hidden>
+          <div class="cart-total"><span>Subtotal</span><b id="cart-sub">₦0</b></div>
+          <p class="cart-note">Delivery is worked out at checkout.</p>
+          <button class="fm-apply" id="cart-checkout" type="button">Checkout</button>
+        </div>
       </section>
 
       <nav class="dock" id="dock" aria-label="Main">

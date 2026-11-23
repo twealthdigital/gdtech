@@ -2,6 +2,7 @@ import "./base.css";
 import "./glass.js";
 import "./home.css";
 import "./filter.js";
+import "./cart.js";
 import "./dock.js";
 import "./categories.js";
 import "./tradein.css";
