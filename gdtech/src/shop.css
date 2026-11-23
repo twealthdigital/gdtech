@@ -313,39 +313,53 @@
 .sp-sec[hidden] { display: none; }
 .sp-card[hidden] { display: none; }
 
-/* Liquid glass brand dropdown anchored to the active gadget chip */
+/* Liquid glass brand dropdown anchored to the active gadget chip (matches bottom dock glass) */
 .sp-scroll.drop-lock { overflow-y: hidden; }
 .sp-drop-bd {
   position: absolute; top: var(--cut, 280px); left: 0; right: 0; bottom: 0; z-index: 30; pointer-events: none;
-  background: rgba(255, 255, 255, 0);
-  -webkit-backdrop-filter: blur(0px) saturate(1); backdrop-filter: blur(0px) saturate(1);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 22px);
-  mask-image: linear-gradient(to bottom, transparent 0, #000 22px);
-  transition: background 0.35s ease, backdrop-filter 0.45s ease, -webkit-backdrop-filter 0.45s ease;
+  background: rgba(11, 11, 12, 0);
+  transition: background 0.3s ease;
 }
 .sp-drop-bd.open {
-  background: rgba(255, 255, 255, 0.24); pointer-events: auto;
-  -webkit-backdrop-filter: blur(12px) saturate(1.4); backdrop-filter: blur(12px) saturate(1.4);
+  background: rgba(11, 11, 12, 0.04); pointer-events: auto;
 }
 .sp-drop {
   position: absolute; z-index: 31; box-sizing: border-box;
-  padding: 8px; border-radius: 24px;
-  --g1: 0.78; --g2: 0.52; background-color: rgba(255, 255, 255, 0.62);
-  max-height: min(340px, calc(100% - 260px)); overflow-y: auto; scrollbar-width: none;
+  border-radius: 26px;
   transform-origin: var(--ox, 50%) var(--oy, -8px);
   opacity: 0; visibility: hidden; transform: translateY(-8px) scale(0.32, 0.14);
-  transition: transform 0.28s cubic-bezier(0.5, 0, 0.75, 0), opacity 0.16s ease 0.04s, border-radius 0.28s ease, visibility 0s linear 0.28s;
+  transition: transform 0.28s cubic-bezier(0.5, 0, 0.75, 0), opacity 0.16s ease 0.04s, visibility 0s linear 0.28s;
 }
-.sp-drop::-webkit-scrollbar { display: none; }
-.sp-drop:not(.open) { border-radius: 50px; }
 .sp-drop.open {
-  opacity: 1; visibility: visible; transform: none; border-radius: 24px;
-  transition: transform 0.48s cubic-bezier(0.22, 1.22, 0.36, 1), opacity 0.16s ease, border-radius 0.32s ease, visibility 0s;
+  opacity: 1; visibility: visible; transform: none;
+  transition: transform 0.48s cubic-bezier(0.22, 1.22, 0.36, 1), opacity 0.16s ease, visibility 0s;
 }
+.sp-drop-glass {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none; border-radius: 26px;
+  --g1: 0.54; --g2: 0.24;
+}
+.sp-drop-glass.glass {
+  box-shadow:
+    inset 2px 2px 2px -1px #fff,
+    inset -2px -2px 3px -1px rgba(255, 255, 255, 0.85),
+    inset 0 0 16px rgba(255, 255, 255, 0.45),
+    0 0 0 0.5px rgba(120, 100, 90, 0.16),
+    0 12px 26px rgba(90, 40, 0, 0.22);
+}
+.lg-refract .sp-drop-glass.glass {
+  -webkit-backdrop-filter: var(--lens, saturate(1)) blur(4.5px) saturate(1.9) brightness(1.08);
+  backdrop-filter: var(--lens, saturate(1)) blur(4.5px) saturate(1.9) brightness(1.08);
+}
+.sp-drop-list {
+  position: relative; z-index: 1; padding: 8px; border-radius: 26px;
+  max-height: min(340px, calc(100dvh - 280px)); overflow-y: auto; scrollbar-width: none;
+}
+.sp-drop-list::-webkit-scrollbar { display: none; }
 .sp-opt {
   position: relative; z-index: 3; display: flex; align-items: center; justify-content: space-between; gap: 10px;
   width: 100%; height: 42px; padding: 0 12px; border-radius: 16px; background: none; text-align: left;
   font-size: 14px; font-weight: 700; color: var(--black);
+  text-shadow: 0 1px 8px rgba(255, 255, 255, 0.65);
   opacity: 0; transform: translateY(-6px) scale(0.96); filter: blur(4px);
   transition: opacity 0.16s ease, transform 0.16s ease, filter 0.16s ease, background 0.2s ease, color 0.2s ease;
 }
@@ -354,9 +368,9 @@
   transition: opacity 0.28s ease, transform 0.38s cubic-bezier(0.2, 1.2, 0.4, 1), filter 0.24s ease, background 0.2s ease, color 0.2s ease;
   transition-delay: calc(var(--i, 0) * 24ms + 45ms);
 }
-.sp-opt:hover { background: rgba(11, 11, 12, 0.05); }
+.sp-opt:hover { background: rgba(255, 255, 255, 0.28); }
 .sp-opt:active { transform: scale(0.96); }
-.sp-opt.on { background: var(--black); color: var(--orange); }
+.sp-opt.on { background: var(--black); color: var(--orange); text-shadow: none; }
 .sp-opt-chk {
   flex: none; width: 16px; height: 16px; display: grid; place-items: center;
   opacity: 0; transform: scale(0.5);

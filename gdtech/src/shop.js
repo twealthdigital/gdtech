@@ -4,6 +4,7 @@ import { priceFor } from "./data/phones.js";
 import { SHOPS, OPT } from "./data/gadgets.js";
 import { galleryOf, cardPhoto, registerArt } from "./data/gallery.js";
 import { IMAGES, TITLES, TONE_OF } from "./collections.js";
+import { lensBoost } from "./glass.js";
 import { heroGeomCalc, reduceShopFilter, hasDropdownArrow, chipLabelFor } from "./shop-logic.js";
 
 // The shop page. Anything can open it:
@@ -96,6 +97,8 @@ function card(item, tone, i, wide) {
 }
 
 const dropEl = $("sp-drop");
+const dropGlass = $("sp-drop-glass");
+const dropList = $("sp-drop-list");
 const dropBd = $("sp-drop-bd");
 dropEl.inert = true;
 let chipsMode = null;
@@ -177,7 +180,7 @@ function syncChips({ scroll = true, instant = false, animateLabel = false } = {}
 function renderDrop() {
   if (!state.cat) return;
   const opts = [{ id: "", label: "All" }, ...brandsOf(state.cat).map((b) => ({ id: b.brand, label: b.title }))];
-  dropEl.innerHTML = opts.map((o, i) => {
+  dropList.innerHTML = opts.map((o, i) => {
     const on = !o.id ? !state.group : state.group === o.id;
     return `<button class="sp-opt${on ? " on" : ""}" type="button" role="option" aria-selected="${on}" data-g="${o.id}" style="--i:${i}"><span>${o.label}</span><span class="sp-opt-chk" aria-hidden="true">${CHECK}</span></button>`;
   }).join("");
@@ -212,6 +215,10 @@ function openDrop() {
   dropBd.classList.add("open");
   dropEl.classList.add("open");
   anchor.setAttribute("aria-expanded", "true");
+  if (dropGlass) {
+    lensBoost(dropGlass, 1.45);
+    setTimeout(() => state.dropOpen && lensBoost(dropGlass, 1), 320);
+  }
 }
 
 function closeDrop() {
@@ -222,6 +229,7 @@ function closeDrop() {
   scroller.classList.remove("drop-lock");
   dropEl.setAttribute("aria-hidden", "true");
   dropEl.inert = true;
+  if (dropGlass) lensBoost(dropGlass, 1);
   const anchor = chipsEl.querySelector('.c-tab.on[aria-expanded]');
   if (anchor) anchor.setAttribute("aria-expanded", "false");
 }
