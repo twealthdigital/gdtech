@@ -1,9 +1,9 @@
 import "./collections.css";
 import { CATS, svg } from "./data/categories.js";
 import { picked, setCategory } from "./categories.js";
+import { lensBoost } from "./glass.js";
 
 const $ = (id) => document.getElementById(id);
-const DEFAULT_CAT = "mobile";
 
 // Display names for collections (falls back to the brand name)
 export const TITLES = {
@@ -58,48 +58,182 @@ export const TONE_OF = {
   "headsets:Anker": "cream", "headsets:Beats": "ink",
 };
 
+const TAB_LABEL = { mobile: "Phones", laptops: "Laptops", headsets: "Headsets", tablets: "Tablets", gaming: "Gaming" };
+const TABS = [{ id: "all", name: "All" }, ...CATS.map((c) => ({ id: c.id, name: TAB_LABEL[c.id] || c.name }))];
+
+const scrollEl = $("col-scroll");
 const tabsEl = $("col-tabs");
 const gridEl = $("col-grid");
+const midEl = $("col-mid");
+const searchBox = $("col-search");
+const qEl = $("col-q");
+const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-tabsEl.innerHTML = CATS.map((c) => `<button class="c-tab" type="button" role="tab" data-id="${c.id}">${c.name}</button>`).join("");
+tabsEl.innerHTML = TABS.map((t) => `<button class="c-tab" type="button" role="tab" data-id="${t.id}">${t.name}</button>`).join("");
 
-function card(cat, brand, i) {
+function cardHtml(cat, brand, i) {
   const key = cat.id + ":" + brand;
   const title = TITLES[key] || brand;
   const sub = title !== brand ? brand : "";
   const img = IMAGES[key];
+  const catLabel = TAB_LABEL[cat.id] || cat.name;
+  const searchStr = `${title} ${brand} ${catLabel}`.toLowerCase();
   const art = img
     ? `<img src="${img.src}" width="${img.w}" height="${img.h}" alt="${title}"${img.z ? ` style="--z:${img.z};--up:${img.up}%${img.x ? `;--x:${img.x}%` : ""}"` : ""} loading="lazy" decoding="async" draggable="false" />`
     : `<span class="k-ico">${svg(cat.icon)}</span>`;
-  return `<button class="k-card ${TONE_OF[key] || TONES[i % TONES.length]}${img ? " has-img" : ""}" type="button" data-cat="${cat.id}" data-brand="${brand}" style="--i:${i}">
+  return `<button class="k-card ${TONE_OF[key] || TONES[i % TONES.length]}${img ? " has-img" : ""}" type="button" data-cat="${cat.id}" data-brand="${brand}" data-key="${key}" data-search="${searchStr}" style="--i:${i}">
     <span class="k-art">${art}</span>
     <span class="k-text">${sub ? `<small>${sub}</small>` : ""}<b>${title}</b></span>
     <span class="k-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
   </button>`;
 }
 
-let shown = null;
-function render() {
-  const id = picked.cat || DEFAULT_CAT;
+// Build all collection cards at once so all categories appear in a 2x2 grid
+const ALL_ENTRIES = [];
+let idx = 0;
+for (const cat of CATS) {
+  for (const brand of cat.brands) {
+    ALL_ENTRIES.push({ cat, brand, key: cat.id + ":" + brand, idx: idx++ });
+  }
+}
+gridEl.innerHTML = ALL_ENTRIES.map((e) => cardHtml(e.cat, e.brand, e.idx)).join("");
+
+const cardByKey = new Map();
+gridEl.querySelectorAll(".k-card").forEach((el) => cardByKey.set(el.dataset.key, el));
+
+let activeTab = "all";
+
+function updateWide() {
+  gridEl.querySelector(".sp-none")?.remove();
+  const cards = [...gridEl.querySelectorAll(".k-card")];
+  cards.forEach((c) => c.classList.remove("wide"));
+  const vis = cards.filter((c) => !c.hidden);
+  if (vis.length % 2 === 1) vis[vis.length - 1].classList.add("wide");
+  const q = (qEl?.value || "").trim();
+  if (!vis.length && q) {
+    gridEl.insertAdjacentHTML("beforeend", `<div class="sp-none">Nothing matches "${q.replace(/[<>&"]/g, "")}"</div>`);
+  }
+}
+
+function orderedEntries(tabId) {
+  if (!tabId || tabId === "all") return ALL_ENTRIES;
+  const top = ALL_ENTRIES.filter((e) => e.cat.id === tabId);
+  const rest = ALL_ENTRIES.filter((e) => e.cat.id !== tabId);
+  return [...top, ...rest];
+}
+
+function syncTabs(tabId, instant = false) {
   tabsEl.querySelectorAll(".c-tab").forEach((t) => {
-    const on = t.dataset.id === id;
+    const on = t.dataset.id === tabId;
     t.classList.toggle("on", on);
-    t.setAttribute("aria-selected", on);
-    if (on && shown !== id) tabsEl.scrollTo({ left: t.offsetLeft - (tabsEl.clientWidth - t.offsetWidth) / 2, behavior: "smooth" });
+    t.setAttribute("aria-selected", String(on));
+    if (on) tabsEl.scrollTo({ left: Math.max(0, t.offsetLeft - (tabsEl.clientWidth - t.offsetWidth) / 2), behavior: instant ? "auto" : "smooth" });
   });
-  if (shown === id) return;
-  shown = id;
-  const cat = CATS.find((c) => c.id === id);
-  gridEl.innerHTML = cat.brands.map((b, i) => card(cat, b, i)).join("");
-  gridEl.dataset.cat = id;
+}
+
+// Reorder cards so the selected category moves to the top and phones shift down smoothly
+export function setCollectionFilter(tabId = "all", { animate = true, scrollTop = false } = {}) {
+  const nextTab = tabId && TABS.some((t) => t.id === tabId) ? tabId : "all";
+  syncTabs(nextTab, !animate);
+  if (activeTab === nextTab) {
+    if (scrollTop && scrollEl) scrollEl.scrollTo({ top: 0, behavior: animate ? "smooth" : "auto" });
+    return;
+  }
+  activeTab = nextTab;
+
+  const canFlip = animate && !reduceMotion() && gridEl.offsetParent !== null;
+  const firstRects = new Map();
+  if (canFlip) {
+    cardByKey.forEach((el, k) => {
+      if (!el.hidden) firstRects.set(k, el.getBoundingClientRect());
+    });
+  }
+
+  const ordered = orderedEntries(nextTab);
+  const frag = document.createDocumentFragment();
+  ordered.forEach((e) => {
+    const el = cardByKey.get(e.key);
+    if (el) frag.appendChild(el);
+  });
+  gridEl.appendChild(frag);
+  updateWide();
+
+  if (canFlip) {
+    cardByKey.forEach((el, k) => {
+      const first = firstRects.get(k);
+      if (!first || el.hidden) return;
+      const last = el.getBoundingClientRect();
+      const dx = first.left - last.left;
+      const dy = first.top - last.top;
+      if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+      el.animate(
+        [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }],
+        { duration: 440, easing: "cubic-bezier(0.22, 1.08, 0.36, 1)" }
+      );
+    });
+  }
+
+  if (scrollTop && scrollEl && scrollEl.scrollTop > 12) {
+    scrollEl.scrollTo({ top: 0, behavior: animate ? "smooth" : "auto" });
+  }
+}
+
+export function resetCollectionSearch() {
+  if (!qEl) return;
+  qEl.value = "";
+  midEl?.classList.remove("searching");
+  cardByKey.forEach((el) => { el.hidden = false; });
+  updateWide();
+}
+
+function filterGrid() {
+  const q = (qEl?.value || "").trim().toLowerCase();
+  cardByKey.forEach((el) => {
+    el.hidden = q ? !el.dataset.search.includes(q) : false;
+  });
+  updateWide();
 }
 
 tabsEl.addEventListener("click", (e) => {
   const t = e.target.closest(".c-tab");
-  if (t) setCategory(t.dataset.id);
+  if (!t) return;
+  const id = t.dataset.id;
+  setCollectionFilter(id, { animate: true, scrollTop: true });
+  setCategory(id === "all" ? null : id);
 });
 
-// Tilt: the card leans toward the pointer and the phone rotates a little and shifts with it (mouse hover or finger)
+// Liquid glass search circle: smoothly expands left over the "Collections" title on click/focus
+function syncSearchClass() {
+  if (!midEl || !qEl) return;
+  const on = document.activeElement === qEl || qEl.value.trim().length > 0;
+  midEl.classList.toggle("searching", on);
+}
+if (searchBox && qEl) {
+  searchBox.addEventListener("click", () => {
+    if (document.activeElement !== qEl) {
+      qEl.focus();
+      lensBoost(searchBox, 1.35);
+      setTimeout(() => lensBoost(searchBox, 1), 240);
+    }
+  });
+  qEl.addEventListener("focus", syncSearchClass);
+  qEl.addEventListener("blur", syncSearchClass);
+  qEl.addEventListener("input", () => {
+    syncSearchClass();
+    filterGrid();
+  });
+  qEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { qEl.blur(); return; }
+    if (e.key === "Escape") {
+      e.stopPropagation();
+      if (qEl.value) { qEl.value = ""; filterGrid(); }
+      qEl.blur();
+      syncSearchClass();
+    }
+  });
+}
+
+// Tilt: the card leans toward the pointer and the device rotates a little and shifts with it
 const lean = (card, e) => {
   const r = card.getBoundingClientRect();
   const px = Math.max(-1, Math.min(1, ((e.clientX - r.left) / r.width) * 2 - 1));
@@ -124,14 +258,17 @@ gridEl.addEventListener("pointerout", (e) => {
 gridEl.addEventListener("pointerup", (e) => { const c = e.target.closest(".k-card"); if (c) setTimeout(() => settle(c), 220); });
 gridEl.addEventListener("pointercancel", (e) => { const c = e.target.closest(".k-card"); if (c) settle(c); });
 
-// Tapping a collection tells the rest of the app which one was opened
+// Tapping a collection card opens its brand shop on top of Collections
 gridEl.addEventListener("click", (e) => {
   const c = e.target.closest(".k-card");
-  if (c) document.dispatchEvent(new CustomEvent("collection:open", { detail: { cat: c.dataset.cat, brand: c.dataset.brand } }));
+  if (c) document.dispatchEvent(new CustomEvent("collection:open", { detail: { cat: c.dataset.cat, brand: c.dataset.brand, trigger: c } }));
 });
 
-// Follows the category bubbles and the "All categories" dropdown too
-document.addEventListener("category:change", render);
+// Follow category selections from Home
+document.addEventListener("category:change", () => {
+  setCollectionFilter(picked.cat || "all", { animate: false });
+});
 
-// Mobile is the default collection
-if (!picked.cat) setCategory(DEFAULT_CAT); else render();
+// Initial render: All tab active, all collections listed 2 by 2
+syncTabs("all", true);
+updateWide();

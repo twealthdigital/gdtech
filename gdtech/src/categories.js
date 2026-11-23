@@ -86,7 +86,12 @@ function choose(id) {
   paint();
 }
 
-list.addEventListener("click", (e) => { const b = e.target.closest(".cat"); if (b) choose(b.dataset.id); });
+list.addEventListener("click", (e) => {
+  const b = e.target.closest(".cat");
+  if (!b) return;
+  setCategory(b.dataset.id);
+  document.dispatchEvent(new CustomEvent("collections:open", { detail: { cat: b.dataset.id, trigger: b } }));
+});
 grid.addEventListener("click", (e) => { const b = e.target.closest(".cm-tile"); if (b) choose(b.dataset.id); });
 brandBox.addEventListener("click", (e) => {
   const c = e.target.closest(".chip");
@@ -119,7 +124,14 @@ function close() {
 }
 allBtn.addEventListener("click", () => (panel.classList.contains("open") ? close() : open()));
 backdrop.addEventListener("click", close);
-apply.addEventListener("click", close);
+apply.addEventListener("click", () => {
+  close();
+  if (picked.cat && picked.brands.length === 1) {
+    document.dispatchEvent(new CustomEvent("collection:open", { detail: { cat: picked.cat, brand: picked.brands[0], trigger: apply } }));
+  } else {
+    document.dispatchEvent(new CustomEvent("collections:open", { detail: { cat: picked.cat || "all", trigger: apply } }));
+  }
+});
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
 
 paint();

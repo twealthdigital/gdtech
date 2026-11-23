@@ -3,7 +3,7 @@ import { CATS, svg } from "./data/categories.js";
 import { priceFor } from "./data/phones.js";
 import { SHOPS, OPT } from "./data/gadgets.js";
 import { galleryOf, cardPhoto, registerArt } from "./data/gallery.js";
-import { IMAGES, TITLES, TONE_OF } from "./collections.js";
+import { IMAGES, TITLES, TONE_OF, setCollectionFilter, resetCollectionSearch } from "./collections.js";
 import { lensBoost } from "./glass.js";
 import { heroGeomCalc, reduceShopFilter, hasDropdownArrow, chipLabelFor, dropOptionIndexForY, toggleFavId, orderedFavIds } from "./shop-logic.js";
 
@@ -35,6 +35,9 @@ const fvGrid = $("fv-grid");
 const fvMeta = $("fv-meta");
 const fvEmpty = $("fv-empty");
 const fvTop = favEl.querySelector(".h-top");
+const colEl = $("collections");
+const colScroll = $("col-scroll");
+const colTop = colEl.querySelector(".h-top");
 const ALL = { cat: "all", brand: "all", focus: null };
 const naira = (n) => "₦" + Number(n).toLocaleString("en-NG");
 
@@ -54,7 +57,7 @@ const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
 const CARD_HEART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9-9.6A4.9 4.9 0 0 1 12 7.6a4.9 4.9 0 0 1 9 3.3c-1.5 5-9 9.6-9 9.6z"/></svg>';
 const BAG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5.7 8.6a1 1 0 0 1 1-.9h10.6a1 1 0 0 1 1 .9l.95 10.5a2 2 0 0 1-1.99 2.2H6.74a2 2 0 0 1-1.99-2.2L5.7 8.6z"/><path d="M9 9V6.5a3 3 0 0 1 6 0V9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
 
-const state = { route: null, view: null, cat: null, group: null, dropOpen: false, searching: false, trigger: null, open: false, favOpen: false, fvTrigger: null, pid: null, ptrigger: null, pOpen: false };
+const state = { route: null, view: null, cat: null, group: null, dropOpen: false, searching: false, trigger: null, open: false, colOpen: false, colTrigger: null, favOpen: false, fvTrigger: null, pid: null, ptrigger: null, pOpen: false };
 
 // Every phone by id, so a product page can find its photo, its series and its neighbours
 const PRODUCTS = {};
@@ -561,6 +564,11 @@ const TICK = '<svg class="ok" viewBox="0 0 24 24" fill="none" stroke="currentCol
 const BAG_LINE = '<svg class="bagi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>';
 const GUIDE = "Storage is the space for your photos, videos and apps. Pick more if you film a lot or keep many apps.";
 
+const ANGLES = [
+  { id: "front", label: "Front angle" },
+  { id: "left", label: "Left angle" },
+  { id: "right", label: "Right angle" },
+];
 const sel = { rec: null, gallery: [], g: 0, s: 0, q: 1, adding: false };
 const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 const wait = (ms) => new Promise((r) => setTimeout(r, reduceMotion() ? Math.min(ms, 120) : ms));
@@ -570,11 +578,13 @@ const wasOf = () => { const it = sel.rec.item; return it.was ? Math.round((price
 
 function renderProduct(rec) {
   const { item, group } = rec;
-  Object.assign(sel, { rec, gallery: galleryOf(item.id), g: 0, s: 0, q: 1, adding: false });
+  const base = cardPhoto(item.id) || galleryOf(item.id)[0] || null;
+  const angles = base ? ANGLES.map((a) => ({ ...base, angle: a.id, label: a.label })) : [];
+  Object.assign(sel, { rec, gallery: angles, g: 0, s: 0, q: 1, adding: false });
   const off = item.was ? Math.round((1 - item.price / item.was) * 100) : 0;
   const tags = (group.isNew ? '<span class="pd-tag new">New</span>' : "") + (off > 0 ? `<span class="pd-tag off">Discount ${off}%</span>` : "");
   const thumbs = sel.gallery.length > 1
-    ? `<div class="pd-thumbs" role="tablist" aria-label="Photos">${sel.gallery.map((p, i) => `<button class="pd-th${i ? "" : " on"}" type="button" role="tab" data-i="${i}" aria-label="Photo ${i + 1}"><img src="${p.src}" alt="" loading="lazy" decoding="async" draggable="false" /></button>`).join("")}</div>`
+    ? `<div class="pd-thumbs" role="tablist" aria-label="Product angles">${sel.gallery.map((p, i) => `<button class="pd-th${i ? "" : " on"}" type="button" role="tab" data-i="${i}" aria-selected="${i === 0}" aria-label="${p.label}"><img class="ang-${p.angle}" src="${p.src}" alt="" loading="lazy" decoding="async" draggable="false" /></button>`).join("")}</div>`
     : "";
   const isFav = favs().includes(item.id);
   const opt = OPT[item.cat] || { label: "Select storage", guide: "Storage Guide", note: GUIDE };
@@ -614,11 +624,12 @@ function paintStage() {
   const bg = $("pd-bg");
   if (!p) { img.removeAttribute("src"); img.hidden = true; return; }
   img.hidden = false;
-  img.src = p.src;
+  if (img.getAttribute("src") !== p.src) img.src = p.src;
   img.className = "pd-img " + p.kind;
+  img.dataset.angle = p.angle || "front";
   bg.style.backgroundImage = p.kind === "cut" ? "" : `url("${p.src}")`;
   bg.classList.toggle("blur", p.kind !== "cut");
-  pdBody.querySelectorAll(".pd-th").forEach((b, i) => { b.classList.toggle("on", i === sel.g); b.setAttribute("aria-selected", i === sel.g); });
+  pdBody.querySelectorAll(".pd-th").forEach((b, i) => { b.classList.toggle("on", i === sel.g); b.setAttribute("aria-selected", String(i === sel.g)); });
 }
 
 function paintTotal() {
@@ -718,9 +729,8 @@ pdBody.addEventListener("click", (e) => {
   if (th) {
     const i = +th.dataset.i;
     if (i === sel.g) return;
-    const img = $("pd-img");
-    img.classList.add("swap");
-    setTimeout(() => { sel.g = i; paintStage(); img.classList.remove("swap"); }, 140);
+    sel.g = i;
+    paintStage();
   } else if (chip) {
     sel.s = +chip.dataset.s;
     pdBody.querySelectorAll(".pd-chip").forEach((b) => { const on = b === chip; b.classList.toggle("on", on); b.setAttribute("aria-checked", on); });
@@ -790,10 +800,11 @@ function hideShop({ quiet = false } = {}) {
   closeDrop();
   state.open = false;
   shop.classList.remove("open", "behind");
-  if (!state.pOpen && !state.favOpen && !quiet) { home.classList.remove("shop-open"); dockTab("home"); }
+  if (!state.pOpen && !state.favOpen && !state.colOpen && !quiet) { home.classList.remove("shop-open"); dockTab("home"); }
+  else if (!state.pOpen && !state.favOpen && state.colOpen && !quiet) { colEl.classList.remove("behind"); dockTab("col"); }
   shop.setAttribute("aria-hidden", "true");
   shop.inert = true;
-  if (!quiet && !state.favOpen) {
+  if (!quiet && !state.favOpen && !state.colOpen) {
     const t = state.trigger;
     if (t && t.isConnected && typeof t.focus === "function") t.focus({ preventScroll: true });
   }
@@ -821,11 +832,45 @@ function hideFavs({ quiet = false } = {}) {
   if (!state.favOpen) return;
   state.favOpen = false;
   favEl.classList.remove("open", "behind");
-  if (!state.pOpen && !state.open && !quiet) { home.classList.remove("shop-open"); dockTab("home"); }
+  if (!state.pOpen && !state.open && !state.colOpen && !quiet) { home.classList.remove("shop-open"); dockTab("home"); }
   favEl.setAttribute("aria-hidden", "true");
   favEl.inert = true;
-  if (!quiet && !state.open) {
+  if (!quiet && !state.open && !state.colOpen) {
     const t = state.fvTrigger;
+    if (t && t.isConnected && typeof t.focus === "function") t.focus({ preventScroll: true });
+  }
+}
+
+function showCollections({ instant = false, trigger = null, cat = null } = {}) {
+  const wasOpen = state.colOpen;
+  if (!wasOpen) state.colTrigger = trigger || document.activeElement;
+  colEl.classList.remove("behind");
+  if (!wasOpen) {
+    resetCollectionSearch();
+    colScroll.scrollTop = 0;
+    colTop.classList.remove("stuck");
+  }
+  if (cat != null) setCollectionFilter(cat, { animate: false, scrollTop: true });
+  if (instant) colEl.classList.add("no-anim");
+  colEl.inert = false;
+  colEl.setAttribute("aria-hidden", "false");
+  colEl.classList.add("open");
+  home.classList.add("shop-open");
+  if (instant) requestAnimationFrame(() => requestAnimationFrame(() => colEl.classList.remove("no-anim")));
+  state.colOpen = true;
+  dockTab("col");
+  if (!instant && !wasOpen) setTimeout(() => $("col-back").focus({ preventScroll: true }), 420);
+}
+
+function hideCollections({ quiet = false } = {}) {
+  if (!state.colOpen) return;
+  state.colOpen = false;
+  colEl.classList.remove("open", "behind");
+  if (!state.pOpen && !state.open && !state.favOpen && !quiet) { home.classList.remove("shop-open"); dockTab("home"); }
+  colEl.setAttribute("aria-hidden", "true");
+  colEl.inert = true;
+  if (!quiet && !state.open && !state.favOpen) {
+    const t = state.colTrigger;
     if (t && t.isConnected && typeof t.focus === "function") t.focus({ preventScroll: true });
   }
 }
@@ -847,9 +892,10 @@ function showProduct(id, { instant = false, trigger = null } = {}) {
   home.classList.add("shop-open", "pd-open");
   if (state.open) shop.classList.add("behind");
   if (state.favOpen) favEl.classList.add("behind");
+  if (state.colOpen && !state.open && !state.favOpen) colEl.classList.add("behind");
   if (instant) requestAnimationFrame(() => requestAnimationFrame(() => pd.classList.remove("no-anim")));
   state.pOpen = true;
-  dockTab(state.favOpen ? "fav" : "shop");
+  dockTab(state.favOpen ? "fav" : state.open ? "shop" : state.colOpen ? "col" : "shop");
   if (!instant && !wasOpen) setTimeout(() => $("pd-back").focus({ preventScroll: true }), 420);
 }
 
@@ -860,27 +906,41 @@ function hideProduct(quiet = false) {
   home.classList.remove("pd-open");
   shop.classList.remove("behind");
   favEl.classList.remove("behind");
+  if (!state.open) colEl.classList.remove("behind");
   pd.setAttribute("aria-hidden", "true");
   pd.inert = true;
-  if (!state.open && !state.favOpen) { home.classList.remove("shop-open"); if (!quiet) dockTab("home"); }
-  else if (!quiet) dockTab(state.open ? "shop" : "fav");
+  if (!state.open && !state.favOpen && !state.colOpen) { home.classList.remove("shop-open"); if (!quiet) dockTab("home"); }
+  else if (!quiet) dockTab(state.open ? "shop" : state.favOpen ? "fav" : "col");
   const t = state.ptrigger;
   if (t && t.isConnected && typeof t.focus === "function") t.focus({ preventScroll: true });
 }
 
-export function openShop(route, { push = true, instant = false, trigger = null } = {}) {
+export function openShop(route, { push = true, instant = false, trigger = null, fromCol = false } = {}) {
   if (!route || !route.cat || !route.brand) return;
-  const had = state.open || state.favOpen || state.pOpen;
+  const keepCol = fromCol && state.colOpen;
+  const had = keepCol ? false : (state.open || state.favOpen || state.colOpen || state.pOpen);
   hideProduct(true);
   hideFavs({ quiet: true });
+  if (keepCol) colEl.classList.add("behind");
+  else hideCollections({ quiet: true });
   showShop(route, { instant, trigger });
   if (push) writeHash("#shop=" + encodeURIComponent(keyOf(route)), had);
 }
 
-export function openFavs({ push = true, instant = false, trigger = null } = {}) {
-  const had = state.open || state.favOpen || state.pOpen;
+export function openCollections({ push = true, instant = false, trigger = null, cat = null } = {}) {
+  const had = state.open || state.favOpen || state.colOpen || state.pOpen;
   hideProduct(true);
   hideShop({ quiet: true });
+  hideFavs({ quiet: true });
+  showCollections({ instant, trigger, cat });
+  if (push) writeHash("#collections", had);
+}
+
+export function openFavs({ push = true, instant = false, trigger = null } = {}) {
+  const had = state.open || state.favOpen || state.colOpen || state.pOpen;
+  hideProduct(true);
+  hideShop({ quiet: true });
+  hideCollections({ quiet: true });
   showFavs({ instant, trigger });
   if (push) writeHash("#fav", had);
 }
@@ -894,11 +954,12 @@ export function openProduct(id, { push = true, instant = false, trigger = null }
 
 // One step back: the page on top closes, whatever is under it shows again
 function back() {
-  if (!state.open && !state.favOpen && !state.pOpen) return;
+  if (!state.open && !state.favOpen && !state.colOpen && !state.pOpen) return;
   if (depth > 0) { history.back(); return; }
   hideProduct();
   hideShop();
   hideFavs();
+  hideCollections();
   if (location.hash) clean();
 }
 export function closeShop() { back(); }
@@ -907,6 +968,7 @@ export function closeShop() { back(); }
 function sync({ instant = false } = {}) {
   const p = location.hash.match(/^#product=(.+)$/);
   const s = location.hash.match(/^#shop=(.+)$/);
+  const c = /^#collections$/.test(location.hash);
   const f = /^#fav$/.test(location.hash);
   if (p) {
     const id = decodeURIComponent(p[1]);
@@ -917,20 +979,29 @@ function sync({ instant = false } = {}) {
     hideFavs({ quiet: true });
     const r = parse(decodeURIComponent(s[1]));
     if (!state.open || keyOf(state.route) !== keyOf(r)) showShop(r, { instant });
+  } else if (c) {
+    hideShop({ quiet: true });
+    hideFavs({ quiet: true });
+    if (!state.colOpen) showCollections({ instant });
+    else { colEl.classList.remove("behind"); dockTab("col"); }
   } else if (f) {
     hideShop({ quiet: true });
+    hideCollections({ quiet: true });
     if (!state.favOpen) showFavs({ instant });
   } else {
     hideShop();
     hideFavs();
+    hideCollections();
   }
 }
 
 /* ---------- wiring ---------- */
 shop.inert = true;
+colEl.inert = true;
 favEl.inert = true;
 pd.inert = true;
 $("sp-back").addEventListener("click", back);
+$("col-back").addEventListener("click", back);
 $("fv-back").addEventListener("click", back);
 $("pd-back").addEventListener("click", back);
 $("fv-browse").addEventListener("click", () => openShop(ALL, { trigger: $("fv-browse") }));
@@ -945,14 +1016,18 @@ window.addEventListener("popstate", (e) => { depth = (e.state && e.state.d) || 0
 document.addEventListener("dock:go", (e) => {
   const tab = e.detail && e.detail.tab;
   if (tab === "home") {
-    if (!state.open && !state.favOpen && !state.pOpen) return;
+    if (!state.open && !state.favOpen && !state.colOpen && !state.pOpen) return;
     hideProduct(true);
     hideShop();
     hideFavs();
+    hideCollections();
     toBase();
   } else if (tab === "shop") {
     if (state.open && !state.pOpen && state.route.cat === "all") { scroller.scrollTo({ top: 0, behavior: "smooth" }); return; }
     openShop(ALL, { trigger: document.activeElement });
+  } else if (tab === "col") {
+    if (state.colOpen && !state.open && !state.pOpen) { colScroll.scrollTo({ top: 0, behavior: "smooth" }); return; }
+    openCollections({ trigger: document.activeElement });
   } else if (tab === "fav") {
     if (state.favOpen && !state.pOpen) { fvScroll.scrollTo({ top: 0, behavior: "smooth" }); return; }
     openFavs({ trigger: document.activeElement });
@@ -964,9 +1039,13 @@ document.addEventListener("click", (e) => {
   const t = e.target.closest("[data-shop]");
   if (t) openShop(parse(t.dataset.shop), { trigger: t });
 });
+document.addEventListener("collections:open", (e) => {
+  const { cat, trigger } = e.detail || {};
+  openCollections({ cat: cat || "all", trigger: trigger || document.activeElement });
+});
 document.addEventListener("collection:open", (e) => {
-  const { cat, brand } = e.detail;
-  openShop({ cat, brand, focus: null }, { trigger: document.activeElement });
+  const { cat, brand, trigger } = e.detail;
+  openShop({ cat, brand, focus: null }, { trigger: trigger || document.activeElement, fromCol: state.colOpen });
 });
 
 // Tap a card heart to save/remove, or tap anywhere else on a product card to open its page
@@ -1163,11 +1242,12 @@ qEl.addEventListener("keydown", (e) => { if (e.key === "Enter") qEl.blur(); if (
 
 // Headers: fade-blur once content scrolls under them
 scroller.addEventListener("scroll", () => topEl.classList.toggle("stuck", scroller.scrollTop > 4), { passive: true });
+colScroll.addEventListener("scroll", () => colTop.classList.toggle("stuck", colScroll.scrollTop > 4), { passive: true });
 fvScroll.addEventListener("scroll", () => fvTop.classList.toggle("stuck", fvScroll.scrollTop > 4), { passive: true });
 pdScroll.addEventListener("scroll", () => pdTop.classList.toggle("stuck", pdScroll.scrollTop > 4), { passive: true });
 
 // Bag buttons here open the same bag panel as the home page
-const bags = [$("sp-bag"), $("fv-bag"), $("pd-bag")];
+const bags = [$("sp-bag"), $("col-bag"), $("fv-bag"), $("pd-bag")];
 bags.forEach((b) => b.addEventListener("click", () => document.querySelector("#home > .h-top .bag").click()));
 const syncBag = () => {
   const n = window.GDCart ? window.GDCart.kinds() : 0;
@@ -1180,4 +1260,4 @@ document.addEventListener("cart:change", syncBag);
 syncBag();
 
 // Opened from a shared link or a refresh
-if (/^#(shop=|product=|fav$)/.test(location.hash)) sync({ instant: true });
+if (/^#(shop=|product=|fav$|collections$)/.test(location.hash)) sync({ instant: true });

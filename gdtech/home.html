@@ -122,13 +122,6 @@
         </button>
       </section>
 
-      <section class="col" id="collections" aria-labelledby="col-title">
-        <p class="col-kick">Shop by</p>
-        <h2 id="col-title">COLLECTIONS</h2>
-        <div class="col-tabs" id="col-tabs" role="tablist" aria-label="Collections"></div>
-        <div class="col-grid" id="col-grid"></div>
-      </section>
-
       <section class="deals" aria-labelledby="deals-title">
         <div class="deals-head">
           <p class="col-kick">Don't miss</p>
@@ -153,6 +146,26 @@
         </article>
       </section>
       </div>
+
+<section class="collections" id="collections" aria-label="Collections" aria-hidden="true">
+        <header class="h-top">
+          <button class="sp-back" id="col-back" type="button" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+          <div class="col-mid" id="col-mid">
+            <p class="sp-title col-title">Collections</p>
+            <label class="search glass col-search" id="col-search" data-lens-bezel="0.5" data-lens-depth="1.5">
+              <svg class="s-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+              <input id="col-q" type="search" placeholder="Search collections" aria-label="Search collections" autocomplete="off" enterkeyhint="search" />
+            </label>
+          </div>
+          <button class="sp-bag" id="col-bag" type="button" aria-label="Bag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><b></b></button>
+        </header>
+        <div class="col-scroll" id="col-scroll">
+          <p class="col-kick">Shop by</p>
+          <h2 id="col-title">COLLECTIONS</h2>
+          <div class="col-tabs" id="col-tabs" role="tablist" aria-label="Collections"></div>
+          <div class="col-grid" id="col-grid"></div>
+        </div>
+      </section>
 
       <section class="shop" id="shop" aria-label="Shop" aria-hidden="true">
         <header class="h-top">
@@ -299,6 +312,7 @@
       <nav class="dock" id="dock" aria-label="Main">
         <button class="on" type="button" data-tab="home" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></button>
         <button type="button" data-tab="shop" aria-label="Shop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m2 7 4.4-4.4A2 2 0 0 1 7.8 2h8.4a2 2 0 0 1 1.4.6L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path class="door" d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2 2.7 2.7 0 0 1-1.6-.6.7.7 0 0 0-.8 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.6-.6.7.7 0 0 0-.8 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.6-.6.7.7 0 0 0-.8 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.6-.6.7.7 0 0 0-.8 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"/></svg><span>Shop</span></button>
+        <button type="button" data-tab="col" aria-label="Collections"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="2"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="2"/></svg><span>Collections</span></button>
         <button type="button" data-tab="fav" aria-label="Favourites"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-8-5-9.5-10A5 5 0 0 1 12 7.5 5 5 0 0 1 21.5 11C20 16 12 21 12 21z"/></svg><span>Favourites</span></button>
         <button type="button" data-tab="me" aria-label="Profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>Profile</span></button>
       </nav>

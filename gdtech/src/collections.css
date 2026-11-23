@@ -1,7 +1,81 @@
-/* Collections: solid, bold colour blocks that match the home banners. Minimal text, no glass. */
-.col { container-type: inline-size; margin: 34px 0 0; padding: 0 20px 28px; }
+/* Collections page: full-screen layer inside the home screen. */
+.collections {
+  position: absolute; inset: 0; z-index: 18; background: var(--white);
+  transform: translateX(104%); visibility: hidden;
+  box-shadow: -24px 0 48px rgba(11, 11, 12, 0.1);
+  transition: transform 0.55s cubic-bezier(0.22, 0.9, 0.26, 1), opacity 0.55s ease, visibility 0s linear 0.55s;
+}
+.collections:not(.open) { z-index: 17; }
+.collections.open { transform: none; visibility: visible; transition-delay: 0s; }
+.collections.open.behind { z-index: 17; transform: scale(0.94) translateX(-6%); opacity: 0.4; }
+.collections.no-anim { transition: none !important; }
+.collections .h-top { gap: 12px; }
+
+/* Header search: circular liquid glass icon by default, smoothly expands left over the Collections title on tap */
+.col-mid {
+  position: relative; flex: 1; min-width: 0; height: 42px;
+  display: flex; align-items: center;
+}
+.col-title {
+  flex: none; max-width: calc(100% - 52px);
+  transition: opacity 0.24s ease, transform 0.42s cubic-bezier(0.3, 1.1, 0.45, 1);
+}
+.col-search {
+  position: absolute; right: 0; top: 0; z-index: 2;
+  flex: none; width: 42px; height: 42px; margin: 0; padding: 0 10.5px; gap: 0;
+  overflow: hidden; cursor: pointer;
+  --g1: 0.55; --g2: 0.2;
+  background-color: rgba(11, 11, 12, 0.05);
+  box-shadow:
+    inset 2px 2px 2px -1px #fff,
+    inset -2px -2px 3px -1px rgba(255, 255, 255, 0.85),
+    inset 0 0 14px rgba(255, 255, 255, 0.5),
+    0 0 0 0.5px rgba(120, 100, 90, 0.2),
+    0 8px 18px rgba(90, 40, 0, 0.14);
+  transition:
+    width 0.48s cubic-bezier(0.28, 1.18, 0.36, 1),
+    padding 0.38s ease,
+    gap 0.35s ease,
+    background 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.35s ease,
+    transform 0.35s cubic-bezier(0.3, 1.5, 0.45, 1);
+}
+.col-search:active { transform: scale(0.94); }
+.col-search input {
+  flex: 0 0 0; width: 0; min-width: 0; opacity: 0; pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+.col-search input::placeholder { color: var(--muted); font-weight: 500; }
+.col-mid:has(.col-search:focus-within) .col-search,
+.col-mid:has(.col-search input:not(:placeholder-shown)) .col-search,
+.col-mid.searching .col-search {
+  width: 100%; padding: 0 14px; gap: 8px; cursor: text;
+}
+.col-mid:has(.col-search:focus-within) .col-search:active,
+.col-mid:has(.col-search input:not(:placeholder-shown)) .col-search:active,
+.col-mid.searching .col-search:active { transform: scale(1.02); }
+.col-mid:has(.col-search:focus-within) .col-search input,
+.col-mid:has(.col-search input:not(:placeholder-shown)) .col-search input,
+.col-mid.searching .col-search input {
+  flex: 1 1 0; width: auto; opacity: 1; pointer-events: auto;
+}
+.col-mid:has(.col-search:focus-within) .col-title,
+.col-mid:has(.col-search input:not(:placeholder-shown)) .col-title,
+.col-mid.searching .col-title {
+  opacity: 0; transform: translateX(-10px) scale(0.96); pointer-events: none;
+}
+
+.col-scroll {
+  container-type: inline-size;
+  position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden;
+  overscroll-behavior-y: contain; scrollbar-width: none;
+  padding: calc(env(safe-area-inset-top, 0px) + 70px) 20px calc(env(safe-area-inset-bottom, 0px) + 120px);
+}
+.col-scroll::-webkit-scrollbar { display: none; }
+
 .col-kick { font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--orange); }
-.col h2 { margin-top: 2px; font-size: 34px; line-height: 1; font-weight: 800; letter-spacing: -0.01em; color: var(--black); }
+.col-scroll h2 { margin-top: 2px; font-size: 34px; line-height: 1; font-weight: 800; letter-spacing: -0.01em; color: var(--black); }
 
 /* Tabs: solid pills, the active one is black with orange text */
 .col-tabs { display: flex; gap: 8px; margin: 16px -20px 0; padding: 2px 20px 4px; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; }
@@ -14,9 +88,10 @@
 .c-tab:active { transform: scale(0.95); }
 .c-tab.on { background: var(--black); color: var(--orange); }
 
-/* Cards: 2 columns on phones, a lone last card stretches across */
-.col-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 12px; margin-top: 16px; }
-.k-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
+/* Cards: 2x2 grid, a lone last visible card stretches across */
+.col-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+.k-card[hidden] { display: none; }
+.k-card.wide { grid-column: 1 / -1; min-height: 150px; }
 
 .k-card {
   --card: var(--black); --glow: rgba(255, 122, 26, 0.55); --ink: #fff; --sub: rgba(255, 255, 255, 0.75);
@@ -25,7 +100,7 @@
   background-color: var(--card); background-image: radial-gradient(circle at 50% 34%, var(--glow), transparent 62%);
   transform: perspective(700px) rotateX(calc(var(--py, 0) * -9deg)) rotateY(calc(var(--px, 0) * 11deg)) scale(var(--cs, 1));
   transition: transform 0.65s cubic-bezier(0.2, 1.5, 0.35, 1), box-shadow 0.3s ease;
-  animation: k-in 0.5s cubic-bezier(0.2, 1.1, 0.4, 1) backwards; animation-delay: calc(var(--i, 0) * 55ms);
+  animation: k-in 0.5s cubic-bezier(0.2, 1.1, 0.4, 1) backwards; animation-delay: calc(var(--i, 0) * 35ms);
   -webkit-user-select: none; user-select: none;
 }
 .k-card.hot { --cs: 1.03; box-shadow: 0 16px 30px rgba(11, 11, 12, 0.24); transition-duration: 0.14s; transition-timing-function: ease-out; }
@@ -45,7 +120,7 @@
 @keyframes k-in { from { opacity: 0; transform: translateY(14px) scale(0.96); } }
 
 .k-art { position: absolute; left: 0; right: 0; top: 0; bottom: 66px; display: grid; place-items: end center; padding: 14px 14px 0; }
-/* Photo cards: the phone is big and fills the card, cropped by its rounded edge, fading into the colour at the bottom */
+/* Photo cards: the device is big and fills the card, cropped by its rounded edge, fading into the colour at the bottom */
 .has-img .k-art { inset: 0; display: block; padding: 0; transform-origin: 50% 85%;
   transform: translate(calc(var(--px, 0) * -7px), calc(var(--py, 0) * -5px)) rotate(calc(var(--rz, 0deg) + var(--px, 0) * 7deg)) scale(var(--as, 1));
   transition: transform 0.65s cubic-bezier(0.2, 1.5, 0.35, 1); }
@@ -54,11 +129,18 @@
 .has-img::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(to top, var(--card) 0%, transparent 38%); }
 /* Laptops are wide, so keep the fade at the bottom short or it washes out the base */
 /* Fade height follows the label: 1-line names get a small fade, 2-line MacBook a medium one, 3-line Galaxy Book the biggest */
-.col-grid[data-cat="laptops"] .has-img::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 6%, transparent 26%); }
-.col-grid[data-cat="laptops"] .has-img[data-brand="Apple"]::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 11%, transparent 36%); }
-.col-grid[data-cat="laptops"] .has-img[data-brand="Samsung"]::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 15%, transparent 44%); }
+.k-card[data-cat="laptops"].has-img::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 6%, transparent 26%); }
+.k-card[data-cat="laptops"].has-img[data-brand="Apple"]::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 11%, transparent 36%); }
+.k-card[data-cat="laptops"].has-img[data-brand="Samsung"]::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 15%, transparent 44%); }
 /* Headsets: tall images, so a short fade */
-.col-grid[data-cat="headsets"] .has-img::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 6%, transparent 28%); }
+.k-card[data-cat="headsets"].has-img::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 6%, transparent 28%); }
+/* Tablets: fade follows the label size */
+.k-card[data-cat="tablets"].has-img::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 6%, transparent 26%); }
+.k-card[data-cat="tablets"].has-img[data-brand="Apple"]::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 11%, transparent 36%); }
+.k-card[data-cat="tablets"].has-img[data-brand="Samsung"]::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 15%, transparent 44%); }
+/* Gaming: every label is one short line, so a small fade */
+.k-card[data-cat="gaming"].has-img::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 6%, transparent 26%); }
+
 .k-ico { align-self: center; width: 54%; max-width: 120px; aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.18); }
 .cream .k-ico { background: rgba(23, 23, 26, 0.08); }
 .k-ico svg { width: 56%; height: 56%; stroke-width: 1.5; }
@@ -72,13 +154,12 @@
 .ink .k-go, .onyx .k-go { background: var(--orange); color: var(--black); }
 
 /* A lone last card is wide: art sits to the right, text to the left */
-.k-card:last-child:nth-child(odd) { min-height: 150px; }
-.k-card:last-child:nth-child(odd):not(.has-img) .k-art { left: 45%; bottom: 0; padding-bottom: 0; }
+.k-card.wide:not(.has-img) .k-art { left: 45%; bottom: 0; padding-bottom: 0; }
 
 /* Sizes follow the width of the section */
 @container (max-width: 300px) {
   .col-grid { gap: 9px; }
-  .col h2 { font-size: 29px; }
+  .col-scroll h2 { font-size: 29px; }
   .k-card { min-height: 170px; padding: 12px; border-radius: 20px; }
   .k-art { bottom: 62px; padding: 12px 10px 0; }
   .k-text b { font-size: 17px; }
@@ -89,12 +170,10 @@
   .k-card { min-height: 210px; }
   .k-text b { font-size: 21px; }
 }
-@media (prefers-reduced-motion: reduce) { .k-card, .has-img .k-art { animation: none; transition: none; transform: none; } .c-tab { transition: none; } }
-
-/* Tablets: fade follows the label size (Samsung biggest, Apple medium, one-line names small) */
-.col-grid[data-cat="tablets"] .has-img::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 6%, transparent 26%); }
-.col-grid[data-cat="tablets"] .has-img[data-brand="Apple"]::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 11%, transparent 36%); }
-.col-grid[data-cat="tablets"] .has-img[data-brand="Samsung"]::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 15%, transparent 44%); }
-
-/* Gaming: every label is one short line, so a small fade */
-.col-grid[data-cat="gaming"] .has-img::after { background: linear-gradient(to top, var(--card) 0%, var(--card) 6%, transparent 26%); }
+@media (max-width: 360px) {
+  .col-scroll { padding-left: 16px; padding-right: 16px; }
+  .col-tabs { margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .collections, .col-title, .col-search, .col-search input, .k-card, .has-img .k-art, .c-tab { animation: none !important; transition: none !important; }
+}
