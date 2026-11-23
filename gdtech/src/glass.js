@@ -5,6 +5,9 @@
 // red/green/blue split at the edge. Other browsers keep the CSS-only glass (blur, rim light, sheen).
 const NS = "http://www.w3.org/2000/svg";
 const supported = !!navigator.userAgentData?.brands?.some((b) => /Chromium/.test(b.brand));
+let boostImpl = () => {};
+// Make one element's lens stronger or weaker live (1 is normal). Used for the water swell while pressing and dragging.
+export const lensBoost = (node, m) => boostImpl(node, m);
 
 if (supported) {
   document.documentElement.classList.add("lg-refract");
@@ -71,8 +74,8 @@ if (supported) {
     if (lens && lens.w === w && lens.h === h) return;
     const cs = getComputedStyle(node);
     const short = Math.min(w, h);
-    const bezel = Math.max(8, Math.min(24, short * 0.34));
-    const depth = bezel * (short < 80 ? 0.72 : 0.85); // how far the rim pulls the background, in px
+    const bezel = Math.max(8, Math.min(30, short * (parseFloat(node.dataset.lensBezel) || 0.34)));
+    const depth = bezel * (short < 80 ? 0.72 : 0.85) * 1.12 * (parseFloat(node.dataset.lensDepth) || 1); // how far the rim pulls the background, in px
     const url = buildMap(w, h, radiusOf(cs, w, h), bezel, depth);
 
     if (!lens) {
@@ -93,15 +96,23 @@ if (supported) {
       f.appendChild(el("feBlend", { in: "r", in2: "g", mode: "screen", result: "rg" }));
       f.appendChild(el("feBlend", { in: "rg", in2: "b", mode: "screen" }));
       defs.appendChild(f);
-      lens = { id, map, disp, w: 0, h: 0 };
+      lens = { id, map, disp, w: 0, h: 0, depth: 0, boost: 1 };
       lenses.set(node, lens);
       node.style.setProperty("--lens", `url(#${id})`);
     }
     lens.w = w; lens.h = h;
     lens.map.setAttribute("width", w); lens.map.setAttribute("height", h);
     lens.map.setAttribute("href", url);
-    for (const [dm, k] of lens.disp) dm.setAttribute("scale", (2 * depth * k).toFixed(2));
+    lens.depth = depth;
+    for (const [dm, k] of lens.disp) dm.setAttribute("scale", (2 * depth * k * lens.boost).toFixed(2));
   }
+
+  boostImpl = (node, m) => {
+    const lens = lenses.get(node);
+    if (!lens || Math.abs(lens.boost - m) < 0.02) return;
+    lens.boost = m;
+    for (const [dm, k] of lens.disp) dm.setAttribute("scale", (2 * lens.depth * k * m).toFixed(2));
+  };
 
   const ro = new ResizeObserver((entries) => entries.forEach((e) => build(e.target)));
   const watch = (node) => { if (!lenses.has(node) && !node.__lgw) { node.__lgw = true; ro.observe(node); } };

@@ -1,94 +1,102 @@
-// Bottom bar: a glass droplet sits under the active icon. Tapping stretches it across to the next
-// icon and settles with a small wobble. Pressing lifts and magnifies it, and you can drag it along the bar.
+// Bottom bar. Three layers: the bar's glass, a glass droplet that follows the active icon, then the icons.
+// The droplet is its own glass (a sibling, not a child), so it bends the page behind it like a drop of water.
+// Motion is a spring: tapping stretches it across and it wobbles in, pressing lifts and magnifies it,
+// dragging stretches it with your speed. The lens swells with the movement.
+import { lensBoost } from "./glass.js";
+
 const dock = document.getElementById("dock");
 
 if (dock) {
   const btns = [...dock.querySelectorAll("button")];
+  const bar = document.createElement("span");
+  bar.className = "dock-glass glass";
+  bar.setAttribute("aria-hidden", "true");
   const lens = document.createElement("i");
-  lens.className = "dock-lens";
+  lens.className = "dock-lens glass";
+  lens.dataset.lensBezel = "0.5";
+  lens.dataset.lensDepth = "1.5";
   lens.setAttribute("aria-hidden", "true");
-  dock.prepend(lens);
+  dock.prepend(bar, lens);
 
   const W = 62;
   let centers = [];
   let cur = Math.max(0, btns.findIndex((b) => b.classList.contains("on")));
-  let x = 0;
-  let anim = null;
 
-  const T = (px, sx = 1, sy = 1) => `translate3d(${px - W / 2}px,0,0) scale(${sx},${sy})`;
+  // spring state
+  let x = 0, vx = 0, tx = 0;       // position of the droplet centre
+  let l = 1, vl = 0, tl = 1;       // lift (magnify)
+  let raf = 0, t0 = 0, dragging = false;
+
   const measure = () => { centers = btns.map((b) => b.offsetLeft + b.offsetWidth / 2); };
-  const set = (px, sx = 1, sy = 1) => { x = px; lens.style.transform = T(px, sx, sy); };
   const nearest = (px) => centers.reduce((best, c, i) => (Math.abs(c - px) < Math.abs(centers[best] - px) ? i : best), 0);
   const mark = (i) => btns.forEach((b, n) => b.classList.toggle("on", n === i));
   const hot = (i) => btns.forEach((b, n) => b.classList.toggle("hot", n === i));
 
-  const read = () => new DOMMatrixReadOnly(getComputedStyle(lens).transform).m41 + W / 2;
-
-  function glide(i) {
-    const from = anim ? read() : x;
-    const to = centers[i];
-    if (anim) { anim.cancel(); anim = null; }
-    const dist = Math.abs(to - from);
-    if (dist < 1) { set(to); return; }
-    const s = 1 + Math.min(dist / 80, 0.85);   // stretch grows with the distance travelled
-    const dir = Math.sign(to - from);
-    anim = lens.animate(
-      [
-        { transform: T(from) },
-        { transform: T(from + (to - from) * 0.45, s, 1 / Math.sqrt(s)), offset: 0.4 },
-        { transform: T(to + dir * 5, 0.96, 1.05), offset: 0.74 },
-        { transform: T(to) },
-      ],
-      { duration: 620, easing: "cubic-bezier(0.3, 0.9, 0.35, 1)" }
-    );
-    const done = () => { if (anim) { anim = null; } set(to); };
-    anim.onfinish = done;
-    anim.oncancel = () => {};
-    x = to;
+  function paint() {
+    const s = 1 + Math.min(Math.abs(vx) / 1100, 0.7);          // faster movement stretches it
+    const sx = s * l, sy = l / Math.sqrt(s);
+    lens.style.transform = `translate3d(${x - W / 2}px,0,0) scale(${sx.toFixed(3)},${sy.toFixed(3)})`;
+    // the lens swells with speed and with the press
+    lensBoost(lens, 1 + Math.min(Math.abs(vx) / 700, 1) * 0.9 + (l - 1) * 2.4);
+    lensBoost(bar, dock.classList.contains("lifted") ? 1.3 : 1);
   }
 
-  let down = false, moved = false, lastX = 0, startX = 0;
+  function step(t) {
+    const dt = Math.min((t - t0) / 1000, 1 / 30) || 1 / 60;
+    t0 = t;
+    if (dragging) {
+      const nx = x + (tx - x) * Math.min(1, dt * 32);
+      vx = (nx - x) / dt;
+      x = nx;
+    } else {
+      vx += (300 * (tx - x) - 22 * vx) * dt;            // underdamped spring: overshoots, then settles
+      x += vx * dt;
+    }
+    vl += (320 * (tl - l) - 21 * vl) * dt;
+    l += vl * dt;
+    paint();
+    hot(down ? nearest(x) : -1);
+    const calm = !dragging && Math.abs(tx - x) < 0.15 && Math.abs(vx) < 4 && Math.abs(tl - l) < 0.002 && Math.abs(vl) < 0.05;
+    if (calm) { x = tx; l = tl; vx = vl = 0; paint(); raf = 0; return; }
+    raf = requestAnimationFrame(step);
+  }
+  const run = () => { if (!raf) { t0 = performance.now(); raf = requestAnimationFrame(step); } };
+
+  let down = false, moved = false, startX = 0;
   const local = (e) => e.clientX - dock.getBoundingClientRect().left;
 
   dock.addEventListener("pointerdown", (e) => {
-    down = true; moved = false;
-    startX = lastX = local(e);
+    down = true; moved = false; dragging = false;
+    startX = local(e);
     dock.setPointerCapture?.(e.pointerId);
     dock.classList.add("lifted");
-    const i = nearest(startX);
-    hot(i);
-    glide(i);
+    tl = 1.22;
+    tx = centers[nearest(startX)];
+    run();
   });
 
   dock.addEventListener("pointermove", (e) => {
     if (!down) return;
     const px = local(e);
-    if (!moved && Math.abs(px - startX) > 6) {
-      moved = true;
-      if (anim) { const at = read(); anim.cancel(); anim = null; set(at); }
-    }
+    if (!moved && Math.abs(px - startX) > 6) { moved = true; dragging = true; }
     if (!moved) return;
-    const c = Math.min(Math.max(px, centers[0]), centers[centers.length - 1]);
-    const v = Math.abs(px - lastX);
-    lastX = px;
-    const s = 1 + Math.min(v * 0.045, 0.4);   // faster drag stretches the droplet more
-    set(c, s, 1 / Math.sqrt(s));
-    hot(nearest(c));
+    tx = Math.min(Math.max(px, centers[0]), centers[centers.length - 1]);
+    run();
   });
 
-  const end = (e) => {
+  const end = () => {
     if (!down) return;
-    down = false;
+    down = false; dragging = false;
     dock.classList.remove("lifted");
-    const i = nearest(moved ? x : local(e));
-    cur = i;
-    mark(i); hot(-1);
-    glide(i);
+    cur = nearest(moved ? x : tx);
+    tx = centers[cur]; tl = 1;
+    mark(cur); hot(-1);
+    run();
   };
   dock.addEventListener("pointerup", end);
   dock.addEventListener("pointercancel", end);
 
-  const place = () => { measure(); set(centers[cur]); };
+  const place = () => { measure(); x = tx = centers[cur]; paint(); };
   new ResizeObserver(place).observe(dock);
   place();
   mark(cur);
