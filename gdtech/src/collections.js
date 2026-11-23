@@ -23,7 +23,7 @@ const IMAGES = {
   "laptops:HP": { src: "/laptops/hp.webp", w: 1227, h: 760, z: 1.50, up: 10 },
   "laptops:Lenovo": { src: "/laptops/lenovo.webp", w: 844, h: 760, z: 1.9, up: 5 },
   "laptops:Asus": { src: "/laptops/asus.webp", w: 1237, h: 760, z: 1.5, up: 10 },
-  "laptops:Samsung": { src: "/laptops/samsung.webp", w: 1238, h: 760, z: 1.5, up: 20 },
+  "laptops:Samsung": { src: "/laptops/samsung.webp", w: 1238, h: 760, z: 1.2, up: 20 },
 };
 // Same colour blocks as the home banners
 const TONES = ["orange", "slate", "cream", "ink"];
