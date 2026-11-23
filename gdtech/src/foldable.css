@@ -1,7 +1,7 @@
-/* Galaxy Foldable: lazy video card with short bold words cycling over it */
+/* Galaxy Foldable: lazy video card with one short bold line over it */
 .fold { padding: 4px 0 44px; }
 .v-card {
-  position: relative; margin: 16px 20px 0; aspect-ratio: 1 / 1; overflow: hidden; border-radius: 26px; background: #0b0b0c; color: #fff;
+  position: relative; margin: 16px 20px 0; aspect-ratio: 2 / 1; overflow: hidden; border-radius: 26px; background: #0b0b0c; color: #fff;
   box-shadow: 0 14px 28px rgba(11, 11, 12, 0.22); isolation: isolate;
 }
 .v-media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; z-index: -2; }
@@ -11,21 +11,6 @@
 }
 
 .v-row { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding: 0 18px 18px; }
-.v-words { display: grid; min-width: 0; }
-.v-words span {
-  grid-area: 1 / 1; align-self: end; font-size: 38px; line-height: 0.96; font-weight: 800; letter-spacing: -0.015em; text-transform: uppercase;
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.55); opacity: 0; will-change: transform, opacity;
-  animation: v-word 12s ease-in-out infinite both; animation-delay: calc(var(--k) * 4s); animation-play-state: paused;
-}
+.v-words { min-width: 0; font-size: 34px; line-height: 0.96; font-weight: 800; letter-spacing: -0.015em; text-transform: uppercase; text-shadow: 0 2px 18px rgba(0, 0, 0, 0.55); }
 .v-words i { font-style: normal; color: var(--orange); }
-.v-card.on .v-words span { animation-play-state: running; }
-@keyframes v-word {
-  0% { opacity: 0; transform: translateY(22px) scale(0.98); filter: blur(8px); }
-  5%, 27% { opacity: 1; transform: none; filter: blur(0); }
-  33%, 100% { opacity: 0; transform: translateY(-14px); filter: blur(6px); }
-}
-@media (max-width: 400px) { .v-words span { font-size: 32px; } }
-@media (prefers-reduced-motion: reduce) {
-  .v-words span { animation: none; }
-  .v-words span:first-child { opacity: 1; }
-}
+@media (max-width: 400px) { .v-words { font-size: 30px; } }
