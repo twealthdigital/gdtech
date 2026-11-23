@@ -335,13 +335,13 @@
 }
 .sp-drop-glass {
   position: absolute; inset: 0; z-index: 0; pointer-events: none; border-radius: 26px;
-  --g1: 0.54; --g2: 0.24;
+  --g1: 0.44; --g2: 0.14;
 }
 .sp-drop-glass.glass {
   box-shadow:
     inset 2px 2px 2px -1px #fff,
     inset -2px -2px 3px -1px rgba(255, 255, 255, 0.85),
-    inset 0 0 16px rgba(255, 255, 255, 0.45),
+    inset 0 0 16px rgba(255, 255, 255, 0.4),
     0 0 0 0.5px rgba(120, 100, 90, 0.16),
     0 12px 26px rgba(90, 40, 0, 0.22);
 }
@@ -352,26 +352,54 @@
 .sp-drop-list {
   position: relative; z-index: 1; padding: 8px; border-radius: 26px;
   max-height: min(340px, calc(100dvh - 280px)); overflow-y: auto; scrollbar-width: none;
+  touch-action: none;
 }
 .sp-drop-list::-webkit-scrollbar { display: none; }
+.sp-drop-lens {
+  position: absolute; top: 0; left: 8px; right: 8px; height: 42px; z-index: 1;
+  pointer-events: none; border-radius: 99px; --g1: 0.44; --g2: 0.12;
+  background-color: rgba(11, 11, 12, 0.035);
+  will-change: transform;
+}
+.sp-drop-lens.glass {
+  box-shadow:
+    inset 2px 2px 2px -1px #fff,
+    inset -2px -2px 3px -1px rgba(255, 255, 255, 0.85),
+    inset 0 -5px 10px -4px rgba(11, 11, 12, 0.09),
+    inset 0 0 14px rgba(255, 255, 255, 0.45),
+    0 0 0 0.5px rgba(11, 11, 12, 0.11),
+    0 6px 14px rgba(11, 11, 12, 0.1),
+    0 8px 18px rgba(90, 40, 0, 0.18);
+}
+.sp-drop.lifted .sp-drop-lens.glass {
+  box-shadow:
+    inset 2px 2px 2px -1px #fff,
+    inset -2px -2px 3px -1px #fff,
+    inset 0 -5px 12px -4px rgba(11, 11, 12, 0.12),
+    inset 0 0 18px rgba(255, 255, 255, 0.62),
+    0 0 0 0.5px rgba(11, 11, 12, 0.14),
+    0 10px 20px rgba(11, 11, 12, 0.14),
+    0 14px 26px rgba(90, 40, 0, 0.24);
+}
+.sp-drop-items { position: relative; z-index: 2; }
 .sp-opt {
   position: relative; z-index: 3; display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  width: 100%; height: 42px; padding: 0 12px; border-radius: 16px; background: none; text-align: left;
+  width: 100%; height: 42px; padding: 0 14px; border-radius: 99px; background: none; text-align: left;
   font-size: 14px; font-weight: 700; color: var(--black);
   text-shadow: 0 1px 8px rgba(255, 255, 255, 0.65);
   opacity: 0; transform: translateY(-6px) scale(0.96); filter: blur(4px);
-  transition: opacity 0.16s ease, transform 0.16s ease, filter 0.16s ease, background 0.2s ease, color 0.2s ease;
+  transition: opacity 0.16s ease, transform 0.16s ease, filter 0.16s ease, color 0.2s ease;
 }
 .sp-drop.open .sp-opt {
   opacity: 1; transform: none; filter: none;
-  transition: opacity 0.28s ease, transform 0.38s cubic-bezier(0.2, 1.2, 0.4, 1), filter 0.24s ease, background 0.2s ease, color 0.2s ease;
+  transition: opacity 0.28s ease, transform 0.38s cubic-bezier(0.2, 1.2, 0.4, 1), filter 0.24s ease, color 0.2s ease;
   transition-delay: calc(var(--i, 0) * 24ms + 45ms);
 }
-.sp-opt:hover { background: rgba(255, 255, 255, 0.28); }
-.sp-opt:active { transform: scale(0.96); }
-.sp-opt.on { background: var(--black); color: var(--orange); text-shadow: none; }
+.sp-opt.on { font-weight: 800; color: var(--black); }
+.sp-opt.hot { color: var(--black); }
 .sp-opt-chk {
   flex: none; width: 16px; height: 16px; display: grid; place-items: center;
+  color: var(--orange);
   opacity: 0; transform: scale(0.5);
   transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.3, 1.5, 0.45, 1);
 }

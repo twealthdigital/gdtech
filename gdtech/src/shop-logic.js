@@ -64,3 +64,19 @@ export function chipLabelFor(catId, activeCat, activeGroup, catLabel, brandTitle
   if (catId && catId === activeCat && activeGroup && brandTitle) return brandTitle;
   return catLabel;
 }
+
+export function dropOptionIndexForY(tops, rowHeight, localY) {
+  if (!tops || !tops.length) return -1;
+  const h = rowHeight || 42;
+  let best = 0;
+  let bestDist = Infinity;
+  for (let i = 0; i < tops.length; i++) {
+    const center = tops[i] + h / 2;
+    const d = Math.abs(localY - center);
+    if (d < bestDist) {
+      bestDist = d;
+      best = i;
+    }
+  }
+  return best;
+}
