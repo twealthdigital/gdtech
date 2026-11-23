@@ -85,3 +85,45 @@ export const PHONE_SHOPS = {
     ],
   },
 };
+
+/* ---------- Placeholder prices and storage (EDIT THESE) ----------
+   Nothing here is a real GDTech price yet. Change a number and the shop card, the product page, the bag and the
+   total all follow. Per item you can also set:
+     was: 2600000          the old price, which shows a strike-through and a "Discount %" badge
+     storage: ["256GB"]    the storage options
+     prices: [..]          one price per storage option (otherwise each step up costs 12% more, rounded to ₦10,000)
+*/
+const PRICES = {
+  "iphone-18-pro": 2400000, "iphone-18-pro-max": 2800000, "iphone-duo": 4500000,
+  "iphone-17": 1700000, "iphone-air": 1900000, "iphone-17-pro": 2200000, "iphone-17-pro-max": 2600000,
+  "galaxy-s26": 1500000, "galaxy-s26-plus": 1800000, "galaxy-s26-ultra": 2300000,
+  "galaxy-s25": 1100000, "galaxy-s25-plus": 1300000, "galaxy-s25-ultra": 1700000,
+  "galaxy-z-fold8-ultra": 3500000, "galaxy-z-fold8": 2900000, "galaxy-z-flip8": 1700000,
+  "galaxy-z-fold7": 2500000, "galaxy-z-flip7": 1300000,
+  "pixel-11": 1200000, "pixel-11-pro": 1600000, "pixel-11-pro-xl": 1900000, "pixel-11-pro-fold": 2800000,
+  "pixel-10": 900000, "pixel-10-pro": 1300000, "pixel-10-pro-xl": 1600000, "pixel-10-pro-fold": 2300000,
+  "itel-a300-plus": 180000, "itel-a300c": 150000, "itel-super-26-ultra": 450000, "itel-s25-ultra": 350000,
+};
+const STORAGE = {
+  Apple: ["128GB", "256GB", "512GB", "1TB"],
+  Samsung: ["128GB", "256GB", "512GB", "1TB"],
+  Google: ["128GB", "256GB", "512GB", "1TB"],
+  itel: ["64GB", "128GB", "256GB"],
+};
+const FOLD_STORAGE = ["256GB", "512GB", "1TB"];
+// The newest series of each brand gets the "New" badge
+const NEW_GROUPS = new Set(["iphone-18", "galaxy-s26", "galaxy-z8", "pixel-11", "itel-super"]);
+
+for (const [brand, cfg] of Object.entries(PHONE_SHOPS)) {
+  for (const g of cfg.groups) {
+    g.isNew = NEW_GROUPS.has(g.id);
+    for (const item of g.items) {
+      if (item.price == null) item.price = PRICES[item.id];
+      if (!item.storage) item.storage = item.fold ? FOLD_STORAGE : STORAGE[brand];
+    }
+  }
+}
+
+export const STEP_UP = 0.12;
+export const priceFor = (item, i = 0) =>
+  item.prices && item.prices[i] != null ? item.prices[i] : Math.round((item.price * (1 + STEP_UP * i)) / 10000) * 10000;

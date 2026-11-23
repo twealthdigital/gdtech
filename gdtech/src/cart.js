@@ -38,6 +38,8 @@ let lastAdded = null;
 
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(items)); } catch { /* private mode: bag still works for this visit */ } };
 const count = () => items.reduce((n, p) => n + p.qty, 0);
+// The badge counts different products in the bag, not how many of each (3 phones of one kind is still 1)
+const kinds = () => items.length;
 const total = () => items.reduce((n, p) => n + p.qty * p.price, 0);
 
 function icon(paths, size = 16) {
@@ -94,7 +96,7 @@ function row(p) {
 
 function render() {
   list.replaceChildren(...items.map(row));
-  const c = count();
+  const c = kinds();
   const has = c > 0;
   empty.hidden = has;
   list.hidden = !has;
@@ -105,14 +107,14 @@ function render() {
   countPill.hidden = !has;
   badge.textContent = c > 99 ? "99+" : c;
   btn.classList.toggle("has", has);
-  btn.setAttribute("aria-label", has ? `Bag, ${c} item${c === 1 ? "" : "s"}` : "Bag");
+  btn.setAttribute("aria-label", has ? `Bag, ${c} product${c === 1 ? "" : "s"}` : "Bag");
   lastAdded = null;
 }
 
 function changed() {
   save();
   render();
-  document.dispatchEvent(new CustomEvent("cart:change", { detail: { items: items.map((p) => ({ ...p })), count: count(), total: total() } }));
+  document.dispatchEvent(new CustomEvent("cart:change", { detail: { items: items.map((p) => ({ ...p })), count: count(), kinds: kinds(), total: total() } }));
 }
 
 function bump() {
@@ -129,7 +131,7 @@ function add(p, opts = {}) {
   }
   const key = keyOf(item);
   const found = items.find((x) => keyOf(x) === key);
-  if (found) found.qty += item.qty; else items.push(item);
+  if (found) found.qty = Math.min(99, found.qty + item.qty); else items.push({ ...item, qty: Math.min(99, item.qty) });
   lastAdded = key;
   changed();
   bump();
@@ -235,5 +237,5 @@ document.addEventListener("click", (e) => {
   add({ id: d.id, name: d.name, price: d.price, img: d.img, variant: d.variant, qty: d.qty }, { open: "openCart" in d });
 });
 
-window.GDCart = { add, remove, setQty, clear, open, close, items: () => items.map((p) => ({ ...p })), count, total };
+window.GDCart = { add, remove, setQty, clear, open, close, items: () => items.map((p) => ({ ...p })), count, kinds, total };
 render();

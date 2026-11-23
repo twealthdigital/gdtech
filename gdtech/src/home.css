@@ -134,8 +134,13 @@
   display: flex; align-items: center;
   border-radius: 99px; --g1: 0.5; --g2: 0.16;
 }
-.dock { touch-action: none; transition: transform 0.45s cubic-bezier(0.3, 1.5, 0.45, 1); }
+.dock { touch-action: none; transition: transform 0.45s cubic-bezier(0.3, 1.5, 0.45, 1), opacity 0.35s ease, visibility 0s linear 0s; }
 .dock.lifted { transform: translateX(-50%) scale(1.035); }
+/* On the shop and product pages the bar drops away and fades; it rises back in whenever we return to the home page */
+.home.shop-open .dock, .home.shop-open .dock.lifted {
+  transform: translateX(-50%) translateY(150%); opacity: 0; visibility: hidden; pointer-events: none;
+  transition: transform 0.5s cubic-bezier(0.5, 0, 0.75, 0), opacity 0.35s ease, visibility 0s linear 0.5s;
+}
 .dock button {
   position: relative; z-index: 1; flex: 1 1 0; min-width: 0; height: 52px; padding: 0; overflow: hidden;
   display: flex; align-items: center; justify-content: center; background: none; color: rgba(11, 11, 12, 0.5);
@@ -170,7 +175,9 @@
     radial-gradient(52% 70% at 80% 100%, rgba(255, 150, 70, 0.36), transparent 72%),
     linear-gradient(to top, rgba(255, 140, 60, 0.26), rgba(255, 170, 110, 0.1) 50%, transparent);
   -webkit-mask-image: linear-gradient(to top, #000 30%, transparent 100%); mask-image: linear-gradient(to top, #000 30%, transparent 100%);
+  transition: opacity 0.45s ease;
 }
+.home.shop-open::after { opacity: 0; }
 /* Header glow so the glass has something to catch */
 .h-scroll::before {
   content: ""; position: absolute; left: 0; right: 0; top: 0; height: 260px; z-index: -1; pointer-events: none;

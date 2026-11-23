@@ -1,6 +1,6 @@
 # Model photos
 
-Drop a photo here named after the product id and the shop card uses it automatically
+Drop a photo here named after the product id and the shop card and the first photo on that phone's page use it automatically
 (webp, png, jpg or avif; a transparent cut-out on no background looks best).
 
 The ids are in `src/data/phones.js`. For example:

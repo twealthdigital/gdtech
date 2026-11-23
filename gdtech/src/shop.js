@@ -1,6 +1,7 @@
 import "./shop.css";
 import { CATS, svg } from "./data/categories.js";
-import { PHONE_SHOPS } from "./data/phones.js";
+import { PHONE_SHOPS, priceFor } from "./data/phones.js";
+import { galleryOf, cardPhoto } from "./data/gallery.js";
 import { IMAGES, TITLES, TONE_OF } from "./collections.js";
 
 // The shop page. Anything can open it:
@@ -24,15 +25,9 @@ const topEl = shop.querySelector(".h-top");
 const pd = $("pd");
 const pdScroll = $("pd-scroll");
 const pdBody = $("pd-body");
-const pdTitle = $("pd-title");
 const pdTop = pd.querySelector(".h-top");
 const ALL = { cat: "all", brand: "all", focus: null };
 const naira = (n) => "₦" + Number(n).toLocaleString("en-NG");
-
-// Photos dropped into src/assets/models/ (named after the product id) are picked up automatically
-const MODEL_IMG = {};
-const found = import.meta.glob("./assets/models/*.{webp,png,jpg,jpeg,avif}", { eager: true, query: "?url", import: "default" });
-for (const [path, url] of Object.entries(found)) MODEL_IMG[path.split("/").pop().replace(/\.[^.]+$/, "")] = url;
 
 const ICONS = {
   phone: CATS.find((c) => c.id === "mobile").icon,
@@ -79,13 +74,12 @@ function viewOf(route) {
 }
 
 function card(item, tone, i, wide) {
-  const img = MODEL_IMG[item.id];
-  const art = img
-    ? `<img src="${img}" alt="${item.name}" loading="lazy" decoding="async" draggable="false" />`
+  const ph = cardPhoto(item.id);
+  const art = ph
+    ? `<img class="${ph.kind === "cut" ? "" : "photo"}" src="${ph.src}" alt="${item.name}" loading="lazy" decoding="async" draggable="false" />`
     : `<span class="sp-ico">${svg(iconFor(item))}</span>`;
   const buy = item.price
-    ? `<div class="sp-buy"><b>${naira(item.price)}</b>
-         <button class="sp-add" type="button" data-add-to-cart data-id="${item.id}" data-name="${item.name}" data-price="${item.price}"${img ? ` data-img="${img}"` : ""} aria-label="Add ${item.name} to bag">${BAG}</button></div>`
+    ? `<div class="sp-buy"><b>${naira(priceFor(item, 0))}</b><span class="sp-add" aria-hidden="true">${BAG}</span></div>`
     : "";
   return `<article class="sp-card ${tone}${wide ? " wide" : ""}" style="--i:${i}" data-pid="${item.id}" role="button" tabindex="0" aria-label="View ${item.name}">
     <div class="sp-art">${item.fold ? '<span class="sp-tag">Foldable</span>' : ""}${art}</div>
@@ -145,36 +139,209 @@ function render(route) {
   }
 }
 
-/* ---------- the product page ---------- */
-const PERKS = [
-  { t: "100% genuine", d: '<path d="M12 3l7.5 3v5.5c0 4.4-3.1 7.9-7.5 9.5-4.4-1.6-7.5-5.1-7.5-9.5V6L12 3z"/><path d="M8.8 12l2.3 2.3 4.2-4.6"/>' },
-  { t: "Fast delivery", d: '<path d="M3 6.5h10v9H3zM13 9.5h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="16.5" cy="17.5" r="1.8"/>' },
-  { t: "Trade in your old phone", d: '<path d="M5 9h13l-3-3M19 15H6l3 3"/>' },
-];
+/* ---------- the product page ----------
+   Photos on top (thumbnails down the side), then a white sheet: badges, name, storage, amount, total, Add to Bag.
+   Add to Bag loads, ticks, then the photo flies into the bag button; nothing can be pressed until that is finished. */
+const FAV_KEY = "gdtech-fav";
+const favs = () => { try { const a = JSON.parse(localStorage.getItem(FAV_KEY) || "[]"); return Array.isArray(a) ? a : []; } catch { return []; } };
+const saveFavs = (a) => { try { localStorage.setItem(FAV_KEY, JSON.stringify(a)); } catch { /* private mode */ } };
+const HEART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9-9.6A4.9 4.9 0 0 1 12 7.6a4.9 4.9 0 0 1 9 3.3c-1.5 5-9 9.6-9 9.6z"/></svg>';
+const MINUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg>';
+const PLUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>';
+const SPIN = '<svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9" opacity=".25"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>';
+const TICK = '<svg class="ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const BAG_LINE = '<svg class="bagi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>';
+const GUIDE = "Storage is the space for your photos, videos and apps. Pick more if you film a lot or keep many apps.";
 
-function renderProduct({ item, group, cfg }) {
-  const img = MODEL_IMG[item.id];
-  const art = img
-    ? `<img src="${img}" alt="${item.name}" decoding="async" draggable="false" />`
-    : `<span class="sp-ico">${svg(iconFor(item))}</span>`;
-  const buy = item.price
-    ? `<div class="pd-buy"><div class="pd-price"><span>Price</span><b>${naira(item.price)}</b></div>
-         <button class="pd-add" type="button" data-add-to-cart data-id="${item.id}" data-name="${item.name}" data-price="${item.price}"${img ? ` data-img="${img}"` : ""}>${BAG}<span>Add to bag</span></button></div>`
-    : `<div class="pd-buy"><div class="pd-price"><span>Price</span><b class="soon">Coming soon</b></div></div>`;
-  const more = group.items.filter((i) => i.id !== item.id);
+const sel = { rec: null, gallery: [], g: 0, s: 0, q: 1, adding: false };
+const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+const wait = (ms) => new Promise((r) => setTimeout(r, reduceMotion() ? Math.min(ms, 120) : ms));
+const clampQty = (n) => Math.max(1, Math.min(99, Math.floor(+n) || 1));
+const totalOf = () => priceFor(sel.rec.item, sel.s) * clampQty(sel.q);
+const wasOf = () => { const it = sel.rec.item; return it.was ? Math.round((priceFor(it, sel.s) * it.was) / it.price / 1000) * 1000 * clampQty(sel.q) : 0; };
 
-  pdTitle.textContent = item.name;
+function renderProduct(rec) {
+  const { item, group } = rec;
+  Object.assign(sel, { rec, gallery: galleryOf(item.id), g: 0, s: 0, q: 1, adding: false });
+  const off = item.was ? Math.round((1 - item.price / item.was) * 100) : 0;
+  const tags = (group.isNew ? '<span class="pd-tag new">New</span>' : "") + (off > 0 ? `<span class="pd-tag off">Discount ${off}%</span>` : "");
+  const thumbs = sel.gallery.length > 1
+    ? `<div class="pd-thumbs" role="tablist" aria-label="Photos">${sel.gallery.map((p, i) => `<button class="pd-th${i ? "" : " on"}" type="button" role="tab" data-i="${i}" aria-label="Photo ${i + 1}"><img src="${p.src}" alt="" loading="lazy" decoding="async" draggable="false" /></button>`).join("")}</div>`
+    : "";
+  const isFav = favs().includes(item.id);
+
   pdBody.innerHTML = `
-    <div class="pd-hero ${group.tone}">${item.fold ? '<span class="sp-tag">Foldable</span>' : ""}${art}</div>
-    <div class="pd-main">
-      <p class="pd-kick">${group.title}</p>
-      <h2>${item.name}</h2>
-      ${buy}
-      <ul class="pd-perks">${PERKS.map((p) => `<li><span>${svg(p.d)}</span>${p.t}</li>`).join("")}</ul>
+    <div class="pd-stage">
+      <div class="pd-bg" id="pd-bg"></div>
+      <img class="pd-img" id="pd-img" alt="${item.name}" decoding="async" draggable="false" />
+      ${thumbs}
     </div>
-    ${more.length ? `<section class="pd-more" aria-label="More from ${group.title}"><h3>More from ${group.title}</h3>
-      <div class="pd-row">${more.map((it, k) => card(it, group.tone, k, false)).join("")}</div></section>` : ""}`;
+    <div class="pd-sheet">
+      ${tags ? `<div class="pd-tags">${tags}</div>` : ""}
+      <div class="pd-name">
+        <div><h2>${item.name}</h2><p>${group.title}</p></div>
+        <button class="pd-fav${isFav ? " on" : ""}" id="pd-fav" type="button" aria-pressed="${isFav}" aria-label="Save ${item.name}">${HEART}</button>
+      </div>
+      <div class="pd-label"><b>Select storage</b><button class="pd-guide" id="pd-guide" type="button" aria-expanded="false">Storage Guide</button></div>
+      <p class="pd-note" id="pd-note" hidden>${GUIDE}</p>
+      <div class="pd-sizes" role="radiogroup" aria-label="Storage">${item.storage.map((v, i) => `<button class="pd-chip${i ? "" : " on"}" type="button" role="radio" aria-checked="${i === 0}" data-s="${i}">${v}</button>`).join("")}</div>
+      <div class="pd-foot">
+        <div class="pd-qty"><b>Qty</b>
+          <div class="pd-step"><button class="pd-minus" type="button" aria-label="One less">${MINUS}</button>
+            <input id="pd-q" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" value="1" aria-label="Quantity" autocomplete="off" />
+            <button class="pd-plus" type="button" aria-label="One more">${PLUS}</button></div>
+        </div>
+        <div class="pd-total"><span>Total price</span><s id="pd-was"></s><b id="pd-sum"></b></div>
+      </div>
+      <button class="pd-add" id="pd-add" type="button"><span class="ic">${BAG_LINE}${SPIN}${TICK}</span><span class="lbl">Add to Bag</span></button>
+    </div>`;
+  paintStage();
+  paintTotal();
 }
+
+function paintStage() {
+  const p = sel.gallery[sel.g];
+  const img = $("pd-img");
+  const bg = $("pd-bg");
+  if (!p) { img.removeAttribute("src"); img.hidden = true; return; }
+  img.hidden = false;
+  img.src = p.src;
+  img.className = "pd-img " + p.kind;
+  bg.style.backgroundImage = p.kind === "cut" ? "" : `url("${p.src}")`;
+  bg.classList.toggle("blur", p.kind !== "cut");
+  pdBody.querySelectorAll(".pd-th").forEach((b, i) => { b.classList.toggle("on", i === sel.g); b.setAttribute("aria-selected", i === sel.g); });
+}
+
+function paintTotal() {
+  const was = wasOf();
+  $("pd-sum").textContent = naira(totalOf());
+  const w = $("pd-was");
+  w.textContent = was ? naira(was) : "";
+  w.hidden = !was;
+}
+
+function setQty(n, { keepText = false } = {}) {
+  sel.q = n;
+  const input = $("pd-q");
+  if (!keepText) input.value = String(clampQty(n));
+  paintTotal();
+}
+
+// Fly a copy of the photo into the bag button
+async function fly(from, target) {
+  const hb = home.getBoundingClientRect();
+  const a = from.getBoundingClientRect();
+  const t = target.getBoundingClientRect();
+  if (!from.animate || reduceMotion() || a.width < 4) return;
+  const el = from.cloneNode(false);
+  el.removeAttribute("id");
+  el.className = from.className + " pd-fly";
+  Object.assign(el.style, { left: a.left - hb.left + "px", top: a.top - hb.top + "px", width: a.width + "px", height: a.height + "px" });
+  home.appendChild(el);
+  from.style.transition = "none";
+  from.style.opacity = "0";
+  const dx = t.left + t.width / 2 - (a.left + a.width / 2);
+  const dy = t.top + t.height / 2 - (a.top + a.height / 2);
+  const end = 30 / Math.max(a.width, a.height);
+  const anim = el.animate([
+    { transform: "translate(0,0) scale(1)", opacity: 1, offset: 0 },
+    { transform: `translate(${dx * 0.12}px,${dy * 0.18 + 10}px) scale(0.78)`, opacity: 1, offset: 0.22 },
+    { transform: `translate(${dx * 0.62}px,${dy * 0.7}px) scale(${Math.max(end, 0.3)})`, opacity: 1, offset: 0.7 },
+    { transform: `translate(${dx}px,${dy}px) scale(${end})`, opacity: 0.85, offset: 1 },
+  ], { duration: 900, easing: "cubic-bezier(0.55, 0, 0.3, 1)", fill: "forwards" });
+  try { await anim.finished; } catch { /* cancelled */ }
+  el.remove();
+  from.style.transition = "opacity 0.5s ease";
+  from.style.opacity = "";
+}
+
+async function addToBag() {
+  if (sel.adding || !sel.rec) return;
+  sel.adding = true;
+  const { item } = sel.rec;
+  const btn = $("pd-add");
+  const lbl = btn.querySelector(".lbl");
+  const qty = clampQty(sel.q);
+  const variant = item.storage[sel.s];
+  const ph = sel.gallery[sel.g] || cardPhoto(item.id);
+  const line = { id: item.id, name: item.name, price: priceFor(item, sel.s), img: (cardPhoto(item.id) || ph || {}).src || "", variant, qty };
+  setQty(qty);
+
+  // 1. loading: the button shrinks to a ring and spins; everything else on the page is locked
+  pdBody.classList.add("busy");
+  $("pd-q").readOnly = true;
+  btn.disabled = true;
+  btn.setAttribute("aria-busy", "true");
+  btn.classList.add("loading");
+  lbl.textContent = "Adding";
+  await wait(850);
+
+  // 2. success: it grows back, turns green and ticks
+  btn.classList.remove("loading");
+  btn.classList.add("done");
+  lbl.textContent = "Added to bag";
+  await wait(420);
+
+  // 3. the photo flies into the bag button above, then the bag takes it in
+  const target = $("pd-bag");
+  if (state.pOpen) await fly($("pd-img"), target);
+  if (window.GDCart) window.GDCart.add(line);
+  target.classList.remove("bump");
+  void target.offsetWidth;
+  target.classList.add("bump");
+  await wait(650);
+
+  // 4. ready again
+  btn.classList.remove("done");
+  btn.disabled = false;
+  btn.removeAttribute("aria-busy");
+  lbl.textContent = "Add to Bag";
+  $("pd-q").readOnly = false;
+  pdBody.classList.remove("busy");
+  sel.adding = false;
+}
+
+pdBody.addEventListener("click", (e) => {
+  if (sel.adding) return;
+  const t = e.target;
+  const th = t.closest(".pd-th");
+  const chip = t.closest(".pd-chip");
+  if (th) {
+    const i = +th.dataset.i;
+    if (i === sel.g) return;
+    const img = $("pd-img");
+    img.classList.add("swap");
+    setTimeout(() => { sel.g = i; paintStage(); img.classList.remove("swap"); }, 140);
+  } else if (chip) {
+    sel.s = +chip.dataset.s;
+    pdBody.querySelectorAll(".pd-chip").forEach((b) => { const on = b === chip; b.classList.toggle("on", on); b.setAttribute("aria-checked", on); });
+    paintTotal();
+  } else if (t.closest(".pd-minus")) setQty(clampQty(sel.q) - 1);
+  else if (t.closest(".pd-plus")) setQty(clampQty(sel.q) + 1);
+  else if (t.closest("#pd-guide")) {
+    const note = $("pd-note");
+    note.hidden = !note.hidden;
+    $("pd-guide").setAttribute("aria-expanded", String(!note.hidden));
+  } else if (t.closest("#pd-fav")) {
+    const b = $("pd-fav");
+    const id = sel.rec.item.id;
+    const list = favs();
+    const on = !list.includes(id);
+    saveFavs(on ? [...list, id] : list.filter((x) => x !== id));
+    b.classList.toggle("on", on);
+    b.setAttribute("aria-pressed", on);
+  } else if (t.closest("#pd-add")) addToBag();
+});
+
+// Type an amount instead of pressing plus: digits only, up to 99
+pdBody.addEventListener("input", (e) => {
+  if (e.target.id !== "pd-q") return;
+  const v = e.target.value.replace(/\D/g, "").slice(0, 2);
+  e.target.value = v;
+  setQty(v === "" ? 1 : +v, { keepText: true });
+});
+pdBody.addEventListener("focusout", (e) => { if (e.target.id === "pd-q") setQty(clampQty(e.target.value)); });
+pdBody.addEventListener("keydown", (e) => { if (e.target.id === "pd-q" && e.key === "Enter") e.target.blur(); });
 
 /* ---------- history ----------
    Every page we push on top of the home page is one history entry, and "depth" counts them,
@@ -362,7 +529,7 @@ pdScroll.addEventListener("scroll", () => pdTop.classList.toggle("stuck", pdScro
 const bags = [$("sp-bag"), $("pd-bag")];
 bags.forEach((b) => b.addEventListener("click", () => document.querySelector("#home > .h-top .bag").click()));
 const syncBag = () => {
-  const n = window.GDCart ? window.GDCart.count() : 0;
+  const n = window.GDCart ? window.GDCart.kinds() : 0;
   bags.forEach((b) => {
     b.classList.toggle("has", n > 0);
     b.querySelector("b").textContent = n > 99 ? "99+" : n;
