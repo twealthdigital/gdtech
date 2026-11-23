@@ -6,6 +6,8 @@ import "./categories.js";
 import "./tradein.css";
 import "./launch.css";
 import "./launch.js";
+import "./foldable.css";
+import "./foldable.js";
 import "./collections.js";
 
 const $ = (id) => document.getElementById(id);
