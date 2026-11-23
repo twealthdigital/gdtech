@@ -116,7 +116,31 @@ function focusHero(key) {
   heroTimer = setTimeout(() => { h.innerHTML = cfg ? cfg.title : "All<br>phones"; k.textContent = cfg ? "Shop" : "GDTech"; h.classList.remove("swap"); }, 170);
 }
 
+const qEl = $("sp-q");
+let filtered = false;
+// Search inside the shop page: hides cards that don't match, and sections that end up empty
+function filterBody() {
+  const q = (qEl.value || "").trim().toLowerCase();
+  bodyEl.querySelector(".sp-none")?.remove();
+  if (!q) {
+    if (filtered) { filtered = false; if (state.view) renderBody(state.view); }
+    return;
+  }
+  filtered = true;
+  let shown = 0;
+  bodyEl.querySelectorAll(".sp-sec").forEach((sec) => {
+    const cards = [...sec.querySelectorAll(".sp-card")];
+    cards.forEach((c) => { c.hidden = !c.querySelector("h4").textContent.toLowerCase().includes(q); c.classList.remove("wide"); });
+    const vis = cards.filter((c) => !c.hidden);
+    if (vis.length % 2 === 1) vis[vis.length - 1].classList.add("wide");
+    sec.hidden = vis.length === 0;
+    shown += vis.length;
+  });
+  if (!shown) bodyEl.insertAdjacentHTML("beforeend", `<div class="sp-none">No phones match "${q.replace(/[<>&"]/g, "")}"</div>`);
+}
+
 function render(route) {
+  if (qEl) { qEl.value = ""; filtered = false; }
   const view = viewOf(route);
   state.view = view;
 
@@ -535,9 +559,19 @@ chipsEl.addEventListener("click", (e) => {
   if (!c || !state.view) return;
   state.group = c.dataset.g || null;
   focusHero(state.group);
+  qEl.value = "";
+  filtered = false;
   renderBody(state.view);
 });
 bodyEl.addEventListener("click", (e) => { if (e.target.closest("#sp-soon-back")) back(); });
+
+// Search bar: typing searches every series, so any chip filter steps aside
+qEl.addEventListener("input", () => {
+  if (!state.view) return;
+  if (qEl.value.trim() && state.group) { state.group = null; focusHero(null); renderBody(state.view); }
+  filterBody();
+});
+qEl.addEventListener("keydown", (e) => { if (e.key === "Enter") qEl.blur(); if (e.key === "Escape") e.stopPropagation(); });
 
 // Headers: fade-blur once content scrolls under them
 scroller.addEventListener("scroll", () => topEl.classList.toggle("stuck", scroller.scrollTop > 4), { passive: true });
